@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Property</title>
+</head>
+<body>
+<h2>Add Property</h2>
+<form th:action="@{'/properties/owner/' + ${ownerId} + '/add'}" method="post" th:object="${property}">
+    <label>Title:</label>
+    <input type="text" th:field="*{title}" /><br/>
+
+    <label>Description:</label>
+    <textarea th:field="*{description}"></textarea><br/>
+
+    <label>City:</label>
+    <input type="text" th:field="*{city}" /><br/>
+
+    <label>Area:</label>
+    <input type="text" th:field="*{area}" /><br/>
+
+    <label>Rent:</label>
+    <input type="number" step="0.01" th:field="*{rent}" /><br/>
+
+    <button type="submit">Save Property</button>
+</form>
+<a th:href="@{'/properties/owner/' + ${ownerId}}">Back to My Properties</a>
+</body>
+</html>

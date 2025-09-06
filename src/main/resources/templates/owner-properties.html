@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Properties</title>
+</head>
+<body>
+<h2>My Properties</h2>
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>City</th>
+        <th>Area</th>
+        <th>Rent</th>
+        <th>Actions</th>
+    </tr>
+    <tr th:each="p : ${properties}">
+        <td th:text="${p.title}"></td>
+        <td th:text="${p.city}"></td>
+        <td th:text="${p.area}"></td>
+        <td th:text="${p.rent}"></td>
+        <td>
+            <a th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}">Edit</a>
+        </td>
+    </tr>
+</table>
+
+<a th:href="@{'/properties/owner/' + ${ownerId} + '/add'}">Add New Property</a>
+</body>
+</html>

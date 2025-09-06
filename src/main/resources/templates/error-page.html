@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error</title>
+</head>
+<body>
+<h2 style="color:red;">Error</h2>
+<p th:text="${errorMessage}">Something went wrong!</p>
+
+<!-- Dynamic Back button -->
+<a th:href="${backUrl}">
+    <button>⬅ Back</button>
+</a>
+</body>
+</html>

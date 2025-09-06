@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Properties</title>
+</head>
+<body>
+<h2>Property Listings</h2>
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>City</th>
+        <th>Area</th>
+        <th>Rent</th>
+        <th>Owner</th>
+    </tr>
+    <tr th:each="p : ${properties}">
+        <td th:text="${p.title}"></td>
+        <td th:text="${p.city}"></td>
+        <td th:text="${p.area}"></td>
+        <td th:text="${p.rent}"></td>
+        <td th:text="${p.owner.fullName}"></td>
+    </tr>
+</table>
+<a href="/properties/add">Add Property</a>
+</body>
+</html>
