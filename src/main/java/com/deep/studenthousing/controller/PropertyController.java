@@ -29,9 +29,13 @@ public class PropertyController {
     public String listOwnerProperties(@PathVariable Long ownerId, Model model) {
         User owner = userService.findById(ownerId);
 
-//        if(owner.getRole().equals(Role.STUDENT)){
-//            return ""
-//        }
+        if(owner == null){
+            return "error-page";
+        }
+
+        if(owner.getRole().equals(Role.STUDENT)){
+            return "error-page";
+        }
 
         List<Property> properties = userService.findByOwner(owner);
         model.addAttribute("properties", properties);
