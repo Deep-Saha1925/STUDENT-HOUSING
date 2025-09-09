@@ -45,7 +45,10 @@
 <body>
 <div class="container mt-5 animate__animated animate__fadeIn">
     <h2 class="text-center mb-4">👨‍💼 Admin Dashboard</h2>
-
+    <p>Manage Users and Properties</p>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-danger">🚪 Logout</button>
+    </form>
     <!-- Registered Users -->
     <div class="card mb-4">
         <div class="card-header text-center">

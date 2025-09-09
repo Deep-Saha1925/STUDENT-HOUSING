@@ -27,7 +27,12 @@ public class SecurityConfig {
                         .permitAll()
                         .successHandler(successHandler)
                 )
-                .logout(logout -> logout.permitAll());
+                .logout(logout -> logout
+                        .logoutUrl("/logout")                    // must be POST
+                        .logoutSuccessUrl("/login?logout=true")  // redirect after logout
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll());
 
         return http.build();
     }
