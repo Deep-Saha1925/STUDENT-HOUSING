@@ -3,6 +3,8 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/users")
 public class UserController {
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -31,7 +35,8 @@ public class UserController {
         if (user.getRole() == null) {
             user.setRole(Role.STUDENT); // default role
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user);
-        return "redirect:/";
+        return "redirect:/login";
     }
 }
