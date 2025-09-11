@@ -9,6 +9,26 @@
         body {
             background: #f4f8fb;
         }
+        .header-bar {
+            background: linear-gradient(45deg, #0066ff, #00cc99);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+        .header-bar h2 {
+            color: #fff;
+            margin: 0;
+        }
+        .header-bar p {
+            color: #e8f9f7;
+            margin: 0;
+            font-size: 1rem;
+        }
+        .btn-logout {
+            border-radius: 30px;
+            font-weight: 500;
+        }
         .card {
             border-radius: 15px;
             box-shadow: 0 6px 20px rgba(0,0,0,0.1);
@@ -43,12 +63,22 @@
     </style>
 </head>
 <body>
-<div class="container mt-5 animate__animated animate__fadeIn">
-    <h2 class="text-center mb-4">👨‍💼 Admin Dashboard</h2>
-    <p>Manage Users and Properties</p>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit" class="btn btn-danger">🚪 Logout</button>
+
+<!-- Header Bar -->
+<div class="header-bar d-flex justify-content-between align-items-center">
+    <div>
+        <h2>👨‍💼 Admin Dashboard</h2>
+        <p>Welcome, <span th:text="${admin.fullName}">Admin Name</span> | Manage Users & Properties</p>
+    </div>
+    <form th:action="@{/logout}" method="post" class="m-0">
+        <button type="submit" class="btn btn-danger btn-logout">
+            🚪 Logout
+        </button>
     </form>
+</div>
+
+<div class="container animate__animated animate__fadeIn">
+
     <!-- Registered Users -->
     <div class="card mb-4">
         <div class="card-header text-center">
@@ -101,7 +131,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="p : ${properties}">
+                    <tr th:each="p : ${properties}"
+                        th:onclick="|window.location.href='/properties/${p.id}'|"
+                        style="cursor:pointer;">
                         <td th:text="${p.id}"></td>
                         <td th:text="${p.title}"></td>
                         <td th:text="${p.city}"></td>

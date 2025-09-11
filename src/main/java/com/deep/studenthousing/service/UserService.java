@@ -35,4 +35,8 @@ public class UserService {
     public List<Property> findByOwner(User owner) {
         return propertyRepository.findByOwner(owner);
     }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 }

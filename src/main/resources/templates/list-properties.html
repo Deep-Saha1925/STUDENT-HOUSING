@@ -74,13 +74,13 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="p : ${properties}">
+                <tr th:each="p : ${properties}"
+                    th:onclick="|window.location.href='/properties/${p.id}'|"
+                    style="cursor:pointer;">
                     <td th:text="${p.title}"></td>
                     <td th:text="${p.city}"></td>
                     <td th:text="${p.area}"></td>
-                    <td>
-                        <span class="badge bg-success" th:text="${p.rent}"></span>
-                    </td>
+                    <td><span class="badge bg-success" th:text="${p.rent}"></span></td>
                     <td th:text="${p.owner.fullName}"></td>
                 </tr>
                 </tbody>

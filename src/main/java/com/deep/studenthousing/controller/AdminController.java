@@ -4,6 +4,7 @@ import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +25,14 @@ public class AdminController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, Authentication authentication) {
         List<User> allUsers = userService.findAll();
         List<Property> allProperties = propertyService.findAll();
+        String email = authentication.getName();
+        User admin = userService.findByEmail(email);
 
         model.addAttribute("users", allUsers);
+        model.addAttribute("admin", admin);
         model.addAttribute("properties", allProperties);
 
         return "admin-dashboard";

@@ -92,22 +92,24 @@
         <h3 class="text-white mb-3">🏠 Available Properties</h3>
         <div class="row g-4">
             <div class="col-md-4" th:each="p : ${properties}">
-                <div class="card property-card">
-                    <!-- Placeholder image (replace with dynamic property image if available) -->
-                    <img src="https://via.placeholder.com/400x200.png?text=Property" class="card-img-top" alt="Property Image">
-                    <div class="card-body">
-                        <h5 class="card-title" th:text="${p.title}"></h5>
-                        <p class="card-text">
-                            <strong>City:</strong> <span th:text="${p.city}"></span><br>
-                            <strong>Area:</strong> <span th:text="${p.area}"></span><br>
-                            <strong>Rent:</strong> ₹<span th:text="${p.rent}"></span>
-                        </p>
-                        <p class="text-muted small">Owner: <span th:text="${p.owner.fullName}"></span></p>
-                        <a href="#" class="btn btn-outline-light btn-sm">View Details</a>
+                <a th:href="@{'/properties/' + ${p.id}}" class="text-decoration-none text-dark">
+                    <div class="card property-card h-100">
+                        <!-- Property Image -->
+                        <img src="https://via.placeholder.com/400x200.png?text=Property" class="card-img-top" alt="Property Image">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${p.title}"></h5>
+                            <p class="card-text">
+                                <strong>City:</strong> <span th:text="${p.city}"></span><br>
+                                <strong>Area:</strong> <span th:text="${p.area}"></span><br>
+                                <strong>Rent:</strong> ₹<span th:text="${p.rent}"></span>
+                            </p>
+                            <p class="text-muted small">Owner: <span th:text="${p.owner.fullName}"></span></p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
+
     </div>
 </div>
 

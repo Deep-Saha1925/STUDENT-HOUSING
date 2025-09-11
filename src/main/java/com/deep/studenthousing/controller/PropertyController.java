@@ -29,19 +29,24 @@ public class PropertyController {
     public String listOwnerProperties(@PathVariable Long ownerId, Model model) {
         User owner = userService.findById(ownerId);
 
-        if(owner == null){
+        if (owner == null) {
             return "error-page";
         }
 
-        if(owner.getRole().equals(Role.STUDENT)){
+        if (owner.getRole().equals(Role.STUDENT)) {
             return "error-page";
         }
 
         List<Property> properties = userService.findByOwner(owner);
-        model.addAttribute("properties", properties);
+
+        // Add owner, ownerId, and properties to model
+        model.addAttribute("owner", owner);
         model.addAttribute("ownerId", ownerId);
+        model.addAttribute("properties", properties);
+
         return "owner-properties";
     }
+
 
     // Show form to add property for specific owner
     @GetMapping("/owner/{ownerId}/add")
@@ -113,5 +118,14 @@ public class PropertyController {
         propertyService.save(property);
 
         return "redirect:/properties/owner/" + ownerId;
+    }
+
+
+    //view property
+    @GetMapping("/{id}")
+    public String viewProperty(@PathVariable Long id, Model model){
+        Property property = propertyService.findById(id);
+        model.addAttribute("property", property);
+        return "property-details";
     }
 }
