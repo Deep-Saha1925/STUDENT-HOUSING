@@ -54,12 +54,20 @@
             👋 Welcome, <strong th:text="${owner.fullName}"></strong>
         </span>
         <!-- Logout button -->
+
+    </div>
+
+    <div class="ms-auto d-flex align-items-center">
+        <a th:href="@{'/profile/' + ${owner.id}}" class="btn btn-custom me-2">
+            <i class="bi bi-person-circle"></i> View Profile
+        </a>
         <form th:action="@{/logout}" method="post" class="d-inline">
             <button type="submit" class="btn btn-danger btn-logout">
                 <i class="bi bi-box-arrow-right"></i> Logout
             </button>
         </form>
     </div>
+
 </nav>
 
 

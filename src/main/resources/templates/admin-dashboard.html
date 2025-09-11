@@ -70,11 +70,17 @@
         <h2>👨‍💼 Admin Dashboard</h2>
         <p>Welcome, <span th:text="${admin.fullName}">Admin Name</span> | Manage Users & Properties</p>
     </div>
-    <form th:action="@{/logout}" method="post" class="m-0">
-        <button type="submit" class="btn btn-danger btn-logout">
-            🚪 Logout
-        </button>
-    </form>
+
+    <div class="ms-auto d-flex align-items-center">
+        <a th:href="@{'/profile/' + ${admin.id}}" class="btn btn-custom me-2">
+            <i class="bi bi-person-circle"></i> View Profile
+        </a>
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <button type="submit" class="btn btn-danger btn-logout">
+                🚪 Logout
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="container animate__animated animate__fadeIn">
