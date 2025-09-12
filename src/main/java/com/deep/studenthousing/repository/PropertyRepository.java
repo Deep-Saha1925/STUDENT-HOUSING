@@ -13,4 +13,6 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     List<Property> findByCity(String city);
 
     List<Property> findByOwner(User owner);
+
+    List<Property> findByCityContainingIgnoreCase(String query);
 }

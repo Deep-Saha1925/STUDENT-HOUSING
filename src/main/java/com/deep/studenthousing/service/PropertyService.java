@@ -26,4 +26,8 @@ public class PropertyService {
     public Property findById(Long propertyId) {
         return propertyRepository.findById(propertyId).get();
     }
+
+    public List<Property> findByCityContainingIgnoreCase(String query) {
+        return propertyRepository.findByCityContainingIgnoreCase(query);
+    }
 }
