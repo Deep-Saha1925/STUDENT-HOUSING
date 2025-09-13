@@ -30,4 +30,8 @@ public class PropertyService {
     public List<Property> findByCityContainingIgnoreCase(String query) {
         return propertyRepository.findByCityContainingIgnoreCase(query);
     }
+
+    public List<Property> searchProperties(String city, Double rent) {
+        return propertyRepository.searchProperties(city, rent);
+    }
 }

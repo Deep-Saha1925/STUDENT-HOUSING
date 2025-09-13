@@ -19,16 +19,26 @@ public class SearchController {
     }
 
     @GetMapping("/search")
-    public String searchProperties(@RequestParam(value = "query", required = false) String query,
+    public String searchProperties(@RequestParam(value = "city", required = false) String city,
+                                   @RequestParam(value = "rent", required = false) String rentStr,
                                    Model model) {
-        List<Property> properties;
-        if (query != null && !query.isEmpty()) {
-            properties = propertyService.findByCityContainingIgnoreCase(query);
-        } else {
-            properties = propertyService.findAll();
+        // Clean params
+        if (city != null && city.trim().isEmpty()) {
+            city = null;
         }
+
+        Double rent = null;
+        if (rentStr != null && !rentStr.trim().isEmpty()) {
+            rent = Double.parseDouble(rentStr);
+        }
+
+        // Call service
+        List<Property> properties = propertyService.searchProperties(city, rent);
+
         model.addAttribute("properties", properties);
-        model.addAttribute("query", query);
+        model.addAttribute("city", city);
+        model.addAttribute("rent", rent);
         return "search";
     }
+
 }
