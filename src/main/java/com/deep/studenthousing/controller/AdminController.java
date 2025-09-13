@@ -26,16 +26,25 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
-        List<User> allUsers = userService.findAll();
-        List<Property> allProperties = propertyService.findAll();
         String email = authentication.getName();
         User admin = userService.findByEmail(email);
 
-        model.addAttribute("users", allUsers);
         model.addAttribute("admin", admin);
-        model.addAttribute("properties", allProperties);
 
         return "admin-dashboard";
     }
 
+    // Users Page
+    @GetMapping("/users")
+    public String manageUsers(Model model) {
+        model.addAttribute("users", userService.findAll());
+        return "admin-users";
+    }
+
+    // Properties Page
+    @GetMapping("/properties")
+    public String manageProperties(Model model) {
+        model.addAttribute("properties", propertyService.findAll());
+        return "admin-properties";
+    }
 }
