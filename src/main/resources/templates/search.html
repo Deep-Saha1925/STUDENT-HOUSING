@@ -20,9 +20,17 @@
         border-radius: 15px;
         box-shadow: 0 6px 15px rgba(0,0,0,0.1);
         transition: transform 0.2s;
+        overflow: hidden;
     }
     .property-card:hover {
         transform: translateY(-5px);
+    }
+    .property-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover; /* fit properly */
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
     }
     .badge-rent {
         background: #28a745;
@@ -66,17 +74,33 @@
       <p class="text-muted">No properties found for your search.</p>
     </div>
 
+    <!-- Property Cards -->
     <div th:each="prop : ${properties}" class="col-md-4 mb-4">
       <div class="card property-card h-100">
+        <!-- Show first image -->
+        <img th:if="${!#lists.isEmpty(prop.imageUrls)}"
+             th:src="${prop.imageUrls[0]}"
+             class="property-img"
+             alt="Property Image">
+
+        <!-- Placeholder if no image -->
+        <img th:if="${#lists.isEmpty(prop.imageUrls)}"
+             src="https://via.placeholder.com/400x200.png?text=No+Image"
+             class="property-img"
+             alt="No Image">
+
         <div class="card-body">
-          <h5 class="card-title" th:text="${prop.title}">Property Title</h5>
-          <p><strong>City:</strong> <span th:text="${prop.city}"></span></p>
-          <p><strong>Area:</strong> <span th:text="${prop.area}"></span></p>
-          <p><strong>Owner:</strong> <span th:text="${prop.owner.fullName}"></span></p>
-          <p><span class="badge badge-rent">₹ <span th:text="${prop.rent}"></span></span></p>
-          <a th:href="@{'/properties/' + ${prop.id}}" class="btn btn-outline-primary btn-sm">
-            View Details
-          </a>
+          <h5 class="card-title fw-bold" th:text="${prop.title}">Property Title</h5>
+          <p class="card-text">
+            <i class="bi bi-geo-alt"></i> <span th:text="${prop.city}"></span>, <span th:text="${prop.area}"></span><br>
+            <small class="text-muted">Owner: <span th:text="${prop.owner.fullName}"></span></small>
+          </p>
+          <span class="badge badge-rent">₹ <span th:text="${prop.rent}"></span></span>
+          <div class="mt-3">
+            <a th:href="@{'/properties/' + ${prop.id}}" class="btn btn-outline-primary btn-sm">
+              View Details
+            </a>
+          </div>
         </div>
       </div>
     </div>
