@@ -57,7 +57,7 @@
 
                 <!-- Card Body -->
                 <div class="card-body p-4">
-                    <form th:action="@{'/properties/owner/' + ${ownerId} + '/add'}" method="post" th:object="${property}">
+                    <form th:action="@{'/properties/owner/' + ${ownerId} + '/add'}" method="post" th:object="${property}" enctype="multipart/form-data">
 
                         <!-- Title -->
                         <div class="mb-3">
@@ -88,6 +88,13 @@
                             <label class="form-label fw-bold">Rent (₹)</label>
                             <input type="number" step="0.01" class="form-control" th:field="*{rent}" placeholder="Enter rent amount">
                         </div>
+
+                        <!--image upload-->
+                        <div class="mb-3">
+                            <label for="images" class="form-label">Upload Images</label>
+                            <input type="file" class="form-control" id="images" name="images" multiple required>
+                        </div>
+
 
                         <!-- Submit Button -->
                         <div class="text-center">

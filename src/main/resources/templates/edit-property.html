@@ -54,8 +54,9 @@
 
                 <!-- Card Body -->
                 <div class="card-body p-4">
+                    <!-- Update Form -->
                     <form th:action="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${property.id}}"
-                          method="post" th:object="${property}">
+                          method="post" th:object="${property}" enctype="multipart/form-data">
 
                         <!-- Title -->
                         <div class="mb-3">
@@ -87,11 +88,37 @@
                             <input type="number" step="0.01" class="form-control" th:field="*{rent}" placeholder="Enter rent amount">
                         </div>
 
+                        <!-- Upload new images -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Upload New Images</label>
+                            <input type="file" name="images" class="form-control" multiple required>
+                        </div>
+
                         <!-- Submit Button -->
                         <div class="text-center">
-                            <button type="submit" class="btn btn-custom px-4 py-2">✅ Update Property</button>
+                            <button type="submit" class="btn btn-custom px-4 py-2">
+                                ✅ Update Property
+                            </button>
                         </div>
                     </form>
+
+                    <!-- Existing Images Section (separate forms for delete) -->
+                    <div class="mt-4">
+                        <label class="form-label fw-bold">Existing Images</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <div th:each="imgUrl : ${property.imageUrls}" class="text-center">
+                                <img th:src="${imgUrl}" class="img-thumbnail mb-1"
+                                     style="width: 120px; height: 100px; object-fit: cover;">
+
+                                <!-- Delete Form -->
+                                <form th:action="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${property.id} + '/delete-image'}"
+                                      method="post">
+                                    <input type="hidden" name="imageUrl" th:value="${imgUrl}"/>
+                                    <button type="submit" class="btn btn-sm btn-danger">🗑 Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Back Link -->
                     <div class="text-center">

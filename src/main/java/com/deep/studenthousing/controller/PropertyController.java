@@ -3,13 +3,16 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
+import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -18,10 +21,12 @@ public class PropertyController {
 
     private final UserService userService;
     private final PropertyService propertyService;
+    private final ImageUploadService imageUploadService;
 
-    public PropertyController(UserService userService, PropertyService propertyService) {
+    public PropertyController(UserService userService, PropertyService propertyService, ImageUploadService imageUploadService) {
         this.userService = userService;
         this.propertyService = propertyService;
+        this.imageUploadService = imageUploadService;
     }
 
     // Show all properties for a specific owner
@@ -61,7 +66,8 @@ public class PropertyController {
     public String saveProperty(@PathVariable Long ownerId,
                                @ModelAttribute("property") Property property,
                                Model model,
-                               HttpServletRequest request) {
+                               @RequestParam("images") MultipartFile[] images,
+                               HttpServletRequest request)  throws IOException {
         User owner = userService.findById(ownerId);
 
         //Only Owners can add property
@@ -75,6 +81,13 @@ public class PropertyController {
 
         property.setOwner(owner);
         propertyService.save(property);
+
+        if(images != null && images.length > 0){
+            List<String> imageUrls = imageUploadService.uploadMultipleImages(images, ownerId, property.getId());
+            property.setImageUrls(imageUrls);
+
+            propertyService.save(property);
+        }
 
         return "redirect:/properties/owner/" + ownerId;
     }
@@ -98,7 +111,8 @@ public class PropertyController {
     @PostMapping("/owner/{ownerId}/edit/{propertyId}")
     public String updateProperty(@PathVariable Long ownerId,
                                  @PathVariable Long propertyId,
-                                 @ModelAttribute("property") Property updatedProperty) {
+                                 @ModelAttribute("property") Property updatedProperty,
+                                 @RequestParam(value = "images", required = false) MultipartFile[] images) throws IOException {
         Property property = propertyService.findById(propertyId);
 
         if (property.getOwner().getRole() != Role.OWNER) {
@@ -109,16 +123,50 @@ public class PropertyController {
             throw new RuntimeException("Unauthorized: Owner mismatch!");
         }
 
+        // Update fields
         property.setTitle(updatedProperty.getTitle());
         property.setDescription(updatedProperty.getDescription());
         property.setCity(updatedProperty.getCity());
         property.setArea(updatedProperty.getArea());
         property.setRent(updatedProperty.getRent());
 
+        // Handle new image uploads
+        if (images != null && images.length > 0 && !images[0].isEmpty()) {
+            List<String> imageUrls = imageUploadService.uploadMultipleImages(images, ownerId, propertyId);
+
+            // Append new images to existing ones
+            if (property.getImageUrls() != null) {
+                property.getImageUrls().addAll(imageUrls);
+            } else {
+                property.setImageUrls(imageUrls);
+            }
+        }
+
         propertyService.save(property);
 
         return "redirect:/properties/owner/" + ownerId;
     }
+
+
+    @PostMapping("/owner/{ownerId}/edit/{propertyId}/delete-image")
+    public String deleteImage(@PathVariable Long ownerId,
+                              @PathVariable Long propertyId,
+                              @RequestParam("imageUrl") String imageUrl){
+        Property property = propertyService.findById(propertyId);
+
+        if (property.getOwner().getId().equals(ownerId)) {
+            // Remove image from property
+            property.getImageUrls().remove(imageUrl);
+            propertyService.save(property);
+
+            // (Optional) Delete from Cloudinary
+            imageUploadService.deleteImage(imageUrl);
+        }
+
+        return "redirect:/properties/owner/" + ownerId + "/edit/" + propertyId;
+    }
+
+
 
 
     //view property

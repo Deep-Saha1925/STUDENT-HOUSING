@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "properties")
 @Getter
@@ -27,5 +30,9 @@ public class Property {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
+
+    //image urls
+    @ElementCollection
+    private List<String> imageUrls = new ArrayList<>();
 
 }
