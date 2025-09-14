@@ -8,8 +8,10 @@
         .card { border-radius: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
         .card-header { background: #0066ff; color: white; }
         table th { background: #0066ff; color: white; }
-        tr:hover { background-color: rgba(0,123,255,0.1); cursor: pointer; }
+        tr:hover { background-color: rgba(0,123,255,0.1); }
         .badge-role { font-size: 0.9rem; }
+        .btn-action { margin: 0 2px; }
+        .pointer { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -28,18 +30,35 @@
                         <th>Email</th>
                         <th>Role</th>
                         <th>Phone</th>
+                        <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="u : ${users}"
-                        th:onclick="|window.location.href='/profile/' + ${u.id}|" >
-                        <td th:text="${u.id}"></td>
-                        <td th:text="${u.fullName}"></td>
-                        <td th:text="${u.email}"></td>
+                    <tr th:each="u : ${users}">
+                        <td th:text="${u.id}" class="pointer"
+                            th:onclick="|window.location.href='/profile/' + ${u.id}|"></td>
+                        <td th:text="${u.fullName}" class="pointer"
+                            th:onclick="|window.location.href='/profile/' + ${u.id}|"></td>
+                        <td th:text="${u.email}" class="pointer"
+                            th:onclick="|window.location.href='/profile/' + ${u.id}|"></td>
                         <td>
-                            <span class="badge bg-primary badge-role" th:text="${u.role}"></span>
+                                <span th:classappend="${u.role == 'ADMIN'} ? 'badge bg-danger badge-role' : 'badge bg-primary badge-role'"
+                                      th:text="${u.role}"></span>
                         </td>
-                        <td th:text="${u.phone}"></td>
+                        <td th:text="${u.phone}" class="pointer"
+                            th:onclick="|window.location.href='/profile/' + ${u.id}|"></td>
+                        <td>
+                            <!-- Edit button -->
+                            <a th:href="@{/admin/update/{id}(id=${u.id})}" class="btn btn-sm btn-warning btn-action">Edit</a>
+
+                            <!-- Delete button -->
+                            <a th:if="${u.role != 'ADMIN'}"
+                               th:href="@{/admin/delete/{id}(id=${u.id})}"
+                               class="btn btn-sm btn-danger btn-action"
+                               onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+
+                            <button th:if="${u.role == 'ADMIN'}" class="btn btn-sm btn-secondary" disabled>Delete</button>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

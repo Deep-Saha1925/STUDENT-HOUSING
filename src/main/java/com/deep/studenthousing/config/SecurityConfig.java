@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .permitAll()
                         .successHandler(successHandler)
                 )
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/users/**", "/admin/update/**"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")                    // must be POST
                         .logoutSuccessUrl("/login?logout=true")  // redirect after logout

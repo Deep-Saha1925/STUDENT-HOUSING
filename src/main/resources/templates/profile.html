@@ -77,17 +77,16 @@
         </div>
 
         <!-- Show properties if Owner -->
-        <div th:if="${user.role.name() == 'OWNER'}" class="mt-4">
-            <h4 class="mb-3">🏠 Properties Listed</h4>
-            <div th:if="${#lists.isEmpty(user.properties)}">
-                <p class="text-muted">No properties listed yet.</p>
-            </div>
-            <div th:each="prop : ${user.properties}" class="property-card">
-                <h5 th:text="${prop.title}">Property Title</h5>
-                <p><strong>City:</strong> <span th:text="${prop.city}"></span></p>
-                <p><strong>Area:</strong> <span th:text="${prop.area}"></span></p>
-                <p><strong>Rent (₹):</strong> <span th:text="${prop.rent}"></span></p>
-            </div>
+
+        <h4 class="mb-3">🏠 Properties Listed</h4>
+        <div th:if="${#lists.isEmpty(user.properties)}">
+            <p class="text-muted">No properties listed yet.</p>
+        </div>
+        <div th:each="prop : ${user.properties}" class="property-card">
+            <h5 th:text="${prop.title}">Property Title</h5>
+            <p><strong>City:</strong> <span th:text="${prop.city}"></span></p>
+            <p><strong>Area:</strong> <span th:text="${prop.area}"></span></p>
+            <p><strong>Rent (₹):</strong> <span th:text="${prop.rent}"></span></p>
         </div>
     </div>
 
