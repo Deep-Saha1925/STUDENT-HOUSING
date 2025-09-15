@@ -47,7 +47,7 @@
 <body>
 
 <!-- Header with Logout -->
-<div class="header-bar d-flex justify-content-between align-items-center">
+<div class="header-bar d-flex justify-content-between align-items-center" th:if="${user != null}">
     <h2 class="fw-bold">🎓 Welcome, <span th:text="${user.fullName}"></span>!</h2>
 
     <div class="ms-auto d-flex align-items-center">
@@ -60,12 +60,12 @@
 </div>
 
 <!-- Welcome Section -->
-<div class="welcome-text">
+<div class="welcome-text" th:if="${user != null}">
     <h3>Hello <span th:text="${user.fullName}"></span> 👋</h3>
     <p>Manage your profile, search for rental properties, and stay connected — all in one place.</p>
 </div>
 
-<div class="container">
+<div class="container" th:if="${user != null}">
     <div class="row g-4 d-flex justify-content-center">
         <!-- My Profile -->
         <div class="col-md-4">
@@ -103,6 +103,11 @@
         </div>
         -->
     </div>
+</div>
+
+<div class="welcome-text" th:if="${user == null}">
+    <h3>Hello Guest 👋</h3>
+    <p>Please <a href="/login">login</a> to access your dashboard.</p>
 </div>
 
 <!-- Bootstrap JS -->

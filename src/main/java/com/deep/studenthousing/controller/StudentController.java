@@ -25,17 +25,25 @@ public class StudentController {
     @GetMapping("/student/dashboard")
     public String studentDashboard(Authentication authentication, Model model) {
         // fetch logged-in user
-        String email = authentication.getName();
-        User user = userRepo.findByEmail(email);
+        if(authentication != null) {
 
-        // fetch all properties
-        List<Property> properties = propertyService.findAll();
+            String email = authentication.getName();
+            User user = userRepo.findByEmail(email);
 
-        // add data to model
-        model.addAttribute("user", user);
-        model.addAttribute("properties", properties);
+            // fetch all properties
+            List<Property> properties = propertyService.findAll();
 
-        // point to student dashboard template
-        return "student-dashboard";   // NOTE: file should be templates/student/dashboard.html
+            // add data to model
+            if (user != null) {
+                model.addAttribute("user", user);
+                model.addAttribute("user", user);
+                model.addAttribute("properties", properties);
+
+                // point to student dashboard template
+                return "student-dashboard";
+            }
+        }
+
+        return "redirect:/access-denied";
     }
 }

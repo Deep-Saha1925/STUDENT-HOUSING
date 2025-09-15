@@ -35,7 +35,7 @@ public class PropertyController {
         User owner = userService.findById(ownerId);
 
         if (owner == null) {
-            return "error-page";
+            return "access-denied";
         }
 
         if (owner.getRole().equals(Role.STUDENT)) {

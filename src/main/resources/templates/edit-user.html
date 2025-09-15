@@ -27,7 +27,7 @@
 
       <div class="mb-3">
         <label class="form-label">Password (leave blank to keep existing)</label>
-        <input type="password" class="form-control" name="password">
+        <input type="password" class="form-control" name="password" th:field="*{password}">
       </div>
       <button type="submit" class="btn btn-success">💾 Save Changes</button>
       <a th:href="@{/admin/users}" class="btn btn-secondary">Cancel</a>
