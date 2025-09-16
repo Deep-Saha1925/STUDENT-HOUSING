@@ -40,7 +40,12 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String register(@ModelAttribute("user") User user, Authentication authentication) {
+    public String register(@ModelAttribute("user") User user, Authentication authentication, Model model) {
+
+        if(userService.findByEmail(user.getEmail()) != null){
+            model.addAttribute("errorMessage", "Email already exists.");
+            return "error-page";
+        }
 
         if(authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){

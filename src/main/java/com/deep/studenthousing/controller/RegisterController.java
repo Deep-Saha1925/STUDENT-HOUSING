@@ -30,7 +30,12 @@ public class RegisterController {
     }
 
     @PostMapping("/register-user")
-    public String register(@ModelAttribute("user") User user) {
+    public String register(@ModelAttribute("user") User user, Model model) {
+
+        if(userService.findByEmail(user.getEmail()) != null){
+            model.addAttribute("errorMessage", "Email already exists.");
+            return "error-page";
+        }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user);
