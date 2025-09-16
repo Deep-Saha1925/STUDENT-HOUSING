@@ -1,6 +1,7 @@
 package com.deep.studenthousing.controller;
 
 import com.deep.studenthousing.entity.User;
+import com.deep.studenthousing.exception.UserNotFoundException;
 import com.deep.studenthousing.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,20 @@ public class ProfileController {
             return "profile";
         }else{
             throw new RuntimeException("user not found!!");
+        }
+    }
+
+    @GetMapping("/profile/admin")
+    public String viewAdminProfile(Model model){
+        User admin = userService.findFirstByRole();
+        if(admin != null){
+            User newUser = new User();
+            newUser.setEmail(admin.getEmail());
+            newUser.setPhone(admin.getPhone());
+            model.addAttribute("user", newUser);
+            return "admin-profile";
+        }else{
+            throw new UserNotFoundException("Admin not found");
         }
     }
 }

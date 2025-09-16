@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.deep.studenthousing.entity.Role.ADMIN;
+
 @Service
 public class UserService {
 
@@ -57,5 +59,9 @@ public class UserService {
         }
 
         userRepository.delete(user);
+    }
+
+    public User findFirstByRole() {
+        return userRepository.findFirstByRole(ADMIN).get();
     }
 }
