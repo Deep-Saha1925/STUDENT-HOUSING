@@ -90,6 +90,7 @@
                     <th>City</th>
                     <th>Area</th>
                     <th>Rent (₹)</th>
+                    <th>Available</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -100,6 +101,18 @@
                     <td th:text="${p.area}"></td>
                     <td>
                         <span class="badge badge-rent" th:text="${p.rent}"></span>
+                    </td>
+                    <td>
+                        <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
+                            <input type="hidden" name="_method" value="patch"/>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="available"
+                                       th:checked="${p.available}"
+                                       onchange="this.form.submit()">
+                            </div>
+                        </form>
                     </td>
                     <td>
                         <a th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}"

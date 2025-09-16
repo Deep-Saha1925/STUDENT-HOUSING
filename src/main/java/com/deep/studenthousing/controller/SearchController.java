@@ -33,7 +33,10 @@ public class SearchController {
         }
 
         // Call service
-        List<Property> properties = propertyService.searchProperties(city, rent);
+        List<Property> properties = propertyService.searchProperties(city, rent)
+                                                    .stream()
+                                                    .filter(Property::isAvailable)
+                                                    .toList();
 
         model.addAttribute("properties", properties);
         model.addAttribute("city", city);

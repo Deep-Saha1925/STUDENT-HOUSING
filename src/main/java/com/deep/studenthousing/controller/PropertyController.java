@@ -167,6 +167,15 @@ public class PropertyController {
     }
 
 
+    @PostMapping("/owner/{ownerId}/availability/{propertyId}")
+    public String toggleAvailability(@PathVariable Long ownerId,
+                                     @PathVariable Long propertyId,
+                                     @RequestParam(value = "available", required = false) String available) {
+        Property property = propertyService.findById(propertyId);
+        property.setAvailable(available != null); // Checkbox checked = true, else false
+        propertyService.save(property);
+        return "redirect:/properties/owner/" + ownerId;
+    }
 
 
     //view property

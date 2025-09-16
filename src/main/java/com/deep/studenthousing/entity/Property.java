@@ -27,6 +27,8 @@ public class Property {
     private String area;
     private double rent;
 
+    private boolean available = true;   //checking whether is available for student.
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
