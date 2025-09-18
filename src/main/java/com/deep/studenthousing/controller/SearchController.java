@@ -18,6 +18,30 @@ public class SearchController {
         this.propertyService = propertyService;
     }
 
+    @GetMapping("/student-search")
+    public String searchPropertiesByStudent(@RequestParam(value = "city", required = false) String city,
+                                   @RequestParam(value = "rent", required = false) String rentStr,
+                                   Model model) {
+        // Clean params
+        if (city != null && city.trim().isEmpty()) {
+            city = null;
+        }
+
+        Double rent = null;
+        if (rentStr != null && !rentStr.trim().isEmpty()) {
+            rent = Double.parseDouble(rentStr);
+        }
+
+        // Call service
+        List<Property> properties = propertyService.searchProperties(city, rent)
+                .stream()
+                .filter(Property::isAvailable)
+                .toList();
+
+        model.addAttribute("properties", properties);
+        return "search";
+    }
+
     @GetMapping("/search")
     public String searchProperties(@RequestParam(value = "city", required = false) String city,
                                    @RequestParam(value = "rent", required = false) String rentStr,
@@ -39,9 +63,7 @@ public class SearchController {
                                                     .toList();
 
         model.addAttribute("properties", properties);
-        model.addAttribute("city", city);
-        model.addAttribute("rent", rent);
-        return "search";
+        return "fragments/property-list :: propertyList";
     }
 
 }

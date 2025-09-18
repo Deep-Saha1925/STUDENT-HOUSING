@@ -179,58 +179,23 @@
 <!-- Property Listings -->
 <div class="container my-5">
     <h2 class="text-center mb-4">🏠 Available Properties</h2>
-
     <!-- Search Form -->
-    <form class="row g-2 justify-content-center mt-3">
-        <div class="col-md-4">
-            <input type="text" name="city" th:value="${city}" class="form-control" placeholder="Enter city">
+    <form id="searchForm" class="row g-3">
+        <div class="col-md-5">
+            <input type="text" id="cityInput" name="city" class="form-control" placeholder="Enter city">
         </div>
-        <div class="col-md-3">
-            <input type="number" name="rent" th:value="${rent}" class="form-control" placeholder="Max Rent (₹)">
+        <div class="col-md-5">
+            <input type="number" id="rentInput" name="rent" class="form-control" placeholder="Max Rent (₹)">
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-custom w-100">Search</button>
+            <button type="submit" class="btn btn-custom w-100">Search></button>
         </div>
     </form>
 
-    <div class="row mt-4">
-
-        <div th:if="${#lists.isEmpty(properties)}" class="text-center">
-            <p class="text-muted">No properties found for your search.</p>
-        </div>
-
-        <div class="col-md-4 mb-4" th:each="p : ${properties}">
-            <div class="card property-card">
-                <!-- Show first image -->
-                <img th:if="${!#lists.isEmpty(p.imageUrls)}"
-                     th:src="${p.imageUrls[0]}"
-                     class="property-img"
-                     alt="Property Image">
-
-                <!-- Placeholder if no image -->
-                <img th:if="${#lists.isEmpty(p.imageUrls)}"
-                     src="https://via.placeholder.com/400x200.png?text=No+Image"
-                     class="property-img"
-                     alt="No Image">
-
-                <div class="card-body">
-                    <h5 th:text="${p.title}"></h5>
-                    <p>
-                        <strong>City:</strong> <span th:text="${p.city}"></span><br>
-                        <strong>Area:</strong> <span th:text="${p.area}"></span><br>
-                        <strong>Rent:</strong> ₹<span th:text="${p.rent}"></span>
-                    </p>
-                    <span class="badge bg-success" th:if="${p.available}">Available</span>
-                    <span class="badge bg-danger" th:unless="${p.available}">Not Available</span>
-                    <div class="mt-2">
-                        <a th:href="@{'/properties/' + ${p.id}}" class="btn btn-outline-primary btn-sm">
-                            View Details
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="propertyContainer">
+        <div th:replace="fragments/property-list :: propertyList"></div>
     </div>
+
 </div>
 
 <!-- Footer -->
@@ -240,5 +205,22 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("searchForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let city = document.getElementById("cityInput").value;
+            let rent = document.getElementById("rentInput").value;
+
+            fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}`)
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("propertyContainer").innerHTML = html;
+                })
+                .catch(err => console.error("Error fetching properties:", err));
+        });
+    });
+</script>
 </body>
 </html>
