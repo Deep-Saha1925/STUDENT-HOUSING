@@ -21,6 +21,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/register").hasRole("ADMIN")
                         .requestMatchers("/", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/register-user").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -30,8 +31,8 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/users/**", "/admin/update/**"))
                 .logout(logout -> logout
-                        .logoutUrl("/logout")                    // must be POST
-                        .logoutSuccessUrl("/login?logout=true")  // redirect after logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll());
