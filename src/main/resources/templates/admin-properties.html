@@ -43,7 +43,40 @@
           </tbody>
         </table>
       </div>
-      <a th:href="@{/admin/dashboard}" class="btn btn-secondary mt-3">⬅ Back to Dashboard</a>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <a th:href="@{/admin/dashboard}" class="btn btn-secondary">
+          ⬅ Back to Dashboard
+        </a>
+
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+              <a class="page-link"
+                 th:href="@{/admin/properties(page=${currentPage - 1})}">
+                Previous
+              </a>
+            </li>
+
+            <li class="page-item disabled">
+              <span class="page-link">
+                Page <span th:text="${currentPage + 1}"></span>
+                of <span th:text="${totalPages}"></span>
+              </span>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+              <a class="page-link"
+                 th:href="@{/admin/properties(page=${currentPage + 1})}">
+                Next
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
     </div>
   </div>
 </div>

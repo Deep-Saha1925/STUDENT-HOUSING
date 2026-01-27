@@ -4,6 +4,9 @@ import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.PropertyImage;
 import com.deep.studenthousing.repository.PropertyImageRepository;
 import com.deep.studenthousing.repository.PropertyRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,8 +28,13 @@ public class PropertyService {
         return propertyRepository.save(property);
     }
 
-    public List<Property> findAll() {
+    public List<Property> findAll(){
         return propertyRepository.findAll();
+    }
+
+    public Page<Property> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return propertyRepository.findAll(pageable);
     }
 
     public Property findById(Long propertyId) {

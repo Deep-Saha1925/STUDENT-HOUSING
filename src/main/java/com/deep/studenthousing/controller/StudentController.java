@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -23,7 +24,10 @@ public class StudentController {
     }
 
     @GetMapping("/student/dashboard")
-    public String studentDashboard(Authentication authentication, Model model) {
+    public String studentDashboard(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Authentication authentication, Model model) {
         // fetch logged-in user
         if(authentication != null) {
 
@@ -35,7 +39,6 @@ public class StudentController {
 
             // add data to model
             if (user != null) {
-                model.addAttribute("user", user);
                 model.addAttribute("user", user);
                 model.addAttribute("properties", properties);
 

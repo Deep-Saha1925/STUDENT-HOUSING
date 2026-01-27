@@ -58,8 +58,18 @@ public class AdminController {
 
     // Properties Page
     @GetMapping("/properties")
-    public String manageProperties(Model model) {
-        model.addAttribute("properties", propertyService.findAll());
+    public String manageProperties(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model)
+    {
+
+        Page<Property> propertyPage = propertyService.findAll(page, size);
+
+        model.addAttribute("properties", propertyPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", propertyPage.getTotalPages());
+
         return "admin-properties";
     }
 
