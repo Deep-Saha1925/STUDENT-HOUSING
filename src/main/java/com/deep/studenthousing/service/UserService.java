@@ -5,6 +5,9 @@ import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.exception.UserNotFoundException;
 import com.deep.studenthousing.repository.PropertyRepository;
 import com.deep.studenthousing.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +32,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<User> findAll() {
-        return userRepository.findAll();
+    public Page<User> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable);
     }
+
 
     public User findById(Long ownerId) {
         return userRepository.findById(ownerId).orElseThrow(() -> new UserNotFoundException("User not found with id: " + ownerId));

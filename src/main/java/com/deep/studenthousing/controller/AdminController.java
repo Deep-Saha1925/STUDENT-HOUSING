@@ -5,6 +5,7 @@ import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -42,8 +43,16 @@ public class AdminController {
 
     // Users Page
     @GetMapping("/users")
-    public String manageUsers(Model model) {
-        model.addAttribute("users", userService.findAll());
+    public String manageUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+
+        Page<User> userPage = userService.findAll(page, size);
+
+        model.addAttribute("users", userPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", userPage.getTotalPages());
         return "admin-users";
     }
 
