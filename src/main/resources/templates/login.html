@@ -3,55 +3,352 @@
 <head>
   <title>Login</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+        --accent:       #ff5e62;
+        --accent-2:     #ff9966;
+        --bg:           #faf7f4;
+        --card-bg:      #ffffff;
+        --text:         #1a1a1a;
+        --text-muted:   #777;
+        --border:       rgba(0,0,0,0.09);
+        --input-bg:     #f5f2ef;
+        --input-border: #e0dbd5;
+        --placeholder:  #aaa;
+        --shadow:       0 8px 40px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] {
+        --bg:           #111112;
+        --card-bg:      #1e1e22;
+        --text:         #f0ede8;
+        --text-muted:   #888;
+        --border:       rgba(255,255,255,0.07);
+        --input-bg:     #26252a;
+        --input-border: #35343a;
+        --placeholder:  #555;
+        --shadow:       0 8px 40px rgba(0,0,0,0.45);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
     body {
-        background: linear-gradient(135deg, #6a11cb, #2575fc);
-        height: 100vh;
+        font-family: 'DM Sans', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
+        justify-content: center;
+        padding: 30px 16px;
+        transition: background-color 0.35s ease, color 0.35s ease;
+        position: relative;
     }
-    .card {
+    body::before {
+        content: '';
+        position: fixed;
+        top: -100px; right: -100px;
+        width: 420px; height: 420px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,94,98,0.08) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    body::after {
+        content: '';
+        position: fixed;
+        bottom: -80px; left: -80px;
+        width: 320px; height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,153,102,0.07) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .theme-toggle {
+        position: fixed;
+        top: 18px; right: 18px;
+        width: 38px; height: 38px;
+        border-radius: 9px;
+        border: 1.5px solid var(--border);
+        background: var(--card-bg);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        z-index: 999;
+        box-shadow: var(--shadow);
+    }
+    .theme-toggle:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: rotate(20deg);
+    }
+    .brand-link {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.2rem;
+        color: var(--text);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 28px;
+        opacity: 0.75;
+        transition: opacity 0.2s;
+        position: relative;
+        z-index: 1;
+    }
+    .brand-link:hover { opacity: 1; color: var(--text); }
+    .brand-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        flex-shrink: 0;
+    }
+    .logout-alert {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(34,197,94,0.1);
+        border: 1.5px solid rgba(34,197,94,0.25);
+        color: #16a34a;
+        border-radius: 10px;
+        padding: 11px 16px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        z-index: 1;
+    }
+    [data-theme="dark"] .logout-alert {
+        background: rgba(34,197,94,0.08);
+        color: #4ade80;
+    }
+    .login-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
         border-radius: 20px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+        box-shadow: var(--shadow);
+        padding: 40px 38px;
+        width: 100%;
+        max-width: 420px;
+        transition: background 0.35s ease;
+        position: relative;
+        z-index: 1;
     }
-    .btn-primary {
-        border-radius: 50px;
+    .card-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,94,98,0.08);
+        color: var(--accent);
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 20px;
+        margin-bottom: 14px;
     }
-    .btn-outline-light {
-        border-radius: 50px;
+    .login-card h2 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 2rem;
+        font-weight: 400;
+        color: var(--text);
+        letter-spacing: -0.5px;
+        margin-bottom: 6px;
     }
+    .login-card .subtitle {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        margin-bottom: 28px;
+        font-weight: 300;
+    }
+    .field-wrap {
+        position: relative;
+        margin-bottom: 14px;
+    }
+    .field-icon {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        pointer-events: none;
+        z-index: 2;
+    }
+    .field-wrap input {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        display: block;
+        background: var(--input-bg) !important;
+        border: 1.5px solid var(--input-border) !important;
+        color: var(--text) !important;
+        border-radius: 10px !important;
+        padding: 11px 14px 11px 38px !important;
+        font-size: 0.88rem;
+        font-family: 'DM Sans', sans-serif;
+        transition: border-color 0.2s, background 0.35s, box-shadow 0.2s;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    .field-wrap input::placeholder { color: var(--placeholder) !important; }
+    .field-wrap input:focus {
+        outline: none !important;
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(255,94,98,0.12) !important;
+        background: var(--card-bg) !important;
+    }
+    .pwd-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 0.95rem;
+        padding: 0;
+        line-height: 1;
+        transition: color 0.2s;
+        z-index: 3;
+    }
+    .pwd-toggle:hover { color: var(--text); }
+    .btn-login {
+        width: 100%;
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        border: none;
+        color: #fff;
+        padding: 12px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 6px 20px rgba(255,94,98,0.28);
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: 'DM Sans', sans-serif;
+    }
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(255,94,98,0.36);
+        opacity: 0.95;
+    }
+    .register-prompt {
+        text-align: center;
+        font-size: 0.83rem;
+        color: var(--text-muted);
+        margin-top: 20px;
+    }
+    .register-prompt a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .register-prompt a:hover { opacity: 0.8; }
   </style>
 </head>
 <body>
-<div class="container">
 
-  <div th:if="${param.logout}">
-    <div class="alert alert-success">✅ You have been logged out successfully.</div>
-  </div>
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+  <i class="bi bi-moon-fill" id="themeIcon"></i>
+</button>
 
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="card p-4 text-center">
-        <h2 class="mb-4">🔑 Login</h2>
+<!-- Brand -->
+<a href="/" class="brand-link">
+  <span class="brand-dot"></span>
+  Student Housing
+</a>
 
-        <!-- Login Form -->
-        <form th:action="@{/login}" method="post">
-          <div class="mb-3">
-            <input type="text" class="form-control" name="username" placeholder="Email" required>
-          </div>
-          <div class="mb-3">
-            <input type="password" class="form-control" name="password" placeholder="Password" required>
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Login</button>
-        </form>
-
-<!--        &lt;!&ndash; Switch to Register &ndash;&gt;-->
-<!--        <p class="mt-3 text-muted">Don’t have an account?</p>-->
-<!--        <a href="/users/register" class="btn btn-outline-dark w-100">Register</a>-->
-      </div>
-    </div>
+<!-- ✅ UNCHANGED: logout check -->
+<div th:if="${param.logout}">
+  <div class="logout-alert">
+    <i class="bi bi-check-circle-fill"></i>
+    You have been logged out successfully.
   </div>
 </div>
+
+<!-- Card -->
+<div class="login-card">
+
+  <div class="card-eyebrow">
+    <i class="bi bi-key-fill"></i> Welcome Back
+  </div>
+  <h2>Sign in</h2>
+  <p class="subtitle">Enter your credentials to access your account.</p>
+
+  <!-- ✅ UNCHANGED: th:action, name="username", name="password" -->
+  <form th:action="@{/login}" method="post">
+
+    <div class="field-wrap">
+      <i class="bi bi-envelope field-icon"></i>
+      <input type="text" class="form-control" name="username" placeholder="Email" required>
+    </div>
+
+    <div class="field-wrap">
+      <i class="bi bi-lock field-icon"></i>
+      <input type="password" class="form-control" id="passwordField" name="password" placeholder="Password" required>
+      <button type="button" class="pwd-toggle" id="pwdToggle" tabindex="-1">
+        <i class="bi bi-eye" id="pwdIcon"></i>
+      </button>
+    </div>
+
+    <button type="submit" class="btn-login">
+      <i class="bi bi-arrow-right-circle"></i> Login
+    </button>
+
+  </form>
+
+  <!-- ✅ UNCHANGED: commented out register block preserved as comment -->
+  <!--
+  <p class="mt-3 text-muted">Don't have an account?</p>
+  <a href="/users/register" class="btn btn-outline-dark w-100">Register</a>
+  -->
+
+  <p class="register-prompt">
+    Don't have an account? <a href="/register-user">Register</a>
+  </p>
+
+</div>
+
+<script>
+  /* Theme Toggle */
+  const toggleBtn = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const html      = document.documentElement;
+  const saved     = localStorage.getItem('sh-theme') || 'light';
+  applyTheme(saved);
+  toggleBtn.addEventListener('click', () => {
+      const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('sh-theme', next);
+  });
+  function applyTheme(theme) {
+      html.dataset.theme = theme;
+      themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+      toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  }
+
+  /* Password Toggle */
+  document.getElementById('pwdToggle').addEventListener('click', () => {
+      const field = document.getElementById('passwordField');
+      const icon  = document.getElementById('pwdIcon');
+      const isHidden = field.type === 'password';
+      field.type = isHidden ? 'text' : 'password';
+      icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+</script>
 </body>
 </html>
