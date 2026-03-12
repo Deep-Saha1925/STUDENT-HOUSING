@@ -348,23 +348,26 @@
             </div>
         </div>
 
-        <div class="divider"></div>
+        <!-- Properties section — only shown for OWNERs -->
+        <div th:if="${user.role.toString() == 'OWNER' or user.role.toString() == 'ROLE_OWNER' or user.role == 'OWNER'}">
 
-        <!-- Properties section -->
-        <p class="section-title">
-            <i class="bi bi-house-door"></i> Properties Listed
-        </p>
+            <div class="divider"></div>
 
-        <!-- ✅ UNCHANGED: th:if, th:each, prop fields -->
-        <div th:if="${#lists.isEmpty(user.properties)}">
-            <p class="empty-msg">No properties listed yet.</p>
-        </div>
+            <p class="section-title">
+                <i class="bi bi-house-door"></i> Properties Listed
+            </p>
 
-        <div th:each="prop : ${user.properties}" class="property-card">
-            <h5 th:text="${prop.title}">Property Title</h5>
-            <p><strong>City:</strong> <span th:text="${prop.city}"></span></p>
-            <p><strong>Area:</strong> <span th:text="${prop.area}"></span></p>
-            <p><strong>Rent (₹):</strong> <span th:text="${prop.rent}"></span></p>
+            <div th:if="${#lists.isEmpty(user.properties)}">
+                <p class="empty-msg">No properties listed yet.</p>
+            </div>
+
+            <div th:each="prop : ${user.properties}" class="property-card">
+                <h5 th:text="${prop.title}">Property Title</h5>
+                <p><strong>City:</strong> <span th:text="${prop.city}"></span></p>
+                <p><strong>Area:</strong> <span th:text="${prop.area}"></span></p>
+                <p><strong>Rent (₹):</strong> <span th:text="${prop.rent}"></span></p>
+            </div>
+
         </div>
 
     </div>
