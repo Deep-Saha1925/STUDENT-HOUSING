@@ -19,8 +19,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users/register").hasRole("ADMIN")
-                        .requestMatchers("/", "/search", "/fragments/**", "/css/**", "/js/**", "/images/**", "/properties/**").permitAll()
+                        .requestMatchers("/", "/search", "/fragments/**", "/access-denied", "/css/**", "/js/**", "/images/**", "/properties/**").permitAll()
                         .requestMatchers("/register-user").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -28,6 +29,11 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .permitAll()
                         .successHandler(successHandler)
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(((request, response, accessDeniedException) -> {
+                            response.sendRedirect("/access-denied");
+                        }))
                 )
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/users/**", "/admin/update/**"))
                 .logout(logout -> logout
