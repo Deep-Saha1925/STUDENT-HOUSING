@@ -258,7 +258,6 @@
 
 <div class="container animate__animated animate__fadeIn" style="position:relative; z-index:1;">
 
-  <!-- ✅ UNCHANGED: href="/student/dashboard" -->
   <div class="top-bar">
     <a href="/student/dashboard" class="btn-back">
       <i class="bi bi-arrow-left"></i> Back to Dashboard
@@ -268,7 +267,6 @@
   <h2 class="page-title">Search Properties</h2>
   <p class="page-subtitle">Find affordable housing near your campus</p>
 
-  <!-- ✅ UNCHANGED: form id, input names/ids, th:value -->
   <div class="search-wrap">
     <form id="searchForm" class="d-flex gap-2 flex-wrap w-100 align-items-center">
       <input type="text" class="form-control" name="city" id="cityInput"
@@ -281,7 +279,6 @@
     </form>
   </div>
 
-  <!-- ✅ UNCHANGED: th:replace fragment -->
   <div id="propertyContainer">
     <div th:replace="fragments/property-list :: propertyList"></div>
   </div>
@@ -308,7 +305,6 @@
       toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
   }
 
-  /* ✅ UNCHANGED: search fetch logic */
   document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("searchForm").addEventListener("submit", function(event) {
           event.preventDefault();
