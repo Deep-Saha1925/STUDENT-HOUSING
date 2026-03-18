@@ -3,36 +3,334 @@
 <head>
   <title>Edit User</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+        --accent:       #ff5e62;
+        --accent-2:     #ff9966;
+        --bg:           #faf7f4;
+        --card-bg:      #ffffff;
+        --text:         #1a1a1a;
+        --text-muted:   #777;
+        --border:       rgba(0,0,0,0.09);
+        --input-bg:     #f5f2ef;
+        --input-border: #e0dbd5;
+        --placeholder:  #aaa;
+        --label:        #444;
+        --shadow:       0 8px 40px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] {
+        --bg:           #111112;
+        --card-bg:      #1e1e22;
+        --text:         #f0ede8;
+        --text-muted:   #888;
+        --border:       rgba(255,255,255,0.07);
+        --input-bg:     #26252a;
+        --input-border: #35343a;
+        --placeholder:  #555;
+        --label:        #ccc;
+        --shadow:       0 8px 40px rgba(0,0,0,0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+        font-family: 'DM Sans', sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+        transition: background 0.35s, color 0.35s;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: -100px; right: -100px;
+        width: 420px; height: 420px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,94,98,0.07) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    body::after {
+        content: '';
+        position: fixed;
+        bottom: -80px; left: -80px;
+        width: 320px; height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,153,102,0.06) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .theme-toggle {
+        position: fixed;
+        top: 18px; right: 18px;
+        width: 38px; height: 38px;
+        border-radius: 9px;
+        border: 1.5px solid var(--border);
+        background: var(--card-bg);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        z-index: 999;
+        box-shadow: var(--shadow);
+    }
+    .theme-toggle:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: rotate(20deg);
+    }
+
+    .brand-link {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.15rem;
+        color: var(--text);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        position: relative;
+        z-index: 1;
+    }
+    .brand-link:hover { opacity: 1; color: var(--text); }
+
+    .brand-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+    }
+
+    .edit-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        width: 100%;
+        max-width: 480px;
+        transition: background 0.35s;
+        position: relative;
+        z-index: 1;
+    }
+
+    .edit-card-header {
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        padding: 22px 32px;
+        text-align: center;
+    }
+
+    .edit-card-header .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.18);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+    }
+
+    .edit-card-header h3 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.6rem;
+        font-weight: 400;
+        color: #fff;
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+    .edit-card-body { padding: 30px 32px 26px; }
+
+    .field-group { margin-bottom: 16px; }
+
+    .field-group label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--label);
+        margin-bottom: 6px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+
+    .field-group input {
+        width: 100%;
+        display: block;
+        background: var(--input-bg) !important;
+        border: 1.5px solid var(--input-border) !important;
+        color: var(--text) !important;
+        border-radius: 10px !important;
+        padding: 11px 14px !important;
+        font-size: 0.88rem;
+        font-family: 'DM Sans', sans-serif;
+        transition: border-color 0.2s, background 0.35s, box-shadow 0.2s;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .field-group input::placeholder { color: var(--placeholder) !important; }
+
+    .field-group input:focus {
+        outline: none !important;
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(255,94,98,0.12) !important;
+        background: var(--card-bg) !important;
+    }
+
+    .field-hint {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+    }
+
+    .section-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 18px 0;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        border: none;
+        color: #fff;
+        padding: 12px 28px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 6px 20px rgba(255,94,98,0.28);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-family: 'DM Sans', sans-serif;
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(255,94,98,0.36);
+        opacity: 0.95;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--input-bg);
+        border: 1.5px solid var(--border);
+        color: var(--text-muted);
+        padding: 11px 22px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-family: 'DM Sans', sans-serif;
+    }
+    .btn-cancel:hover {
+        color: var(--text);
+        border-color: var(--text);
+    }
+  </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-  <div class="card shadow p-4">
-    <h3 class="mb-3">✏ Edit User</h3>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <i class="bi bi-moon-fill" id="themeIcon"></i>
+</button>
+
+<a href="/admin/users" class="brand-link">
+  <span class="brand-dot"></span>
+  Admin Panel
+</a>
+
+<div class="edit-card">
+
+  <div class="edit-card-header">
+    <div class="eyebrow"><i class="bi bi-pencil-square"></i> Edit User</div>
+    <h3>Update User Details</h3>
+  </div>
+
+  <div class="edit-card-body">
+
     <form th:action="@{'/admin/users/edit/' + ${user.id}}" th:object="${user}" method="post">
-      <div class="mb-3">
-        <label class="form-label">Full Name</label>
-        <input type="text" class="form-control" th:field="*{fullName}" th:value="${user.fullName}" required>
+
+      <div class="field-group">
+        <label>Full Name</label>
+        <input type="text" th:field="*{fullName}" th:value="${user.fullName}" required placeholder="Full name">
       </div>
-      <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" class="form-control" th:field="*{email}" th:value="${user.email}" required>
+
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" th:field="*{email}" th:value="${user.email}" required placeholder="Email address">
       </div>
-      <div class="mb-3">
-        <label class="form-label">Phone</label>
-        <input type="text" class="form-control" th:field="*{phone}" th:value="${user.phone}" required>
+
+      <div class="field-group">
+        <label>Phone</label>
+        <input type="text" th:field="*{phone}" th:value="${user.phone}" required placeholder="Phone number">
       </div>
 
       <input type="hidden" name="id" th:value="${user.id}" />
       <input type="hidden" name="role" th:value="${user.role}" />
 
-      <div class="mb-3">
-        <label class="form-label">Password (leave blank to keep existing)</label>
-        <input type="password" class="form-control" name="password" th:field="*{password}">
+      <div class="section-divider"></div>
+
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" name="password" th:field="*{password}" placeholder="Leave blank to keep existing">
+        <p class="field-hint"><i class="bi bi-info-circle"></i> Leave blank to keep the current password.</p>
       </div>
-      <button type="submit" class="btn btn-success">💾 Save Changes</button>
-      <a th:href="@{/admin/users}" class="btn btn-secondary">Cancel</a>
+
+      <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn-save">
+          <i class="bi bi-floppy"></i> Save Changes
+        </button>
+        <a th:href="@{/admin/users}" class="btn-cancel">
+          <i class="bi bi-x-circle"></i> Cancel
+        </a>
+      </div>
+
     </form>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const toggleBtn = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const html      = document.documentElement;
+  const saved     = localStorage.getItem('sh-theme') || 'light';
+  applyTheme(saved);
+  toggleBtn.addEventListener('click', () => {
+      const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem('sh-theme', next);
+  });
+  function applyTheme(theme) {
+      html.dataset.theme = theme;
+      themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+      toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  }
+</script>
 </body>
 </html>
