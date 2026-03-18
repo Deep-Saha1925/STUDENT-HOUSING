@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9966"/>
+      <stop offset="100%" stop-color="#ff5e62"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="32" fill="url(#grad)"/>
+
+  <!-- Roof -->
+  <polygon points="6,34 32,10 58,34" fill="white" opacity="0.96"/>
+
+  <!-- House body -->
+  <rect x="14" y="33" width="36" height="24" rx="2" fill="white" opacity="0.96"/>
+
+  <!-- Arch door -->
+  <path d="M24,57 L24,44 Q24,37 32,37 Q40,37 40,44 L40,57 Z" fill="#ff5e62" opacity="0.85"/>
+
+  <!-- Window left with cross -->
+  <rect x="17" y="37" width="10" height="9" rx="1.5" fill="white" opacity="0.55"/>
+  <line x1="22" y1="37" x2="22" y2="46" stroke="#ff9966" stroke-width="1.2"/>
+  <line x1="17" y1="41.5" x2="27" y2="41.5" stroke="#ff9966" stroke-width="1.2"/>
+
+  <!-- Window right with cross -->
+  <rect x="37" y="37" width="10" height="9" rx="1.5" fill="white" opacity="0.55"/>
+  <line x1="42" y1="37" x2="42" y2="46" stroke="#ff9966" stroke-width="1.2"/>
+  <line x1="37" y1="41.5" x2="47" y2="41.5" stroke="#ff9966" stroke-width="1.2"/>
+</svg>

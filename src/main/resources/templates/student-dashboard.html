@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Student Dashboard</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -376,11 +377,9 @@
     <p>Manage your profile, search for rental properties, and stay connected — all in one place.</p>
 </div>
 
-<!-- ✅ UNCHANGED: th:if="${user != null}" -->
 <!-- ── Cards ── -->
 <div class="dash-grid" th:if="${user != null}">
 
-    <!-- ✅ UNCHANGED: th:href="@{'/profile/' + ${user.id}}" -->
     <div class="dash-card">
         <div class="card-icon-wrap icon-blue">
             <i class="bi bi-person-circle"></i>
@@ -403,7 +402,6 @@
         </a>
     </div>
 
-    <!-- ✅ UNCHANGED: future feature comment preserved -->
     <!--
     <div class="col-md-4">
         <div class="card p-4 text-center">
@@ -417,7 +415,6 @@
 
 </div>
 
-<!-- ✅ UNCHANGED: th:if="${user == null}" guest state -->
 <div class="guest-wrap" th:if="${user == null}">
     <h3>Hello Guest 👋</h3>
     <p>Please <a href="/login">login</a> to access your dashboard.</p>
