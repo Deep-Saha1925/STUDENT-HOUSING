@@ -229,10 +229,8 @@
     <i class="bi bi-moon-fill" id="themeIcon"></i>
 </button>
 
-<!-- ✅ UNCHANGED: all th: attributes -->
 <div class="profile-card animate__animated animate__fadeInUp">
 
-    <!-- Header — UNCHANGED: hardcoded "ADMIN" text -->
     <div class="profile-header">
         <div class="avatar-wrap">
             <i class="bi bi-shield-fill-check"></i>
@@ -246,7 +244,6 @@
     <!-- Body -->
     <div class="profile-body">
         <div class="info-section">
-            <!-- ✅ UNCHANGED: th:text="${user.email}" -->
             <div class="info-row">
                 <div class="info-icon"><i class="bi bi-envelope"></i></div>
                 <div>
@@ -254,7 +251,6 @@
                     <div class="info-value" th:text="${user.email}"></div>
                 </div>
             </div>
-            <!-- ✅ UNCHANGED: th:text="${user.phone}" -->
             <div class="info-row">
                 <div class="info-icon"><i class="bi bi-telephone"></i></div>
                 <div>
@@ -265,7 +261,6 @@
         </div>
     </div>
 
-    <!-- ✅ UNCHANGED: href="javascript:history.back()" -->
     <div class="text-center mb-4">
         <a href="javascript:history.back()" class="btn-back">
             <i class="bi bi-arrow-left"></i> Back
