@@ -1,48 +1,108 @@
-# 🏠 Student Housing Management System
+<div align="center">
+
+<img src="assets/student_housing_logo.svg" width="500" alt="Student Housing Logo"/>
+
+<h1>Student Housing Management System</h1>
+<h3>A web-based platform for students, owners, and administrators</h3>
+
+[![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)](https://www.java.com)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat-square&logo=mysql)](https://www.mysql.com)
+[![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3.x-darkgreen?style=flat-square&logo=thymeleaf)](https://www.thymeleaf.org)
+[![Cloudinary](https://img.shields.io/badge/Cloudinary-Image%20Storage-3448C5?style=flat-square&logo=cloudinary)](https://cloudinary.com)
+[![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE)
+
+*A centralized, secure, and scalable platform for students, property owners, and administrators*
+
+[Features](#-features) · [Tech Stack](#️-tech-stack) · [Screenshots](#️-screenshots) · [Setup](#️-running-the-project) · [API Docs](#-pages--routes) · [Author](#-conclusion)
+
+</div>
+
+---
 
 ## 📌 Overview
-The **Student Housing Management System** is a web-based platform built using **Java Spring Boot, Spring Security, Thymeleaf, and MySQL**.  
-It enables **students** to search for rental properties, **owners** to list and manage their properties, and **admins** to manage users and maintain platform integrity.
- 
+
+**Student Housing Management System** is a web-based platform built using **Java Spring Boot, Spring Security, Thymeleaf, and MySQL**. It enables **students** to search for rental properties, **owners** to list and manage their properties, and **admins** to manage users and maintain platform integrity.
+
+> No extra app install needed. Works in any browser. Designed for students and property owners alike.
+
 ---
 
 ## 🚀 Features
 
+<table>
+<tr>
+<td width="50%">
+
 ### 👨‍🎓 Student Features
-- Secure login & registration
-- Personal profile (ID, email, phone)
-- Search for rental properties by city and max rent
-- View full property details with image carousel and owner contact info
-- User-friendly dashboard
+- 🔐 Secure login & registration
+- 👤 Personal profile (ID, email, phone)
+- 🔍 Search properties by city and max rent
+- 🖼️ View full property details with image carousel
+- 📞 Owner contact info on property page
+- 🏠 User-friendly dashboard
+
+</td>
+<td width="50%">
 
 ### 🏠 Owner Features
-- Register & manage rental properties
-- Upload multiple property images (Cloudinary integration)
-- Edit property details — title, city, area, rent, description
-- Delete individual images from existing listings
-- Toggle property availability directly from the dashboard
-- Dashboard with full properties table
+- 📝 Register & manage rental properties
+- ☁️ Upload multiple images (Cloudinary)
+- ✏️ Edit title, city, area, rent, description
+- 🗑️ Delete individual images from listings
+- 🔄 Toggle property availability from dashboard
+- 📊 Dashboard with full properties table
+
+</td>
+</tr>
+<tr>
+<td width="50%">
 
 ### 🔑 Admin Features
-- Admin dashboard with cards for Users, Properties, and Register User
-- View all registered users in a paginated table
-- Edit or delete any user (admins cannot be deleted)
-- View all properties in a paginated table
-- Access denied page for unauthorized route access
+- 📊 Dashboard cards for Users, Properties, Register User
+- 👥 View all registered users (paginated table)
+- ✏️ Edit or delete any user
+- 🚫 Admins cannot be deleted
+- 🏘️ View all properties (paginated table)
+- 🚷 Access denied page for unauthorized routes
+
+</td>
+<td width="50%">
+
+### ⚙️ System Highlights
+- 🔐 Role-based access (STUDENT, OWNER, ADMIN)
+- 🔄 Custom login redirect per role
+- ☁️ Cloudinary auto-delete on property removal
+- 🌙 Light / dark mode with `localStorage` persistence
+- 📱 Bootstrap 5 responsive layout
+- 🚫 Custom 403 & error pages
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🛠️ Tech Stack
-| Layer | Technology |
+
+### Backend
+| Technology | Version | Purpose |
+|---|---|---|
+| Java | 17 | Core language |
+| Spring Boot + MVC | 3.x | REST API & MVC framework |
+| Spring Security | 6.x | Role-based access control |
+| Spring Data JPA | — | ORM & repository layer |
+| MySQL | 8.0 | Persistent data storage |
+| Cloudinary | — | Image upload & auto-delete |
+
+### Frontend
+| Technology | Purpose |
 |---|---|
-| **Backend** | Java 17, Spring Boot, Spring MVC |
-| **Frontend** | Thymeleaf, Bootstrap 5, Animate.css |
-| **Fonts** | DM Serif Display, DM Sans (Google Fonts) |
-| **Database** | MySQL with Spring Data JPA |
-| **Security** | Spring Security — role-based access (STUDENT, OWNER, ADMIN) |
-| **Image Storage** | Cloudinary (upload + auto-delete on property removal) |
-| **UI Theme** | Light / Dark mode toggle with `localStorage` persistence |
- 
+| Thymeleaf | Server-side templating |
+| Bootstrap 5 | Responsive layout & components |
+| Animate.css | Entry animations |
+| DM Serif Display + DM Sans | Typography (Google Fonts) |
+
 ---
 
 ## 🎨 UI Design System
@@ -59,7 +119,7 @@ All pages share a consistent design system using CSS variables, supporting seaml
 | `--text` | `#1A1A1A` | `#F0EDE8` |
 | `--text-muted` | `#777777` | `#888888` |
 | `--input-bg` | `#F5F2EF` | `#26252A` |
- 
+
 ---
 
 ## ⚙️ Implementation Details
@@ -68,20 +128,20 @@ All pages share a consistent design system using CSS variables, supporting seaml
 - Spring Security used for **login, logout, and role-based access control**
 - Roles: `ROLE_STUDENT`, `ROLE_OWNER`, `ROLE_ADMIN`
 - Custom `LoginSuccessHandler` redirects each role to their respective dashboard on login
-- Unauthorized access to protected routes redirects to a friendly `/access-denied` page instead of the default Whitelabel 403 error
+- Unauthorized access to protected routes redirects to `/access-denied` instead of the default Whitelabel 403 error
 
 ### 2️⃣ File Storage
 - Images uploaded to **Cloudinary**
-- When properties are deleted, images are also removed from Cloudinary
+- When properties are deleted, images are also automatically removed from Cloudinary
 
 ### 3️⃣ Error Handling
 - Custom `/access-denied` page for 403 Forbidden errors
-- Custom error page for general exceptions (e.g., user not found)
+- Custom `error.html` for general exceptions (e.g., user not found)
 
 ### 4️⃣ Responsive UI
 - Bootstrap 5 used for responsiveness
 - Navbar buttons collapse into a dropdown on smaller screens
-- Dark/light theme toggle on every page, synced across all pages via `localStorage`
+- Dark/light theme toggle on every page, synced via `localStorage`
 
 ---
 
@@ -89,23 +149,33 @@ All pages share a consistent design system using CSS variables, supporting seaml
 
 | Page | Template | Route | Access |
 |---|---|---|---|
-| Home | `index.html` | `/` | Public |
-| Login | `login.html` | `/login` | Public |
-| Register | `register-only-user.html` | `/register-user` | Public |
-| Student Dashboard | `student-dashboard.html` | `/student/dashboard` | STUDENT |
-| Student Search | `student-search.html` | `/student-search` | STUDENT |
-| Owner Dashboard | `owner-dashboard.html` | `/properties/owner/{id}` | OWNER |
-| Add Property | `add-property.html` | `/properties/owner/{id}/add` | OWNER |
-| Edit Property | `edit-property.html` | `/properties/owner/{id}/edit/{pid}` | OWNER |
-| Property Details | `property-details.html` | `/properties/{id}` | Auth |
-| User Profile | `user-profile.html` | `/profile/{id}` | Auth |
-| Admin Profile | `admin-profile.html` | `/profile/admin` | Auth |
-| Admin Dashboard | `admin-dashboard.html` | `/admin/dashboard` | ADMIN |
-| Manage Users | `manage-users.html` | `/admin/users` | ADMIN |
-| Manage Properties | `manage-properties.html` | `/admin/properties` | ADMIN |
-| Edit User | `edit-user.html` | `/admin/users/edit/{id}` | ADMIN |
-| Access Denied | `access-denied.html` | `/access-denied` | Public |
- 
+| Home | `index.html` | `/` | 🌐 Everyone |
+| Login | `login.html` | `/login` | 🌐 Everyone |
+| Register | `register-only-user.html` | `/register-user` | 🌐 Everyone |
+| Access Denied | `access-denied.html` | `/access-denied` | 🌐 Everyone |
+| Student Dashboard | `student-dashboard.html` | `/student/dashboard` | 🎓 STUDENT |
+| Student Search | `student-search.html` | `/student-search` | 🎓 STUDENT |
+| Owner Dashboard | `owner-dashboard.html` | `/properties/owner/{id}` | 🏠 OWNER |
+| Add Property | `add-property.html` | `/properties/owner/{id}/add` | 🏠 OWNER |
+| Edit Property | `edit-property.html` | `/properties/owner/{id}/edit/{pid}` | 🏠 OWNER |
+| Property Details | `property-details.html` | `/properties/{id}` | 🔒 Auth |
+| User Profile | `user-profile.html` | `/profile/{id}` | 🔒 Auth |
+| Admin Profile | `admin-profile.html` | `/profile/admin` | 🔒 Auth |
+| Admin Dashboard | `admin-dashboard.html` | `/admin/dashboard` | 🔐 ADMIN |
+| Manage Users | `manage-users.html` | `/admin/users` | 🔐 ADMIN |
+| Manage Properties | `manage-properties.html` | `/admin/properties` | 🔐 ADMIN |
+| Edit User | `edit-user.html` | `/admin/users/edit/{id}` | 🔐 ADMIN |
+
+---
+
+## 👥 Roles & Access
+
+| Role | Permissions |
+|---|---|
+| **Student** | Search properties, view property details, manage own profile |
+| **Owner** | Add/edit/delete own properties, manage availability, upload/remove images |
+| **Admin** | Manage all users and properties, register new users (cannot be deleted) |
+
 ---
 
 ## 📂 Project Structure
@@ -137,12 +207,11 @@ src/main/resources/templates
 │── error.html                  # General error page
 │── fragments/
 │   └── property-list.html      # Reusable property card fragment
-```
 
+```
 ---
 
 ## 🖼️ Screenshots
-
 
 ### Home / Index Page
 ![Index Page](assets/index.png)
@@ -153,7 +222,7 @@ src/main/resources/templates
 ### Owner Dashboard
 ![Owner Dashboard](assets/owner_dashboard.png)
 
-### Admin User Management
+### Admin Dashboard
 ![Admin Dashboard](assets/admin_dashboard.png)
 
 ### Property Details
@@ -162,58 +231,80 @@ src/main/resources/templates
 ### Search Properties
 ![Search Properties](assets/search_properties.png)
 
-
 ---
 
 ## ▶️ Running the Project
 
-### 1️⃣ Clone Repository
+### Prerequisites
+- Java 17+
+- MySQL 8+
+- Maven 3.8+
+
+### Steps
+
 ```bash
+# 1. Clone the repository
 git clone https://github.com/yourusername/student-housing-system.git
 cd student-housing-system
 ```
 
-### 2️⃣ Configure MySQL
-Update `application.properties`:
+```bash
+# 2. Create MySQL database
+mysql -u root -p
+```
+
+```sql
+CREATE DATABASE housing_db;
+EXIT;
+```
+
+```bash
+# 3. Configure application.properties
+```
+
 ```properties
+# Database
 spring.datasource.url=jdbc:mysql://localhost:3306/housing_db
 spring.datasource.username=root
 spring.datasource.password=yourpassword
-```
+spring.jpa.hibernate.ddl-auto=update
 
-### 3️⃣ Configure Cloudinary
-```properties
+# Cloudinary
 cloudinary.cloud_name=your_cloud_name
 cloudinary.api_key=your_api_key
 cloudinary.api_secret=your_api_secret
 ```
 
-### 4️⃣ Run the Application
 ```bash
+# 4. Build and run
 mvn spring-boot:run
 ```
 
-Then open [http://localhost:8080](http://localhost:8080).
- 
----
+```bash
+# 5. Open in browser
+open http://localhost:8080
+```
 
-## 👥 Roles & Access
-| Role | Permissions |
-|---|---|
-| **Student** | Search properties, view property details, manage own profile |
-| **Owner** | Add/edit/delete own properties, manage availability |
-| **Admin** | Manage all users and properties, register new users |
- 
 ---
 
 ## 📌 Future Enhancements
-- Booking system for students
-- Payment gateway integration
-- Notification system for owners/students
-- Advanced analytics dashboard for admins
-- Mobile-responsive PWA support
+
+- [ ] Booking system for students
+- [ ] Payment gateway integration
+- [ ] Notification system for owners/students
+- [ ] Advanced analytics dashboard for admins
+- [ ] Mobile-responsive PWA support
 
 ---
 
 ## 🏆 Conclusion
+
 The **Student Housing Management System** provides a **centralized, secure, and scalable platform** for students, property owners, and administrators. Built on Spring Boot with a modern Thymeleaf frontend, it features full role-based access control, cloud image storage, a consistent design system with dark/light theming, and is structured for future extensibility.
+
+---
+
+<div align="center">
+
+*Built with ❤️ · Java · Spring Boot · Thymeleaf · MySQL*
+
+</div>
