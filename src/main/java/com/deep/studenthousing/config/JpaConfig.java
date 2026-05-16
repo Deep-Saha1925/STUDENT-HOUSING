@@ -70,4 +70,12 @@ public class JpaConfig {
         return new JpaTransactionManager(emf);
     }
 
+    @Bean(name = "cloudTransactionManager")
+    @Primary
+    public PlatformTransactionManager cloudTransactionManager(
+            @Qualifier("cloudEntityManagerFactory") EntityManagerFactory emf
+    ){
+        return new JpaTransactionManager(emf);
+    }
+
 }
