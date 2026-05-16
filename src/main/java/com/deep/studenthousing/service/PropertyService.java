@@ -17,15 +17,17 @@ public class PropertyService {
     private final PropertyRepository propertyRepository;
     private final ImageUploadService imageUploadService;
     private final PropertyImageRepository propertyImageRepository;
+    private final DualWriteService dualWriteService;
 
-    public PropertyService(PropertyRepository propertyRepository, ImageUploadService imageUploadService, PropertyImageRepository propertyImageRepository) {
+    public PropertyService(PropertyRepository propertyRepository, ImageUploadService imageUploadService, DualWriteService dualWriteService, PropertyImageRepository propertyImageRepository) {
         this.propertyRepository = propertyRepository;
         this.imageUploadService = imageUploadService;
         this.propertyImageRepository = propertyImageRepository;
+        this.dualWriteService = dualWriteService;
     }
 
-    public Property save(Property property) {
-        return propertyRepository.save(property);
+    public void save(Property property) {
+        dualWriteService.saveBoth(property);
     }
 
     public List<Property> findAll(){

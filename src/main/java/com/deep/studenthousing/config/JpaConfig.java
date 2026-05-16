@@ -18,39 +18,35 @@ import java.util.Properties;
 @EnableTransactionManagement
 public class JpaConfig {
 
-//    LOCAL EntityManager
+    // LOCAL EntityManager (MySQL)
     @Bean(name = "localEntityManagerFactory")
     @Primary
     public LocalContainerEntityManagerFactoryBean localEntityManagerFactory(
-            @Qualifier("localDataSource")DataSource dataSource
-    ){
+            @Qualifier("localDataSource") DataSource dataSource) {
+
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.deep.studenthousing.entity");
+        em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
-        HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-        em.setJpaVendorAdapter(adapter);
-
-        Properties properties = new Properties();
-        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
-        properties.put("hibernate.hbm2ddl.auto", "update");
-        properties.put("hibernate.show_sql", "true");
-        em.setJpaProperties(properties);
+        Properties props = new Properties();
+        props.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+        props.put("hibernate.hbm2ddl.auto", "update");
+        props.put("hibernate.show_sql", "true");
+        em.setJpaProperties(props);
 
         return em;
     }
 
-//    CLOUD EntityManager
+    // CLOUD EntityManager (PostgreSQL - Neon)
     @Bean(name = "cloudEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean cloudEntityManagerFactory(
-            @Qualifier("cloudDataSource")DataSource dataSource
-    ){
+            @Qualifier("cloudDataSource") DataSource dataSource) {
+
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.deep.studenthousing.entity");
-
-        HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-        em.setJpaVendorAdapter(adapter);
+        em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
         Properties props = new Properties();
         props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
@@ -61,21 +57,18 @@ public class JpaConfig {
         return em;
     }
 
-//    Transaction Managers
+    // LOCAL Transaction Manager
     @Bean(name = "localTransactionManager")
     @Primary
     public PlatformTransactionManager localTransactionManager(
-            @Qualifier("localEntityManagerFactory")EntityManagerFactory emf
-    ){
+            @Qualifier("localEntityManagerFactory") EntityManagerFactory emf) {
         return new JpaTransactionManager(emf);
     }
 
+    // CLOUD Transaction Manager
     @Bean(name = "cloudTransactionManager")
-    @Primary
     public PlatformTransactionManager cloudTransactionManager(
-            @Qualifier("cloudEntityManagerFactory") EntityManagerFactory emf
-    ){
+            @Qualifier("cloudEntityManagerFactory") EntityManagerFactory emf) {
         return new JpaTransactionManager(emf);
     }
-
 }
