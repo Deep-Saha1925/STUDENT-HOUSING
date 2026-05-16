@@ -19,7 +19,7 @@ import java.util.Properties;
 public class JpaConfig {
 
     // LOCAL EntityManager (MySQL)
-    @Bean(name = "localEntityManagerFactory")
+    @Bean(name = {"localEntityManagerFactory", "entityManagerFactory"})
     @Primary
     public LocalContainerEntityManagerFactoryBean localEntityManagerFactory(
             @Qualifier("localDataSource") DataSource dataSource) {
