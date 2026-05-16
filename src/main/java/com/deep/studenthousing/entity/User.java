@@ -22,6 +22,7 @@ public class User {
     private Long id;
 
     @NotNull(message = "Name is required.")
+    @Column(name = "full_name")
     private String fullName;
 
     @Column(unique = true)
