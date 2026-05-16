@@ -16,11 +16,11 @@ import java.util.Properties;
 public class JpaConfig {
 
 //    LOCAL EntityManager
-    @Bean
+    @Bean(name = "localEntityManagerFactory")
     @Primary
     public LocalContainerEntityManagerFactoryBean localEntityManagerFactory(
             @Qualifier("localDataSource")DataSource dataSource
-            ){
+    ){
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.deep.studenthousing.entity");
@@ -33,6 +33,27 @@ public class JpaConfig {
         properties.put("hibernate.hbm2ddl.auto", "update");
         properties.put("hibernate.show_sql", "true");
         em.setJpaProperties(properties);
+
+        return em;
+    }
+
+//    CLOUD EntityManager
+    @Bean(name = "cloudEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean cloudEntityManagerFactory(
+            @Qualifier("cloudDataSource")DataSource dataSource
+    ){
+        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource);
+        em.setPackagesToScan("com.deep.studenthousing.entity");
+
+        HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
+        em.setJpaVendorAdapter(adapter);
+
+        Properties props = new Properties();
+        props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        props.put("hibernate.hbm2ddl.auto", "update");
+        props.put("hibernate.show_sql", "true");
+        em.setJpaProperties(props);
 
         return em;
     }
