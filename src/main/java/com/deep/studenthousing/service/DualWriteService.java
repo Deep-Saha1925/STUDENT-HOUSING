@@ -8,25 +8,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DualWriteService {
 
-    @PersistenceContext(unitName = "localEntityManagerFactory")
+    @PersistenceContext(unitName = "local")
     private EntityManager localEm;
 
-    @PersistenceContext(unitName = "cloudEntityManagerFactory")
+    @PersistenceContext(unitName = "cloud")
     private EntityManager cloudEm;
 
-    @Transactional("localTransactionManager")
-    public <T> void saveLocal(T entity){
+    @Transactional("transactionManager")
+    public <T> void saveLocal(T entity) {
         localEm.merge(entity);
     }
 
     @Transactional("cloudTransactionManager")
-    public <T> void saveCloud(T entity){
+    public <T> void saveCloud(T entity) {
         cloudEm.merge(entity);
     }
 
-    public <T> void saveBoth(T entity){
+    public <T> void saveBoth(T entity) {
         saveLocal(entity);
         saveCloud(entity);
     }
-
 }

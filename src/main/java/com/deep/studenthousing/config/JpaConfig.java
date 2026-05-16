@@ -18,19 +18,18 @@ import java.util.Properties;
 @EnableTransactionManagement
 public class JpaConfig {
 
-    // LOCAL EntityManager (MySQL)
-    @Bean(name = {"localEntityManagerFactory", "entityManagerFactory"})
     @Primary
-    public LocalContainerEntityManagerFactoryBean localEntityManagerFactory(
+    @Bean(name = "entityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             @Qualifier("localDataSource") DataSource dataSource) {
 
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.deep.studenthousing.entity");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        em.setPersistenceUnitName("local");
 
         Properties props = new Properties();
-        props.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
         props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.show_sql", "true");
         em.setJpaProperties(props);
@@ -38,7 +37,6 @@ public class JpaConfig {
         return em;
     }
 
-    // CLOUD EntityManager (PostgreSQL - Neon)
     @Bean(name = "cloudEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean cloudEntityManagerFactory(
             @Qualifier("cloudDataSource") DataSource dataSource) {
@@ -47,9 +45,9 @@ public class JpaConfig {
         em.setDataSource(dataSource);
         em.setPackagesToScan("com.deep.studenthousing.entity");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        em.setPersistenceUnitName("cloud");
 
         Properties props = new Properties();
-        props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.show_sql", "true");
         em.setJpaProperties(props);
@@ -57,15 +55,13 @@ public class JpaConfig {
         return em;
     }
 
-    // LOCAL Transaction Manager
-    @Bean(name = "localTransactionManager")
     @Primary
-    public PlatformTransactionManager localTransactionManager(
-            @Qualifier("localEntityManagerFactory") EntityManagerFactory emf) {
+    @Bean(name = "transactionManager")
+    public PlatformTransactionManager transactionManager(
+            @Qualifier("entityManagerFactory") EntityManagerFactory emf) {
         return new JpaTransactionManager(emf);
     }
 
-    // CLOUD Transaction Manager
     @Bean(name = "cloudTransactionManager")
     public PlatformTransactionManager cloudTransactionManager(
             @Qualifier("cloudEntityManagerFactory") EntityManagerFactory emf) {
