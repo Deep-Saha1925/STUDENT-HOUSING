@@ -7,7 +7,7 @@
 
 [![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)](https://www.java.com)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat-square&logo=mysql)](https://www.mysql.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-blue?style=flat-square&logo=postgresql)](https://neon.tech)
 [![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3.x-darkgreen?style=flat-square&logo=thymeleaf)](https://www.thymeleaf.org)
 [![Cloudinary](https://img.shields.io/badge/Cloudinary-Image%20Storage-3448C5?style=flat-square&logo=cloudinary)](https://cloudinary.com)
 [![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE)
@@ -22,9 +22,9 @@
 
 ## 📌 Overview
 
-**Student Housing Management System** is a web-based platform built using **Java Spring Boot, Spring Security, Thymeleaf, and MySQL**. It enables **students** to search for rental properties, **owners** to list and manage their properties, and **admins** to manage users and maintain platform integrity.
+**Student Housing Management System** is a web-based platform built using **Java Spring Boot, Spring Security, Thymeleaf, and PostgreSQL (Neon)**. It enables **students** to search for rental properties, **owners** to list and manage their properties, and **admins** to manage users and maintain platform integrity.
 
-> No extra app install needed. Works in any browser. Designed for students and property owners alike.
+> No extra app install needed. Works in any browser. Designed for students and property owners alike. Data is stored in the cloud via Neon PostgreSQL — accessible from any machine.
 
 ---
 
@@ -76,6 +76,7 @@
 - 🌙 Light / dark mode with `localStorage` persistence
 - 📱 Bootstrap 5 responsive layout
 - 🚫 Custom 403 & error pages
+- 🌐 Cloud-hosted database (Neon PostgreSQL) — data accessible from any machine
 
 </td>
 </tr>
@@ -92,7 +93,7 @@
 | Spring Boot + MVC | 3.x | REST API & MVC framework |
 | Spring Security | 6.x | Role-based access control |
 | Spring Data JPA | — | ORM & repository layer |
-| MySQL | 8.0 | Persistent data storage |
+| PostgreSQL (Neon) | — | Cloud-hosted persistent data storage |
 | Cloudinary | — | Image upload & auto-delete |
 
 ### Frontend
@@ -134,11 +135,16 @@ All pages share a consistent design system using CSS variables, supporting seaml
 - Images uploaded to **Cloudinary**
 - When properties are deleted, images are also automatically removed from Cloudinary
 
-### 3️⃣ Error Handling
+### 3️⃣ Database — Neon PostgreSQL (Cloud)
+- Database is hosted on **Neon** (free tier) — a serverless PostgreSQL platform
+- Data is accessible from **any machine** without local setup
+- Hibernate auto-creates and manages tables via `ddl-auto=update`
+
+### 4️⃣ Error Handling
 - Custom `/access-denied` page for 403 Forbidden errors
 - Custom `error.html` for general exceptions (e.g., user not found)
 
-### 4️⃣ Responsive UI
+### 5️⃣ Responsive UI
 - Bootstrap 5 used for responsiveness
 - Navbar buttons collapse into a dropdown on smaller screens
 - Dark/light theme toggle on every page, synced via `localStorage`
@@ -185,7 +191,7 @@ src/main/java/com/studenthousing
 │── model/          # Entity classes (User, Property)
 │── repository/     # JPA Repositories
 │── service/        # Business logic & Cloudinary integration
-│── config/         # SecurityConfig, CustomLoginSuccessHandler
+│── config/         # SecurityConfig, CustomLoginSuccessHandler, CloudinaryConfig
 │
 src/main/resources/templates
 │── index.html                  # Home / landing page
@@ -207,8 +213,8 @@ src/main/resources/templates
 │── error.html                  # General error page
 │── fragments/
 │   └── property-list.html      # Reusable property card fragment
-
 ```
+
 ---
 
 ## 🖼️ Screenshots
@@ -237,8 +243,9 @@ src/main/resources/templates
 
 ### Prerequisites
 - Java 17+
-- MySQL 8+
 - Maven 3.8+
+- A free [Neon](https://neon.tech) account (PostgreSQL)
+- A free [Cloudinary](https://cloudinary.com) account
 
 ### Steps
 
@@ -249,41 +256,42 @@ cd student-housing-system
 ```
 
 ```bash
-# 2. Create MySQL database
-mysql -u root -p
-```
-
-```sql
-CREATE DATABASE housing_db;
-EXIT;
-```
-
-```bash
-# 3. Configure application.properties
+# 2. Configure application.properties
 ```
 
 ```properties
-# Database
-spring.datasource.url=jdbc:mysql://localhost:3306/housing_db
-spring.datasource.username=root
-spring.datasource.password=yourpassword
+spring.application.name=StudentHousing
+
+# Neon PostgreSQL (Cloud Database)
+spring.datasource.url=jdbc:postgresql://<your-neon-host>/neondb?sslmode=require
+spring.datasource.username=<your-neon-username>
+spring.datasource.password=<your-neon-password>
+spring.datasource.driver-class-name=org.postgresql.Driver
+
 spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 
 # Cloudinary
-cloudinary.cloud_name=your_cloud_name
-cloudinary.api_key=your_api_key
-cloudinary.api_secret=your_api_secret
+cloudinary.cloud-name=<your-cloud-name>
+cloudinary.api-key=<your-api-key>
+cloudinary.api-secret=<your-api-secret>
+
+spring.thymeleaf.cache=false
 ```
 
 ```bash
-# 4. Build and run
+# 3. Build and run
+mvn clean install -DskipTests
 mvn spring-boot:run
 ```
 
 ```bash
-# 5. Open in browser
-open http://localhost:8080
+# 4. Open in browser
+http://localhost:8080
 ```
+
+> ✅ No local database setup needed — Neon PostgreSQL is cloud-hosted. Tables are auto-created by Hibernate on first run.
 
 ---
 
@@ -299,12 +307,27 @@ open http://localhost:8080
 
 ## 🏆 Conclusion
 
-The **Student Housing Management System** provides a **centralized, secure, and scalable platform** for students, property owners, and administrators. Built on Spring Boot with a modern Thymeleaf frontend, it features full role-based access control, cloud image storage, a consistent design system with dark/light theming, and is structured for future extensibility.
+The **Student Housing Management System** provides a **centralized, secure, and scalable platform** for students, property owners, and administrators. Built on Spring Boot with a modern Thymeleaf frontend, it features full role-based access control, cloud image storage via Cloudinary, a cloud-hosted PostgreSQL database via Neon (accessible from any machine), a consistent design system with dark/light theming, and is structured for future extensibility.
+
+---
+
+---
+
+## 👨‍💻 Author
+
+<div align="center">
+
+<h3>Deep Saha</h3>
+
+[![GitHub](https://img.shields.io/badge/GitHub-Deep--Saha1925-181717?style=flat-square&logo=github)](https://github.com/Deep-Saha1925)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-deep--saha-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/deep-saha-07575b284/)
+
+</div>
 
 ---
 
 <div align="center">
 
-*Built with ❤️ · Java · Spring Boot · Thymeleaf · MySQL*
+*Built with ❤️ · Java · Spring Boot · Thymeleaf · PostgreSQL · Neon · Cloudinary*
 
 </div>
