@@ -20,9 +20,10 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
 
     List<Property> findByRentLessThanEqual(Double rent);
 
-    @Query("SELECT p FROM Property p " +
+    @Query(value = "SELECT * FROM properties p " +
             "WHERE (:city IS NULL OR LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))) " +
-            "AND (:rent IS NULL OR p.rent <= :rent)")
+            "AND (:rent IS NULL OR p.rent <= :rent)",
+            nativeQuery = true)
     List<Property> searchProperties(@Param("city") String city,
                                     @Param("rent") Double rent);
 }
