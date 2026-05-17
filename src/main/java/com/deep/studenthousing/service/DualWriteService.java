@@ -25,6 +25,7 @@ public class DualWriteService {
 
     public <T> void saveBoth(T entity) {
         localWriteService.save(entity, localEm);
+        localEm.detach(entity);
         cloudWriteService.save(entity, cloudEm);
     }
 }
