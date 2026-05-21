@@ -17,14 +17,30 @@ public class PropertyService {
     private final PropertyRepository propertyRepository;
     private final ImageUploadService imageUploadService;
     private final PropertyImageRepository propertyImageRepository;
+    private final GeoCodingService geoCodingService;
 
-    public PropertyService(PropertyRepository propertyRepository, ImageUploadService imageUploadService, PropertyImageRepository propertyImageRepository) {
+    public PropertyService(PropertyRepository propertyRepository, ImageUploadService imageUploadService, PropertyImageRepository propertyImageRepository, GeoCodingService geoCodingService) {
         this.propertyRepository = propertyRepository;
         this.imageUploadService = imageUploadService;
         this.propertyImageRepository = propertyImageRepository;
+        this.geoCodingService = geoCodingService;
     }
 
-    public void save(Property property) {
+//    public void save(Property property) {
+//        propertyRepository.save(property);
+//    }
+
+    public void save(Property property){
+        if(property.getLatitude() == null && property.getCity() != null
+                && !property.getCity().isBlank()){
+            double[] coords = geoCodingService.getCoordinates(property.getCity(), property.getArea());
+
+            if(coords != null){
+                property.setLatitude(coords[0]);
+                property.setLongitude(coords[1]);
+            }
+        }
+
         propertyRepository.save(property);
     }
 
@@ -60,5 +76,10 @@ public class PropertyService {
         // 2. Delete from DB
         propertyImageRepository.delete(propertyImage);
     }
+
+    public List<Property> findNearBy(double lat, double lon, double radius){
+        return propertyRepository.findNearby(lat, lon, radius);
+    }
+
 
 }
