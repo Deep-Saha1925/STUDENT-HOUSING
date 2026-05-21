@@ -1,7 +1,9 @@
 package com.deep.studenthousing.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,7 +29,8 @@ public class GeoCodingService {
             HttpHeaders headers = new HttpHeaders();
             headers.set("User-Agent", "StudentHousingApp/1.0");
 
-
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+//            ResponseEntity<String> response = new ResponseEntity<>()
 
         } catch (Exception e) {
             throw new RuntimeException(e);
