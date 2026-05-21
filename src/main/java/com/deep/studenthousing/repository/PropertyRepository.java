@@ -26,4 +26,32 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
             nativeQuery = true)
     List<Property> searchProperties(@Param("city") String city,
                                     @Param("rent") Double rent);
+
+    /**
+     * Haversine formula in PostgreSQL.
+     * Returns properties within given radius (km), sorted nearest first.
+     * Only returns available properties that have coordinates.
+     */
+    @Query(value = """
+    SELECT *, 
+           (6371 * acos(
+               cos(radians(:lat)) * cos(radians(p.latitude))
+               * cos(radians(p.longitude) - radians(:lng))
+               + sin(radians(:lat)) * sin(radians(p.latitude))
+           )) AS distance
+    FROM properties p
+    WHERE p.latitude  IS NOT NULL
+      AND p.longitude IS NOT NULL
+      AND p.available = true
+      AND (6371 * acos(
+               cos(radians(:lat)) * cos(radians(p.latitude))
+               * cos(radians(p.longitude) - radians(:lng))
+               + sin(radians(:lat)) * sin(radians(p.latitude))
+           )) <= :radius
+    ORDER BY distance ASC
+    """, nativeQuery = true)
+    List<Property> findNearby(@Param("lat") double lat,
+                              @Param("lng") double lng,
+                              @Param("radius") double radius);
+
 }
