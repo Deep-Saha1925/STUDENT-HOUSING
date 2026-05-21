@@ -27,6 +27,9 @@ public class Property {
     private String area;
     private double rent;
 
+    private double latitude;
+    private double longitude;
+
     private boolean available = true;   //checking whether is available for student.
 
     @ManyToOne
