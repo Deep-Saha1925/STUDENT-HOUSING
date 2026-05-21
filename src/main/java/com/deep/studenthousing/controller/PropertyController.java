@@ -29,6 +29,22 @@ public class PropertyController {
         this.imageUploadService = imageUploadService;
     }
 
+
+    @GetMapping("/nearby")
+    public String nearBtProperties(
+            @RequestParam double lat,
+            @RequestParam double lon,
+            @RequestParam(defaultValue = "5") double radius,
+            Model model
+    ){
+        List<Property> nearby = propertyService.findNearBy(lat, lon, radius);
+        model.addAttribute("properties", nearby);
+        model.addAttribute("nearbyMode", true);
+        model.addAttribute("searchedRadius", radius);
+        return "fragments/property-list :: propertyList";
+    }
+
+
     // Show all properties for a specific owner
     @GetMapping("/owner/{ownerId}")
     public String listOwnerProperties(@PathVariable Long ownerId, Model model) {
