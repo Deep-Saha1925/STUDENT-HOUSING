@@ -30,7 +30,7 @@ public class PropertyController {
     }
 
 
-    @GetMapping("/properties/nearby")
+    @GetMapping("/nearby")
     public String nearByProperties(
             @RequestParam double lat,
             @RequestParam double lng,
