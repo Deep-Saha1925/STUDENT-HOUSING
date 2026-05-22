@@ -301,17 +301,14 @@
                 <!-- Body -->
                 <div class="add-card-body">
 
-                    <!-- ✅ UNCHANGED: form action, th:object, enctype -->
                     <form th:action="@{'/properties/owner/' + ${ownerId} + '/add'}" method="post" th:object="${property}" enctype="multipart/form-data">
 
                         <div class="field-row">
-                            <!-- ✅ UNCHANGED: th:field="*{title}" -->
                             <div class="field-group">
                                 <label>Title</label>
                                 <input type="text" class="form-control" th:field="*{title}" placeholder="Enter property title">
                             </div>
 
-                            <!-- ✅ UNCHANGED: th:field="*{city}" -->
                             <div class="field-group">
                                 <label>City</label>
                                 <input type="text" class="form-control" th:field="*{city}" placeholder="Enter city">
@@ -319,20 +316,17 @@
                         </div>
 
                         <div class="field-row">
-                            <!-- ✅ UNCHANGED: th:field="*{area}" -->
                             <div class="field-group">
                                 <label>Area</label>
                                 <input type="text" class="form-control" th:field="*{area}" placeholder="Enter area or neighborhood">
                             </div>
 
-                            <!-- ✅ UNCHANGED: th:field="*{rent}" -->
                             <div class="field-group">
                                 <label>Rent (₹)</label>
                                 <input type="number" step="0.01" class="form-control" th:field="*{rent}" placeholder="Enter rent amount">
                             </div>
                         </div>
 
-                        <!-- ✅ UNCHANGED: th:field="*{description}" -->
                         <div class="field-group">
                             <label>Description</label>
                             <textarea class="form-control" th:field="*{description}" rows="3" placeholder="Enter property description"></textarea>
@@ -340,7 +334,6 @@
 
                         <div class="section-divider"></div>
 
-                        <!-- ✅ UNCHANGED: name="images", multiple, required -->
                         <div class="field-group">
                             <label>Upload Images</label>
                             <input type="file" class="form-control" id="images" name="images" multiple required>
@@ -355,7 +348,6 @@
 
                     </form>
 
-                    <!-- ✅ UNCHANGED: back link th:href -->
                     <div class="text-center">
                         <a th:href="@{'/properties/owner/' + ${ownerId}}" class="back-link">
                             <i class="bi bi-arrow-left"></i> Back to My Properties
