@@ -319,7 +319,7 @@
       const rent = document.getElementById("rentInput").value;
       setStatus('');
       showLoading();
-      fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}`)
+      fetch(`/properties/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}`)
               .then(r => r.text())
               .then(html => setResults(html, null))
               .catch(err => console.error(err));

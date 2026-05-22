@@ -30,14 +30,14 @@ public class PropertyController {
     }
 
 
-    @GetMapping("/nearby")
-    public String nearBtProperties(
+    @GetMapping("/properties/nearby")
+    public String nearByProperties(
             @RequestParam double lat,
-            @RequestParam double lon,
+            @RequestParam double lng,
             @RequestParam(defaultValue = "5") double radius,
             Model model
     ){
-        List<Property> nearby = propertyService.findNearBy(lat, lon, radius);
+        List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
         model.addAttribute("properties", nearby);
         model.addAttribute("nearbyMode", true);
         model.addAttribute("searchedRadius", radius);
