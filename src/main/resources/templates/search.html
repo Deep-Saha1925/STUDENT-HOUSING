@@ -310,7 +310,7 @@
   <!-- ── Results ── -->
 
   <div id="propertyContainer">
-    <div th:replace="fragments/property-list :: propertyList"></div>
+    <div th:replace="~{fragments/property-list :: propertyList}"></div>
   </div>
 
 </div>
@@ -369,7 +369,7 @@
               setStatus(`📍 Found you! Searching within ${radius} km…`);
               showLoading();
 
-              // ✅ Calls your @RequestMapping("/properties") + @GetMapping("/nearby")
+              // Calls your @RequestMapping("/properties") + @GetMapping("/nearby")
               fetch(`/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`)
                       .then(r => r.text())
                       .then(html => {

@@ -80,7 +80,6 @@ public class PropertyService {
     }
 
     public List<Property> findNearBy(double lat, double lon, double radius){
-        System.out.println(lat + " " + lon);
         return propertyRepository.findNearby(lat, lon, radius);
     }
 

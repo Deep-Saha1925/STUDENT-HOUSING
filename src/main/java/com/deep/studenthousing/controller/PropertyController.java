@@ -37,11 +37,18 @@ public class PropertyController {
             @RequestParam(defaultValue = "5") double radius,
             Model model
     ){
-        List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
-        model.addAttribute("properties", nearby);
-        model.addAttribute("nearbyMode", true);
-        model.addAttribute("searchedRadius", radius);
-        return "fragments/property-list :: propertyList";
+        try {
+            List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
+            model.addAttribute("properties", nearby);
+            model.addAttribute("nearbyMode", true);
+            model.addAttribute("searchedRadius", radius);
+            return "fragments/property-list :: propertyList";
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("properties", List.of());
+            return "fragments/property-list :: propertyList";
+        }
     }
 
 
