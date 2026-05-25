@@ -54,4 +54,17 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
                               @Param("lng") double lng,
                               @Param("radius") double radius);
 
+    @Query(value = """
+    SELECT * FROM properties p
+    WHERE p.available = true
+      AND (
+          (:city != '' AND LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%')))
+          OR
+          (:area != '' AND LOWER(p.area) LIKE LOWER(CONCAT('%', :area, '%')))
+      )
+    ORDER BY p.rent ASC
+    """, nativeQuery = true)
+    List<Property> findByCityOrArea(@Param("city") String city,
+                                    @Param("area") String area);
+
 }
