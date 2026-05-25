@@ -58,9 +58,15 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     SELECT * FROM properties p
     WHERE p.available = true
       AND (
-          (:city != '' AND LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%')))
+          (:city != '' AND (
+              LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))
+              OR LOWER(p.area) LIKE LOWER(CONCAT('%', :city, '%'))
+          ))
           OR
-          (:area != '' AND LOWER(p.area) LIKE LOWER(CONCAT('%', :area, '%')))
+          (:area != '' AND (
+              LOWER(p.area) LIKE LOWER(CONCAT('%', :area, '%'))
+              OR LOWER(p.city) LIKE LOWER(CONCAT('%', :area, '%'))
+          ))
       )
     ORDER BY p.rent ASC
     """, nativeQuery = true)

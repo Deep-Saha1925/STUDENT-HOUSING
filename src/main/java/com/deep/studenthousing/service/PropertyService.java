@@ -81,30 +81,24 @@ public class PropertyService {
     }
 
     public List<Property> findNearBy(double lat, double lng, double radius) {
-        System.out.println("Finding nearby: lat=" + lat + " lng=" + lng + " radius=" + radius);
 
         // Step 1 — GPS based Haversine
         List<Property> gpsResults = propertyRepository.findNearby(lat, lng, radius);
-        System.out.println("GPS results: " + gpsResults.size());
 
         if (!gpsResults.isEmpty()) {
             return gpsResults;
         }
 
         // Step 2 — Fallback: reverse geocode → text match
-        System.out.println("No GPS results, falling back to text search...");
         Map<String, String> location = geoCodingService.getCityAndArea(lat, lng);
         String city = location.get("city");
         String area  = location.get("area");
-
-        System.out.println("Reverse geocoded → city: " + city + " area: " + area);
 
         if (city.isBlank() && area.isBlank()) {
             return List.of();
         }
 
         List<Property> textResults = propertyRepository.findByCityOrArea(city, area);
-        System.out.println("Text match results: " + textResults.size());
         return textResults;
     }
 
