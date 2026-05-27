@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users/register").hasRole("ADMIN")
-                        .requestMatchers("/", "/search", "/fragments/**", "/access-denied", "/css/**", "/js/**", "/images/**", "/properties/**").permitAll()
+                        .requestMatchers("/", "/search", "/fragments/**", "/access-denied", "/logo.png", "/css/**", "/js/**", "/images/**", "/properties/**").permitAll()
                         .requestMatchers("/register-user").permitAll()
                         .anyRequest().authenticated()
                 )

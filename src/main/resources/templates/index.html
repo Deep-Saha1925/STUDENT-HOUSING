@@ -335,9 +335,9 @@
             margin-bottom: 18px;
         }
 
-        .icon-red   { background: rgba(255,94,98,0.1);  color: #ff5e62; }
+        .icon-red   { background: rgba(255,94,98,0.1);   color: #ff5e62; }
         .icon-amber { background: rgba(255,153,102,0.12); color: #e07b3c; }
-        .icon-green { background: rgba(34,197,94,0.1);  color: #16a34a; }
+        .icon-green { background: rgba(34,197,94,0.1);   color: #16a34a; }
 
         .feature-card h5 {
             font-family: 'DM Serif Display', serif;
@@ -524,7 +524,8 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+            visibility 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #splash.hide {
@@ -532,13 +533,25 @@
             visibility: hidden;
         }
 
-        .splash-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+        #splash-logo {
+            width: 80px;
+            height: 80px;
             margin-bottom: 16px;
-            animation: splashPulse 1s ease-in-out infinite alternate;
+            opacity: 0;
+            transform: scale(0.5) translateY(12px);
+            transition: opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+            transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #splash-logo.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            animation: logoPulse 2s ease-in-out 0.8s infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { filter: drop-shadow(0 0 0px rgba(255,94,98,0)); }
+            50%       { filter: drop-shadow(0 0 14px rgba(255,94,98,0.5)); }
         }
 
         .splash-title {
@@ -546,6 +559,15 @@
             font-size: 2rem;
             color: var(--text);
             letter-spacing: -0.5px;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.7s ease 0.4s,
+            transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s;
+        }
+
+        .splash-title.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .splash-sub {
@@ -553,11 +575,15 @@
             color: var(--text-muted);
             margin-top: 8px;
             font-weight: 300;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.6s ease 0.55s,
+            transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.55s;
         }
 
-        @keyframes splashPulse {
-            from { transform: scale(1);   opacity: 0.7; }
-            to   { transform: scale(1.4); opacity: 1;   }
+        .splash-sub.show {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -566,8 +592,7 @@
 
 <!-- ── Splash Screen ── -->
 <div id="splash">
-<!--    <img th:src="@{/favicon.svg}" alt="Logo" style="width:64px; height:64px; margin-bottom:16px;">-->
-    <img src="/favicon.svg" alt="Logo" style="width:64px; height:64px; margin-bottom:16px;">
+    <img id="splash-logo" th:src="@{/logo.png}" alt="logo">
     <div class="splash-title">Student Housing</div>
     <div class="splash-sub">Finding your perfect home…</div>
 </div>
@@ -718,18 +743,30 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    /* ── Splash Screen ── */
+    (function () {
+        const splash = document.getElementById('splash');
+        const logo   = document.getElementById('splash-logo');
+        const title  = document.querySelector('.splash-title');
+        const sub    = document.querySelector('.splash-sub');
 
-        /* ── Splash ── */
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            document.getElementById('splash').classList.add('hide');
-        }, 2000);
-    });
+        // Animate elements in after first paint
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                logo.classList.add('show');
+                title.classList.add('show');
+                sub.classList.add('show');
+            });
+        });
+
+        // Fade out splash after 2.2s
+        setTimeout(() => splash.classList.add('hide'), 2200);
+    })();
 
     /* ── Theme Toggle ── */
-    const toggleBtn  = document.getElementById('themeToggle');
-    const themeIcon  = document.getElementById('themeIcon');
-    const html       = document.documentElement;
+    const toggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const html      = document.documentElement;
 
     // Load saved preference
     const saved = localStorage.getItem('sh-theme') || 'light';
@@ -749,11 +786,11 @@
 
     /* ── Search ── */
     document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("searchForm").addEventListener("submit", function(event) {
+        document.getElementById("searchForm").addEventListener("submit", function (event) {
             event.preventDefault();
 
-            let city = document.getElementById("cityInput").value;
-            let rent = document.getElementById("rentInput").value;
+            const city = document.getElementById("cityInput").value;
+            const rent = document.getElementById("rentInput").value;
 
             fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}`)
                 .then(res => res.text())
