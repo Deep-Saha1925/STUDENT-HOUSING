@@ -48,6 +48,7 @@
             padding: 40px 16px;
             transition: background 0.35s, color 0.35s;
             position: relative;
+            overflow: hidden;
         }
 
         body::before {
@@ -294,6 +295,98 @@
             height: 1px;
             background: var(--border);
             margin: 4px 0 24px;
+        }
+
+        /* =========================
+   RESPONSIVE FIXES
+========================= */
+
+        /* Tablet */
+        @media (max-width: 992px) {
+            .profile-card {
+                max-width: 92%;
+            }
+
+            .profile-body {
+                padding: 24px;
+            }
+
+            .profile-header {
+                padding: 36px 18px;
+            }
+
+            .info-section {
+                padding: 18px;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 576px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .profile-card {
+                border-radius: 14px;
+            }
+
+            .profile-header h2 {
+                font-size: 1.4rem;
+            }
+
+            .avatar-wrap {
+                width: 72px;
+                height: 72px;
+                font-size: 2.2rem;
+            }
+
+            .profile-body {
+                padding: 16px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .info-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+
+            .property-card {
+                padding: 14px;
+            }
+
+            .property-card h5 {
+                font-size: 0.98rem;
+            }
+
+            .theme-toggle {
+                top: 12px;
+                right: 12px;
+                width: 34px;
+                height: 34px;
+            }
+
+            .btn-back {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 360px) {
+            .profile-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .role-badge {
+                font-size: 0.65rem;
+                padding: 3px 10px;
+            }
         }
     </style>
 </head>
