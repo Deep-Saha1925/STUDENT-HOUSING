@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Student Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
@@ -328,6 +329,79 @@
 
         .guest-wrap a { color: var(--accent); font-weight: 600; text-decoration: none; }
         .guest-wrap a:hover { opacity: 0.8; }
+
+        /* ===== Modern Responsive Update ===== */
+        .dash-grid{
+            display:grid!important;
+            grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+            max-width:1100px;
+            margin:auto;
+        }
+        .dash-card{
+            max-width:none!important;
+            border-radius:22px;
+            transition:.3s ease;
+        }
+        .dash-card:hover{
+            transform:translateY(-8px) scale(1.02);
+        }
+        .btn-card{
+            width:100%;
+            justify-content:center;
+        }
+        .hero{
+            padding:48px 20px;
+        }
+        .hero h3{
+            margin-bottom:16px;
+        }
+        @media (max-width:768px){
+            .header-bar{
+                padding:16px!important;
+                flex-direction:column;
+                gap:14px;
+            }
+            .header-bar>.d-flex{
+                width:100%;
+                justify-content:center;
+            }
+            .navbar-brand{
+                width:100%;
+                justify-content:center;
+            }
+            .welcome-name{
+                display:block!important;
+                width:100%;
+                text-align:center;
+            }
+            .theme-toggle,
+            .btn-nav,
+            .btn-logout-nav{
+                min-height:44px;
+            }
+            .btn-nav,.btn-logout-nav{
+                flex:1;
+                justify-content:center;
+            }
+            .hero{
+                padding:32px 16px;
+            }
+            .hero p{
+                font-size:.9rem;
+            }
+            .dash-grid{
+                padding:0 16px 40px;
+                grid-template-columns:1fr;
+            }
+            .dash-card{
+                padding:24px;
+            }
+            .card-icon-wrap{
+                width:60px;
+                height:60px;
+            }
+        }
+
     </style>
 </head>
 <body>
