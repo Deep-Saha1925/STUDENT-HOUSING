@@ -3,13 +3,10 @@
 <head>
     <title>User Profile</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
-    <!-- Bootstrap -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Animate.css -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
@@ -45,10 +42,9 @@
             background-color: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 40px 16px;
+            padding: 24px 16px 48px;
             transition: background 0.35s, color 0.35s;
             position: relative;
-            overflow: hidden;
         }
 
         body::before {
@@ -73,10 +69,18 @@
             z-index: 0;
         }
 
-        /* Theme toggle */
-        .theme-toggle {
+        /* ── Top bar ── */
+        .top-bar {
             position: fixed;
-            top: 18px; right: 18px;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 12px 18px;
+            z-index: 999;
+        }
+
+        .theme-toggle {
             width: 38px; height: 38px;
             border-radius: 9px;
             border: 1.5px solid var(--border);
@@ -88,8 +92,8 @@
             cursor: pointer;
             font-size: 1rem;
             transition: all 0.25s ease;
-            z-index: 999;
             box-shadow: var(--shadow);
+            flex-shrink: 0;
         }
         .theme-toggle:hover {
             border-color: var(--accent);
@@ -97,10 +101,10 @@
             transform: rotate(20deg);
         }
 
-        /* Profile card */
+        /* ── Profile card ── */
         .profile-card {
             max-width: 680px;
-            margin: 0 auto;
+            margin: 56px auto 0;
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 20px;
@@ -111,34 +115,31 @@
             z-index: 1;
         }
 
-        /* Profile header */
         .profile-header {
             background: linear-gradient(135deg, var(--accent-2), var(--accent));
             color: white;
             text-align: center;
-            padding: 44px 24px 36px;
-            position: relative;
+            padding: 40px 24px 32px;
         }
 
         .avatar-wrap {
-            width: 88px;
-            height: 88px;
+            width: 84px; height: 84px;
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
             border: 3px solid rgba(255,255,255,0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 16px;
-            font-size: 2.8rem;
+            margin: 0 auto 14px;
+            font-size: 2.6rem;
             color: #fff;
         }
 
         .profile-header h2 {
             font-family: 'DM Serif Display', serif;
-            font-size: 1.8rem;
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
             font-weight: 400;
-            margin: 0 0 6px;
+            margin: 0 0 8px;
             letter-spacing: -0.3px;
         }
 
@@ -149,7 +150,7 @@
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.35);
             color: #fff;
-            font-size: 0.75rem;
+            font-size: 0.73rem;
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -157,16 +158,15 @@
             border-radius: 20px;
         }
 
-        /* Profile body */
-        .profile-body { padding: 32px; }
+        /* ── Profile body ── */
+        .profile-body { padding: 28px 28px 20px; }
 
-        /* Info rows */
         .info-section {
             background: var(--prop-bg);
             border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 20px 24px;
-            margin-bottom: 24px;
+            padding: 18px 22px;
+            margin-bottom: 22px;
             transition: background 0.35s;
         }
 
@@ -177,12 +177,10 @@
             padding: 10px 0;
             border-bottom: 1px solid var(--border);
         }
-
         .info-row:last-child { border-bottom: none; }
 
         .info-icon {
-            width: 34px;
-            height: 34px;
+            width: 34px; height: 34px;
             border-radius: 8px;
             background: rgba(255,94,98,0.1);
             color: var(--accent);
@@ -194,7 +192,7 @@
         }
 
         .info-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -204,15 +202,16 @@
         }
 
         .info-value {
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             color: var(--text);
             font-weight: 500;
+            word-break: break-all;
         }
 
-        /* Properties section */
+        /* ── Properties section ── */
         .section-title {
             font-family: 'DM Serif Display', serif;
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 400;
             color: var(--text);
             letter-spacing: -0.3px;
@@ -224,50 +223,44 @@
 
         .empty-msg {
             color: var(--text-muted) !important;
-            font-size: 0.88rem;
+            font-size: 0.87rem;
             text-align: center;
             padding: 20px;
         }
 
-        /* Property cards */
         .property-card {
             background: var(--prop-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 16px 18px;
             margin-bottom: 12px;
             transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.35s;
         }
-
         .property-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.08);
         }
-
         [data-theme="dark"] .property-card:hover {
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
 
         .property-card h5 {
             font-family: 'DM Serif Display', serif;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 400;
             color: var(--text);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .property-card p {
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             color: var(--text-muted);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
-        .property-card p strong {
-            color: var(--label-color);
-            font-weight: 600;
-        }
+        .property-card p strong { color: var(--label-color); font-weight: 600; }
 
-        /* Back button */
+        /* ── Back button ── */
         .btn-back {
             display: inline-flex;
             align-items: center;
@@ -284,141 +277,52 @@
             transition: all 0.2s;
             font-family: 'DM Sans', sans-serif;
         }
+        .btn-back:hover { color: var(--text); border-color: var(--text); }
 
-        .btn-back:hover {
-            color: var(--text);
-            border-color: var(--text);
-            background: var(--input-bg);
+        .divider { height: 1px; background: var(--border); margin: 4px 0 22px; }
+
+        /* ── Mobile (≤575px) ── */
+        @media (max-width: 575px) {
+            .profile-card { margin-top: 60px; border-radius: 14px; }
+            .profile-header { padding: 30px 16px 24px; }
+            .avatar-wrap { width: 68px; height: 68px; font-size: 2rem; }
+            .profile-body { padding: 18px 16px 16px; }
+            .info-section { padding: 14px 16px; }
+            .btn-back { width: 100%; justify-content: center; }
         }
 
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 4px 0 24px;
-        }
-
-        /* =========================
-   RESPONSIVE FIXES
-========================= */
-
-        /* Tablet */
-        @media (max-width: 992px) {
-            .profile-card {
-                max-width: 92%;
-            }
-
-            .profile-body {
-                padding: 24px;
-            }
-
-            .profile-header {
-                padding: 36px 18px;
-            }
-
-            .info-section {
-                padding: 18px;
-            }
-        }
-
-        /* Mobile */
-        @media (max-width: 576px) {
-            body {
-                padding: 20px 10px;
-            }
-
-            .profile-card {
-                border-radius: 14px;
-            }
-
-            .profile-header h2 {
-                font-size: 1.4rem;
-            }
-
-            .avatar-wrap {
-                width: 72px;
-                height: 72px;
-                font-size: 2.2rem;
-            }
-
-            .profile-body {
-                padding: 16px;
-            }
-
-            .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 6px;
-            }
-
-            .info-icon {
-                width: 30px;
-                height: 30px;
-                font-size: 0.8rem;
-            }
-
-            .property-card {
-                padding: 14px;
-            }
-
-            .property-card h5 {
-                font-size: 0.98rem;
-            }
-
-            .theme-toggle {
-                top: 12px;
-                right: 12px;
-                width: 34px;
-                height: 34px;
-            }
-
-            .btn-back {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* Extra small devices */
+        /* ── Very small ── */
         @media (max-width: 360px) {
-            .profile-header h2 {
-                font-size: 1.2rem;
-            }
-
-            .role-badge {
-                font-size: 0.65rem;
-                padding: 3px 10px;
-            }
+            .profile-header h2 { font-size: 1.15rem; }
+            .role-badge { font-size: 0.65rem; }
         }
     </style>
 </head>
 <body>
 
-<!-- Theme Toggle -->
-<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-    <i class="bi bi-moon-fill" id="themeIcon"></i>
-</button>
+<!-- ── Top bar (toggle only — no brand needed on profile) ── -->
+<div class="top-bar">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+    </button>
+</div>
 
-<!-- ✅ UNCHANGED: all th: attributes -->
 <div class="profile-card animate__animated animate__fadeInUp">
 
-    <!-- Header -->
     <div class="profile-header">
         <div class="avatar-wrap">
             <i class="bi bi-person-fill"></i>
         </div>
-        <!-- ✅ UNCHANGED -->
         <h2 th:text="${user.fullName}">User Name</h2>
         <span class="role-badge">
-                <i class="bi bi-shield-check"></i>
-                <span th:text="${user.role}">Role</span>
-            </span>
+            <i class="bi bi-shield-check"></i>
+            <span th:text="${user.role}">Role</span>
+        </span>
     </div>
 
-    <!-- Body -->
     <div class="profile-body">
 
-        <!-- Info section -->
         <div class="info-section">
-            <!-- ✅ UNCHANGED: th:text="${user.id/email/phone}" -->
             <div class="info-row">
                 <div class="info-icon"><i class="bi bi-hash"></i></div>
                 <div>
@@ -442,31 +346,24 @@
             </div>
         </div>
 
-        <!-- Properties section — only shown for OWNERs -->
         <div th:if="${user.role.toString() == 'OWNER' or user.role.toString() == 'ROLE_OWNER' or user.role == 'OWNER'}">
-
             <div class="divider"></div>
-
             <p class="section-title">
                 <i class="bi bi-house-door"></i> Properties Listed
             </p>
-
             <div th:if="${#lists.isEmpty(user.properties)}">
                 <p class="empty-msg">No properties listed yet.</p>
             </div>
-
             <div th:each="prop : ${user.properties}" class="property-card">
                 <h5 th:text="${prop.title}">Property Title</h5>
                 <p><strong>City:</strong> <span th:text="${prop.city}"></span></p>
                 <p><strong>Area:</strong> <span th:text="${prop.area}"></span></p>
                 <p><strong>Rent (₹):</strong> <span th:text="${prop.rent}"></span></p>
             </div>
-
         </div>
 
     </div>
 
-    <!-- ✅ UNCHANGED: back button -->
     <div class="text-center mb-4">
         <a href="javascript:history.back()" class="btn-back">
             <i class="bi bi-arrow-left"></i> Back
@@ -475,7 +372,6 @@
 
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const toggleBtn = document.getElementById('themeToggle');
