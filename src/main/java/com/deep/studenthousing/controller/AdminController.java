@@ -36,6 +36,7 @@ public class AdminController {
         String email = authentication.getName();
         User admin = userService.findByEmail(email);
 
+        System.out.println(authentication);
         model.addAttribute("admin", admin);
 
         return "admin-dashboard";
