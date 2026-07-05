@@ -322,6 +322,11 @@
         </a>
 
         <form th:action="@{/logout}" method="post" class="m-0">
+
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}"/>
+
             <button type="submit" class="btn-logout-nav">
                 <i class="bi bi-box-arrow-right"></i>
                 <span class="btn-logout-text">Logout</span>
