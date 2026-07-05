@@ -23,6 +23,11 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+
+        System.out.println("SUCCESS HANDLER CALLED");
+        System.out.println(authentication.getAuthorities());
+        System.out.println(authentication.getName());
+
         String email = authentication.getName();
         User user = userRepo.findByEmail(email);
 
