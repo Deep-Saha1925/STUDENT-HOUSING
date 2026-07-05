@@ -26,12 +26,6 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         String email = authentication.getName();
         User user = userRepo.findByEmail(email);
 
-        System.out.println(authentication.isAuthenticated());
-
-        System.out.println(authentication.getAuthorities());
-
-        System.out.println(authentication.getPrincipal());
-
         switch (user.getRole()) {
             case STUDENT:
                 response.sendRedirect("/student/dashboard");
