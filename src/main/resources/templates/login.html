@@ -291,6 +291,11 @@
 
 <!-- ── Fixed top bar: brand + theme toggle ── -->
 <div class="top-bar">
+
+  <div th:if="${param.csrf}" class="alert alert-warning">
+    Your session expired — please try logging in again.
+  </div>
+
   <a href="/" class="brand-link">
     <span class="brand-dot"></span>
     Student Housing
