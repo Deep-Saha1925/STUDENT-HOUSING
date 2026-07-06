@@ -38,7 +38,13 @@ public class SecurityConfig {
                         .accessDeniedHandler(((request, response, accessDeniedException) -> {
                             if(accessDeniedException instanceof InvalidCsrfTokenException
                                 || accessDeniedException instanceof MissingCsrfTokenException){
+                                // CSRF token mismatch on login POST - NOT a real
+                                // authorization failure. Send back to login instead
+                                // of the access-denied page.
 
+                                response.sendRedirect("/login?error=csrf");
+                            }else{
+                                response.sendRedirect("/access-denied");
                             }
                         }))
                 )
