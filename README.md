@@ -370,7 +370,5 @@ The **Student Housing Management System** provides a **centralized, secure, and 
 ---
 
 <div align="center">
-
 *Built with ❤️ · Java · Spring Boot · Thymeleaf · PostgreSQL · Neon · Cloudinary · OpenStreetMap*
-
 </div>
