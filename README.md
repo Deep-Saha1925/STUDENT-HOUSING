@@ -255,9 +255,7 @@ src/main/resources/templates
 └── fragments/
     └── property-list.html      # Reusable property card fragment
 ```
-
 ---
-
 ## 🖼️ Screenshots
 
 ### Home / Index Page
