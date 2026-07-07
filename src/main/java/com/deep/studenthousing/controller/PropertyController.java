@@ -29,7 +29,6 @@ public class PropertyController {
         this.imageUploadService = imageUploadService;
     }
 
-
     @GetMapping("/nearby")
     public String nearByProperties(
             @RequestParam double lat,
@@ -50,7 +49,6 @@ public class PropertyController {
             return "fragments/property-list :: propertyList";
         }
     }
-
 
     // Show all properties for a specific owner
     @GetMapping("/owner/{ownerId}")
