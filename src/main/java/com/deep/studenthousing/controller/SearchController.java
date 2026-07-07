@@ -56,7 +56,7 @@ public class SearchController {
             rent = Double.parseDouble(rentStr);
         }
 
-        // Call service
+        // Calling service
         List<Property> properties = propertyService.searchProperties(city, rent)
                                                     .stream()
                                                     .filter(Property::isAvailable)

@@ -196,7 +196,6 @@ public class PropertyController {
         return "redirect:/properties/owner/" + ownerId;
     }
 
-
     //view property
     @GetMapping("/{id}")
     public String viewProperty(@PathVariable Long id, Model model){
