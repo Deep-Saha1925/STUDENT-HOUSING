@@ -20,7 +20,6 @@ public class ImageUploadService {
     }
 
     public String uploadImage(MultipartFile file, Long ownerId, Long propertyId) throws IOException{
-        System.out.println(propertyId);
         String folderPath = String.format("student-housing/owner_%d/property_%d", ownerId, propertyId);
 
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
