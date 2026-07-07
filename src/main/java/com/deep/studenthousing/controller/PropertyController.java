@@ -73,7 +73,6 @@ public class PropertyController {
         return "owner-properties";
     }
 
-
     // Show form to add property for specific owner
     @GetMapping("/owner/{ownerId}/add")
     public String addPropertyForm(@PathVariable Long ownerId, Model model) {
@@ -167,7 +166,6 @@ public class PropertyController {
 
         return "redirect:/properties/owner/" + ownerId;
     }
-
 
     @PostMapping("/owner/{ownerId}/edit/{propertyId}/delete-image")
     public String deleteImage(@PathVariable Long ownerId,
