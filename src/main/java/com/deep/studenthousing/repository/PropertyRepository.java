@@ -18,7 +18,7 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
 
     List<Property> findByCityContainingIgnoreCase(String query);
 
-    List<Property> findByRentLessThanEqual(Double rent);
+    List<Property> findByMonthlyRentLessThanEqual(Double rent);
 
     @Query(value = "SELECT * FROM properties p " +
             "WHERE (:city IS NULL OR LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))) " +
