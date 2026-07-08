@@ -148,7 +148,12 @@ public class PropertyController {
         property.setDescription(updatedProperty.getDescription());
         property.setCity(updatedProperty.getCity());
         property.setArea(updatedProperty.getArea());
-        property.setRent(updatedProperty.getRent());
+        //property.setRent(updatedProperty.getRent());
+
+        property.setMonthlyRent(updatedProperty.getMonthlyRent());
+        property.setDailyRent(updatedProperty.getDailyRent());
+        property.setAvailableMonthly(updatedProperty.isAvailableMonthly());
+        property.setAvailableDaily(updatedProperty.isAvailableDaily());
 
         // Handle new image uploads
         if (images != null && images.length > 0 && !images[0].isEmpty()) {
