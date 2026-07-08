@@ -25,7 +25,16 @@ public class Property {
     private String description;
     private String city;
     private String area;
-    private double rent;
+
+    // Kept column name "rent" so existing data keeps working; this is now the monthly rent.
+    @Column(name = "rent")
+    private double monthlyRent;
+
+    private Double dailyRent;
+
+    // Whether the owner offers this property for each rental type.
+    private boolean availableMonthly = true;
+    private boolean availableDaily = false;
 
     private Double latitude;
     private Double longitude;
