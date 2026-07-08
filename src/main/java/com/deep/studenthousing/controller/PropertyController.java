@@ -203,19 +203,43 @@ public class PropertyController {
     }
 
     //view property
+    //view property
     @GetMapping("/{id}")
-    public String viewProperty(@PathVariable Long id, Model model, Authentication authentication){
+    public String viewProperty(@PathVariable Long id, Model model,
+                               org.springframework.security.core.Authentication authentication,
+                               @RequestParam(value = "booked", required = false) String booked,
+                               @RequestParam(value = "reason", required = false) String reason,
+                               @RequestParam(value = "cancelled", required = false) String cancelled){
         Property property = propertyService.findById(id);
         model.addAttribute("property", property);
 
-        if(authentication != null){
-            User currentUser = userService.findByEmail(authentication.getName());
-            if(currentUser != null){
+        boolean loggedIn = authentication != null;
+        boolean isStudentViewer = false;
+        boolean isOwnProperty = false;
+        User currentUser = null;
+
+        if (loggedIn) {
+            currentUser = userService.findByEmail(authentication.getName());
+            if (currentUser != null) {
                 model.addAttribute("currentUser", currentUser);
-                boolean isStudentViewer = currentUser.getRole() == Role.STUDENT;
-                boolean isOwnProperty = property.getOwner() != null && property.getOwner().getId().equals(currentUser.getId());
-                model.addAttribute("canBook", isStudentViewer && !isOwnProperty);
+                isStudentViewer = currentUser.getRole() == Role.STUDENT;
+                isOwnProperty = property.getOwner() != null && property.getOwner().getId().equals(currentUser.getId());
             }
+        }
+
+        model.addAttribute("loggedIn", loggedIn);
+        model.addAttribute("isStudentViewer", isStudentViewer);
+        model.addAttribute("isOwnProperty", isOwnProperty);
+        model.addAttribute("canBook", isStudentViewer && !isOwnProperty);
+
+        if ("success".equals(booked)) {
+            model.addAttribute("bookedSuccess", true);
+        } else if ("error".equals(booked)) {
+            model.addAttribute("bookedError", true);
+            model.addAttribute("bookedErrorReason", reason);
+        }
+        if ("true".equals(cancelled)) {
+            model.addAttribute("cancelledSuccess", true);
         }
 
         return "property-details";
