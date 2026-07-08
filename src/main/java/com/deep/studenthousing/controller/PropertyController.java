@@ -7,6 +7,7 @@ import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -203,9 +204,20 @@ public class PropertyController {
 
     //view property
     @GetMapping("/{id}")
-    public String viewProperty(@PathVariable Long id, Model model){
+    public String viewProperty(@PathVariable Long id, Model model, Authentication authentication){
         Property property = propertyService.findById(id);
         model.addAttribute("property", property);
+
+        if(authentication != null){
+            User currentUser = userService.findByEmail(authentication.getName());
+            if(currentUser != null){
+                model.addAttribute("currentUser", currentUser);
+                boolean isStudentViewer = currentUser.getRole() == Role.STUDENT;
+                boolean isOwnProperty = property.getOwner() != null && property.getOwner().getId().equals(currentUser.getId());
+                model.addAttribute("canBook", isStudentViewer && !isOwnProperty);
+            }
+        }
+
         return "property-details";
     }
 }
