@@ -26,7 +26,6 @@ public class Property {
     private String city;
     private String area;
 
-    // Kept column name "rent" so existing data keeps working; this is now the monthly rent.
     @Column(name = "rent")
     private double monthlyRent;
 
