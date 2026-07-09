@@ -313,16 +313,36 @@
                             </div>
                         </div>
 
-                        <div class="field-row">
-                            <div class="field-group">
-                                <label>Area</label>
-                                <input type="text" class="form-control" th:field="*{area}" placeholder="Enter area or neighborhood">
-                            </div>
-                            <div class="field-group">
-                                <label>Rent (₹)</label>
-                                <input type="number" step="0.01" class="form-control" th:field="*{rent}" placeholder="Enter rent amount">
-                            </div>
+                        <div class="field-group">
+                            <label>Area</label>
+                            <input type="text" class="form-control" th:field="*{area}" placeholder="Enter area or neighborhood">
                         </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="field-group">
+                            <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                <input type="checkbox" th:field="*{availableMonthly}" style="width:auto;">
+                                Available for Monthly Rent
+                            </label>
+                        </div>
+                        <div class="field-group">
+                            <label>Monthly Rent (₹)</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{monthlyRent}" placeholder="Enter monthly rent amount">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                <input type="checkbox" th:field="*{availableDaily}" style="width:auto;">
+                                Available for Daily Rent
+                            </label>
+                        </div>
+                        <div class="field-group">
+                            <label>Daily Rent (₹)</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{dailyRent}" placeholder="Enter daily rent amount">
+                        </div>
+
+                        <div class="section-divider"></div>
 
                         <div class="field-group">
                             <label>Description</label>
