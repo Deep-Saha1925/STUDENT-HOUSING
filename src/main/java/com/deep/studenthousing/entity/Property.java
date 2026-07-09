@@ -32,7 +32,13 @@ public class Property {
     private Double dailyRent;
 
     // Whether the owner offers this property for each rental type.
+    // columnDefinition gives existing rows a value when Hibernate adds these
+    // columns via ddl-auto=update — without it, ALTER TABLE ... NOT NULL fails
+    // on a table that already has rows.
+    @Column(columnDefinition = "boolean default true", nullable = false)
     private boolean availableMonthly = true;
+
+    @Column(columnDefinition = "boolean default false", nullable = false)
     private boolean availableDaily = false;
 
     private Double latitude;
