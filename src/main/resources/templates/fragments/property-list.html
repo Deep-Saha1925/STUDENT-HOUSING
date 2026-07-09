@@ -16,7 +16,7 @@
         <p>
           <strong>City:</strong> <span th:text="${p.city}"></span><br>
           <strong>Area:</strong> <span th:text="${p.area}"></span><br>
-          <strong>Rent:</strong> ₹<span th:text="${p.rent}"></span>
+          <strong>Rent:</strong> ₹<span th:text="${p.monthlyRent}"></span>
         </p>
         <span class="badge bg-success" th:if="${p.available}">Available</span>
         <span class="badge bg-danger" th:unless="${p.available}">Not Available</span>
