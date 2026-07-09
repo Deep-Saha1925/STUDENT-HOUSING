@@ -7,7 +7,6 @@ import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -66,7 +65,6 @@ public class PropertyController {
 
         List<Property> properties = userService.findByOwner(owner);
 
-        // Add owner, ownerId, and properties to model
         model.addAttribute("owner", owner);
         model.addAttribute("ownerId", ownerId);
         model.addAttribute("properties", properties);
@@ -101,6 +99,7 @@ public class PropertyController {
         }
 
         property.setOwner(owner);
+        normalizeRentalFields(property);
         propertyService.save(property);
 
         if(images != null && images.length > 0){
@@ -149,18 +148,16 @@ public class PropertyController {
         property.setDescription(updatedProperty.getDescription());
         property.setCity(updatedProperty.getCity());
         property.setArea(updatedProperty.getArea());
-        //property.setRent(updatedProperty.getRent());
-
         property.setMonthlyRent(updatedProperty.getMonthlyRent());
         property.setDailyRent(updatedProperty.getDailyRent());
         property.setAvailableMonthly(updatedProperty.isAvailableMonthly());
         property.setAvailableDaily(updatedProperty.isAvailableDaily());
+        normalizeRentalFields(property);
 
         // Handle new image uploads
         if (images != null && images.length > 0 && !images[0].isEmpty()) {
             List<String> imageUrls = imageUploadService.uploadMultipleImages(images, ownerId, propertyId);
 
-            // Append new images to existing ones
             if (property.getImageUrls() != null) {
                 property.getImageUrls().addAll(imageUrls);
             } else {
@@ -180,29 +177,40 @@ public class PropertyController {
         Property property = propertyService.findById(propertyId);
 
         if (property.getOwner().getId().equals(ownerId)) {
-            // Remove image from property
             property.getImageUrls().remove(imageUrl);
             propertyService.save(property);
-
-            // (Optional) Delete from Cloudinary
             imageUploadService.deleteImage(imageUrl);
         }
 
         return "redirect:/properties/owner/" + ownerId + "/edit/" + propertyId;
     }
 
+    // Server-side safety net (client JS already does this, but never trust the client alone):
+    // an unavailable rental type should never carry a rent value, and a listing
+    // needs to offer at least one type or it isn't bookable at all.
+    private void normalizeRentalFields(Property property) {
+        if (!property.isAvailableMonthly()) {
+            property.setMonthlyRent(0);
+        }
+        if (!property.isAvailableDaily()) {
+            property.setDailyRent(null);
+        }
+        if (!property.isAvailableMonthly() && !property.isAvailableDaily()) {
+            // Fall back to monthly rather than silently saving an unbookable property.
+            property.setAvailableMonthly(true);
+        }
+    }
 
     @PostMapping("/owner/{ownerId}/availability/{propertyId}")
     public String toggleAvailability(@PathVariable Long ownerId,
                                      @PathVariable Long propertyId,
                                      @RequestParam(value = "available", required = false) String available) {
         Property property = propertyService.findById(propertyId);
-        property.setAvailable(available != null); // Checkbox checked = true, else false
+        property.setAvailable(available != null);
         propertyService.save(property);
         return "redirect:/properties/owner/" + ownerId;
     }
 
-    //view property
     //view property
     @GetMapping("/{id}")
     public String viewProperty(@PathVariable Long id, Model model,
