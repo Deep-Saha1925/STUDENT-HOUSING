@@ -42,8 +42,6 @@ public class PropertyService {
             }
         }
 
-        System.out.println(property.getLatitude() + " " + property.getLongitude());
-
         propertyRepository.save(property);
     }
 
