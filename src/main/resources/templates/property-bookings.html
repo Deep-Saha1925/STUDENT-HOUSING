@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Property Bookings</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent:     #ff5e62;
+            --accent-2:   #ff9966;
+            --bg:         #faf7f4;
+            --card-bg:    #ffffff;
+            --text:       #1a1a1a;
+            --text-muted: #777;
+            --border:     rgba(0,0,0,0.08);
+            --shadow:     0 8px 40px rgba(0,0,0,0.08);
+            --owner-bg:   #faf7f4;
+            --hr-color:   rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] {
+            --bg:         #111112;
+            --card-bg:    #1e1e22;
+            --text:       #f0ede8;
+            --text-muted: #888;
+            --border:     rgba(255,255,255,0.07);
+            --shadow:     0 8px 40px rgba(0,0,0,0.45);
+            --owner-bg:   #26252a;
+            --hr-color:   rgba(255,255,255,0.07);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px 16px 60px;
+            transition: background 0.35s, color 0.35s;
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 12px 18px;
+            z-index: 999;
+        }
+
+        .theme-toggle {
+            width: 38px; height: 38px;
+            border-radius: 9px;
+            border: 1.5px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow);
+        }
+        .theme-toggle:hover { border-color: var(--accent); color: var(--accent); transform: rotate(20deg); }
+
+        .page-card {
+            max-width: 860px;
+            margin: 56px auto 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 28px 32px;
+        }
+
+        .page-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+        .page-sub { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 22px; }
+
+        .booking-row {
+            background: var(--owner-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .booking-info { font-size: 0.87rem; }
+        .booking-info strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
+        .booking-meta { color: var(--text-muted); font-size: 0.82rem; }
+
+        .status-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .status-confirmed { background: rgba(34,197,94,0.15); color: #16a34a; }
+        .status-pending { background: rgba(234,179,8,0.15); color: #ca8a04; }
+        .status-cancelled { background: rgba(239,68,68,0.12); color: #dc2626; }
+
+        .btn-cancel {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.25);
+            color: #dc2626;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-cancel:hover { background: rgba(239,68,68,0.2); }
+        [data-theme="dark"] .btn-cancel { color: #f87171; }
+
+        .empty-state { text-align: center; color: var(--text-muted); padding: 40px 0; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 20px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        @media (max-width: 575px) {
+            .page-card { margin-top: 58px; padding: 20px; }
+            .booking-row { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+    </button>
+</div>
+
+<div class="container">
+    <div class="page-card">edit
+        <h3 class="page-title" th:text="${property.title}"></h3>
+        <p class="page-sub">
+            <i class="bi bi-geo-alt"></i>
+            <span th:text="${property.city}"></span>, <span th:text="${property.area}"></span>
+            — Bookings for this property
+        </p>
+
+        <div th:if="${cancelledSuccess}" class="alert alert-secondary py-2 px-3 small" style="margin-bottom:14px;">
+            <i class="bi bi-info-circle-fill"></i> Booking cancelled.
+        </div>
+
+        <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+            <i class="bi bi-calendar-x d-block" style="font-size:1.8rem;margin-bottom:8px;"></i>
+            No bookings yet for this property.
+        </div>
+
+        <div th:each="b : ${bookings}" class="booking-row">
+            <div class="booking-info">
+                <strong th:text="${b.student.fullName}"></strong>
+                <span class="booking-meta" th:text="${b.student.email}"></span><br>
+                <span class="booking-meta">
+                    <span th:text="${b.rentalType}"></span> ·
+                    <span th:text="${b.startDate}"></span> → <span th:text="${b.endDate}"></span>
+                </span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span class="status-badge status-confirmed" th:if="${b.status.name() == 'CONFIRMED'}">Confirmed</span>
+                <span class="status-badge status-pending" th:if="${b.status.name() == 'PENDING'}">Pending</span>
+                <span class="status-badge status-cancelled" th:if="${b.status.name() == 'CANCELLED'}">Cancelled</span>
+
+                <form th:if="${b.status.name() != 'CANCELLED'}"
+                      th:action="@{'/properties/bookings/' + ${b.id} + '/cancel'}" method="post"
+                      onsubmit="return confirm('Cancel this booking?');">
+                    <input type="hidden" name="propertyId" th:value="${property.id}">
+                    <button type="submit" class="btn-cancel">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <a th:href="@{'/properties/owner/' + ${ownerId}}" class="back-link">
+            <i class="bi bi-arrow-left-circle"></i> Back to My Properties
+        </a>
+    </div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const html      = document.documentElement;
+    const saved     = localStorage.getItem('sh-theme') || 'light';
+    applyTheme(saved);
+    toggleBtn.addEventListener('click', () => {
+        const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem('sh-theme', next);
+    });
+    function applyTheme(theme) {
+        html.dataset.theme = theme;
+        themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+</script>
+</body>
+</html>
