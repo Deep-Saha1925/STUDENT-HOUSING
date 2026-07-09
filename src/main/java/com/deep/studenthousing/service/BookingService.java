@@ -54,9 +54,33 @@ public class BookingService {
         booking.setRentalType(rentalType);
         booking.setStartDate(startDate);
         booking.setEndDate(endDate);
-        booking.setStatus(BookingStatus.CONFIRMED);
+        // Requires the owner to approve before it's confirmed. It still blocks
+        // the calendar for other students in the meantime (see findOverlappingBookings),
+        // so two people can't be approved into the same dates.
+        booking.setStatus(BookingStatus.PENDING);
 
         return bookingRepository.save(booking);
+    }
+
+    public void approveBooking(Long bookingId, Long ownerId) {
+        Booking booking = getOwnedBooking(bookingId, ownerId);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        bookingRepository.save(booking);
+    }
+
+    public void rejectBooking(Long bookingId, Long ownerId) {
+        Booking booking = getOwnedBooking(bookingId, ownerId);
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+    }
+
+    private Booking getOwnedBooking(Long bookingId, Long ownerId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        if (!booking.getProperty().getOwner().getId().equals(ownerId)) {
+            throw new IllegalStateException("Not authorized to manage this booking.");
+        }
+        return booking;
     }
 
     public void cancelBooking(Long bookingId, Long requesterId) {
