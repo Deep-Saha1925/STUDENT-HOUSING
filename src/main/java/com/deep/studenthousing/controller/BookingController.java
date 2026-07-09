@@ -93,6 +93,36 @@ public class BookingController {
         }
     }
 
+    @PostMapping("/bookings/{bookingId}/approve")
+    public String approveBooking(@PathVariable Long bookingId,
+                                 @RequestParam("propertyId") Long propertyId,
+                                 Authentication authentication) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        User owner = userRepository.findByEmail(authentication.getName());
+        if (owner == null) {
+            return "redirect:/access-denied";
+        }
+        bookingService.approveBooking(bookingId, owner.getId());
+        return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId;
+    }
+
+    @PostMapping("/bookings/{bookingId}/reject")
+    public String rejectBooking(@PathVariable Long bookingId,
+                                @RequestParam("propertyId") Long propertyId,
+                                Authentication authentication) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        User owner = userRepository.findByEmail(authentication.getName());
+        if (owner == null) {
+            return "redirect:/access-denied";
+        }
+        bookingService.rejectBooking(bookingId, owner.getId());
+        return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId;
+    }
+
     @PostMapping("/bookings/{bookingId}/cancel")
     public String cancelBooking(@PathVariable Long bookingId,
                                 @RequestParam("propertyId") Long propertyId,
