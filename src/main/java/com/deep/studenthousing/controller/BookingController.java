@@ -31,6 +31,25 @@ public class BookingController {
         this.userRepository = userRepository;
     }
 
+    // Owner-facing: list all bookings made on one of their properties.
+    @GetMapping("/owner/{ownerId}/bookings/{propertyId}")
+    public String ownerViewBookings(@PathVariable Long ownerId,
+                                    @PathVariable Long propertyId,
+                                    @RequestParam(value = "cancelled", required = false) String cancelled,
+                                    Model model) {
+        Property property = propertyService.findById(propertyId);
+
+        if (!property.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized: Owner mismatch!");
+        }
+
+        model.addAttribute("property", property);
+        model.addAttribute("ownerId", ownerId);
+        model.addAttribute("bookings", bookingService.getBookingsForProperty(propertyId));
+        model.addAttribute("cancelledSuccess", "true".equals(cancelled));
+        return "property-bookings";
+    }
+
     // Returns the property's active booked date ranges as JSON, so the
     // calendar widget on property-details.html can grey them out.
     @GetMapping("/{id}/booked-dates")
@@ -87,6 +106,11 @@ public class BookingController {
         }
 
         bookingService.cancelBooking(bookingId, requester.getId());
+
+        boolean isOwner = requester.getRole() == Role.OWNER;
+        if (isOwner) {
+            return "redirect:/properties/owner/" + requester.getId() + "/bookings/" + propertyId + "?cancelled=true";
+        }
         return "redirect:/properties/" + propertyId + "?cancelled=true";
     }
 }
