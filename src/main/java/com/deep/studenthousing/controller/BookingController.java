@@ -36,6 +36,8 @@ public class BookingController {
     public String ownerViewBookings(@PathVariable Long ownerId,
                                     @PathVariable Long propertyId,
                                     @RequestParam(value = "cancelled", required = false) String cancelled,
+                                    @RequestParam(value = "actionSuccess", required = false) String actionSuccess,
+                                    @RequestParam(value = "actionError", required = false) String actionError,
                                     Model model) {
         Property property = propertyService.findById(propertyId);
 
@@ -47,7 +49,27 @@ public class BookingController {
         model.addAttribute("ownerId", ownerId);
         model.addAttribute("bookings", bookingService.getBookingsForProperty(propertyId));
         model.addAttribute("cancelledSuccess", "true".equals(cancelled));
+        model.addAttribute("actionSuccess", actionSuccess);
+        model.addAttribute("actionError", actionError);
         return "property-bookings";
+    }
+
+    // Student-facing: "My Bookings" — every booking the student has made, across
+    // both rental types, so they can track pending/confirmed/cancelled status.
+    @GetMapping("/my-bookings")
+    public String myBookings(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        User student = userRepository.findByEmail(authentication.getName());
+        if (student == null || student.getRole() != Role.STUDENT) {
+            return "redirect:/access-denied";
+        }
+        List<Booking> bookings = bookingService.getBookingsForStudent(student);
+        model.addAttribute("bookings", bookings);
+        model.addAttribute("dailyBookings", bookings.stream().filter(b -> b.getRentalType() == RentalType.DAILY).toList());
+        model.addAttribute("monthlyBookings", bookings.stream().filter(b -> b.getRentalType() == RentalType.MONTHLY).toList());
+        return "my-bookings";
     }
 
     // Returns the property's active booked date ranges as JSON, so the
@@ -150,45 +172,5 @@ public class BookingController {
             return "redirect:/properties/owner/" + requester.getId() + "/bookings/" + propertyId + "?cancelled=true";
         }
         return "redirect:/properties/" + propertyId + "?cancelled=true";
-    }
-
-    // Student-facing: "My Bookings" — every booking the student has made, across
-    // both rental types, so they can track pending/confirmed/cancelled status.
-    @GetMapping("/my-bookings")
-    public String myBookings(Authentication authentication, Model model) {
-        if (authentication == null) {
-            return "redirect:/login";
-        }
-        User student = userRepository.findByEmail(authentication.getName());
-        if (student == null || student.getRole() != Role.STUDENT) {
-            return "redirect:/access-denied";
-        }
-        List<Booking> bookings = bookingService.getBookingsForStudent(student);
-        model.addAttribute("bookings", bookings);
-        model.addAttribute("dailyBookings", bookings.stream().filter(b -> b.getRentalType() == RentalType.DAILY).toList());
-        model.addAttribute("monthlyBookings", bookings.stream().filter(b -> b.getRentalType() == RentalType.MONTHLY).toList());
-        return "my-bookings";
-    }
-
-    @GetMapping("/owner/{ownerId}/bookings/{propertyId}")
-    public String ownerViewBookings(@PathVariable Long ownerId,
-                                    @PathVariable Long propertyId,
-                                    @RequestParam(value = "cancelled", required = false) String cancelled,
-                                    @RequestParam(value = "actionSuccess", required = false) String actionSuccess,
-                                    @RequestParam(value = "actionError", required = false) String actionError,
-                                    Model model) {
-        Property property = propertyService.findById(propertyId);
-
-        if (!property.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Unauthorized: Owner mismatch!");
-        }
-
-        model.addAttribute("property", property);
-        model.addAttribute("ownerId", ownerId);
-        model.addAttribute("bookings", bookingService.getBookingsForProperty(propertyId));
-        model.addAttribute("cancelledSuccess", "true".equals(cancelled));
-        model.addAttribute("actionSuccess", actionSuccess);
-        model.addAttribute("actionError", actionError);
-        return "property-bookings";
     }
 }
