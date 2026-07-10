@@ -221,6 +221,7 @@
             margin-bottom: 10px;
             font-weight: 600;
             font-size: 0.9rem;
+            color: var(--text);
         }
         .cal-nav {
             background: none;
@@ -249,6 +250,7 @@
             font-size: 0.82rem;
             cursor: pointer;
             transition: background 0.15s;
+            color: var(--text);
         }
         .cal-day:hover:not(.disabled):not(.empty) { background: rgba(255,94,98,0.15); }
         .cal-day.empty { cursor: default; }
@@ -439,7 +441,7 @@
                 <p class="about-title"><i class="bi bi-calendar-check"></i> Book This Property</p>
 
                 <div class="alert alert-success py-2 px-3 small" th:if="${bookedSuccess}">
-                    <i class="bi bi-check-circle-fill"></i> Booking confirmed!
+                    <i class="bi bi-hourglass-split"></i> Booking request sent! The owner needs to confirm it — you'll see the status update once they do.
                 </div>
                 <div class="alert alert-danger py-2 px-3 small" th:if="${bookedError}">
                     <i class="bi bi-x-circle-fill"></i> Booking failed: <span th:text="${bookedErrorReason}"></span>
@@ -467,7 +469,7 @@
                         <input type="hidden" name="startDate" id="startDateInput">
                         <input type="hidden" name="endDate" id="endDateInput">
                         <button type="submit" class="btn-book" id="bookBtn" disabled>
-                            <i class="bi bi-check2-circle"></i> Book Now
+                            <i class="bi bi-check2-circle"></i> Request to Book
                         </button>
                     </form>
                 </div>
@@ -549,6 +551,15 @@
         let selectedStart = null;
         let selectedEnd = null;
 
+        // NEVER use toISOString() for local calendar dates — it converts to UTC first,
+        // which silently shifts the date back a day in any timezone ahead of UTC (e.g. IST).
+        function formatLocalDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const MAX_MONTHS_AHEAD = 12;
@@ -600,7 +611,7 @@
 
             for (let d = 1; d <= daysInMonth; d++) {
                 const date = new Date(viewYear, viewMonth, d);
-                const iso = date.toISOString().slice(0, 10);
+                const iso = formatLocalDate(date);
                 const disabled = isPast(date) || isBooked(date);
 
                 let cls = 'cal-day';
@@ -660,14 +671,14 @@
 
         function updateSelectionUI() {
             if (selectedStart && selectedEnd) {
-                startInput.value = selectedStart.toISOString().slice(0, 10);
-                endInput.value = selectedEnd.toISOString().slice(0, 10);
+                startInput.value = formatLocalDate(selectedStart);
+                endInput.value = formatLocalDate(selectedEnd);
                 rangeLabel.textContent = `${startInput.value} → ${endInput.value}`;
                 bookBtn.disabled = false;
             } else if (selectedStart) {
                 startInput.value = '';
                 endInput.value = '';
-                rangeLabel.textContent = `Move-in: ${selectedStart.toISOString().slice(0, 10)} — now pick your move-out date`;
+                rangeLabel.textContent = `Move-in: ${formatLocalDate(selectedStart)} — now pick your move-out date`;
                 bookBtn.disabled = true;
             } else {
                 startInput.value = '';
