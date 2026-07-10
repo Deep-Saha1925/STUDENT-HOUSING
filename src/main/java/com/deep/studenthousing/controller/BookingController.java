@@ -104,8 +104,12 @@ public class BookingController {
         if (owner == null) {
             return "redirect:/access-denied";
         }
-        bookingService.approveBooking(bookingId, owner.getId());
-        return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId;
+        try {
+            bookingService.approveBooking(bookingId, owner.getId());
+            return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId + "?actionSuccess=approved";
+        } catch (Exception e) {
+            return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId + "?actionError=" + e.getMessage();
+        }
     }
 
     @PostMapping("/bookings/{bookingId}/reject")
@@ -119,8 +123,12 @@ public class BookingController {
         if (owner == null) {
             return "redirect:/access-denied";
         }
-        bookingService.rejectBooking(bookingId, owner.getId());
-        return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId;
+        try {
+            bookingService.rejectBooking(bookingId, owner.getId());
+            return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId + "?actionSuccess=rejected";
+        } catch (Exception e) {
+            return "redirect:/properties/owner/" + owner.getId() + "/bookings/" + propertyId + "?actionError=" + e.getMessage();
+        }
     }
 
     @PostMapping("/bookings/{bookingId}/cancel")
@@ -142,5 +150,23 @@ public class BookingController {
             return "redirect:/properties/owner/" + requester.getId() + "/bookings/" + propertyId + "?cancelled=true";
         }
         return "redirect:/properties/" + propertyId + "?cancelled=true";
+    }
+
+    // Student-facing: "My Bookings" — every booking the student has made, across
+    // both rental types, so they can track pending/confirmed/cancelled status.
+    @GetMapping("/my-bookings")
+    public String myBookings(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        User student = userRepository.findByEmail(authentication.getName());
+        if (student == null || student.getRole() != Role.STUDENT) {
+            return "redirect:/access-denied";
+        }
+        List<Booking> bookings = bookingService.getBookingsForStudent(student);
+        model.addAttribute("bookings", bookings);
+        model.addAttribute("dailyBookings", bookings.stream().filter(b -> b.getRentalType() == RentalType.DAILY).toList());
+        model.addAttribute("monthlyBookings", bookings.stream().filter(b -> b.getRentalType() == RentalType.MONTHLY).toList());
+        return "my-bookings";
     }
 }
