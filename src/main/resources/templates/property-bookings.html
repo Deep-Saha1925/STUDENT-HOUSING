@@ -156,6 +156,17 @@
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="bi bi-moon-fill" id="themeIcon"></i>
     </button>
+
+    <div th:if="${actionSuccess == 'approved'}" class="alert alert-success py-2 px-3 small" style="margin-bottom:14px;">
+        <i class="bi bi-check-circle-fill"></i> Booking approved.
+    </div>
+    <div th:if="${actionSuccess == 'rejected'}" class="alert alert-secondary py-2 px-3 small" style="margin-bottom:14px;">
+        <i class="bi bi-info-circle-fill"></i> Booking rejected.
+    </div>
+    <div th:if="${actionError != null}" class="alert alert-danger py-2 px-3 small" style="margin-bottom:14px;">
+        <i class="bi bi-x-circle-fill"></i> Action failed: <span th:text="${actionError}"></span>
+    </div>
+
 </div>
 
 <div class="container">
