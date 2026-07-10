@@ -192,11 +192,11 @@
                     <span class="status-badge status-confirmed" th:if="${b.status.name() == 'CONFIRMED'}">Confirmed</span>
                     <span class="status-badge status-pending" th:if="${b.status.name() == 'PENDING'}">Pending</span>
                     <span class="status-badge status-cancelled" th:if="${b.status.name() == 'CANCELLED'}">Cancelled</span>
-                    <form th:if="${b.status.name() != 'CANCELLED'}"
+                    <form th:if="${b.status.name() == 'PENDING'}"
                           th:action="@{'/properties/bookings/' + ${b.id} + '/cancel'}" method="post"
-                          onsubmit="return confirm('Cancel this booking?');">
+                          onsubmit="return confirm('Withdraw this booking request?');">
                         <input type="hidden" name="propertyId" th:value="${b.property.id}">
-                        <button type="submit" class="btn-cancel"><i class="bi bi-x-circle"></i> Cancel</button>
+                        <button type="submit" class="btn-cancel"><i class="bi bi-x-circle"></i> Withdraw</button>
                     </form>
                 </div>
             </div>
@@ -213,11 +213,11 @@
                     <span class="status-badge status-confirmed" th:if="${b.status.name() == 'CONFIRMED'}">Confirmed</span>
                     <span class="status-badge status-pending" th:if="${b.status.name() == 'PENDING'}">Pending</span>
                     <span class="status-badge status-cancelled" th:if="${b.status.name() == 'CANCELLED'}">Cancelled</span>
-                    <form th:if="${b.status.name() != 'CANCELLED'}"
+                    <form th:if="${b.status.name() == 'PENDING'}"
                           th:action="@{'/properties/bookings/' + ${b.id} + '/cancel'}" method="post"
-                          onsubmit="return confirm('Cancel this booking?');">
+                          onsubmit="return confirm('Withdraw this booking request?');">
                         <input type="hidden" name="propertyId" th:value="${b.property.id}">
-                        <button type="submit" class="btn-cancel"><i class="bi bi-x-circle"></i> Cancel</button>
+                        <button type="submit" class="btn-cancel"><i class="bi bi-x-circle"></i> Withdraw</button>
                     </form>
                 </div>
             </div>
