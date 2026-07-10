@@ -208,6 +208,19 @@
             border-color: transparent;
         }
 
+        .duration-select {
+            width: 100%;
+            padding: 9px 14px;
+            border-radius: 9px;
+            border: 1.5px solid var(--border);
+            background: var(--owner-bg);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+        }
+
         .booking-calendar {
             background: var(--owner-bg);
             border: 1px solid var(--border);
@@ -461,6 +474,20 @@
                          th:data-monthly-only="${property.availableMonthly and !property.availableDaily}"
                          th:data-daily-only="${!property.availableMonthly and property.availableDaily}"></div>
 
+                    <div id="durationWrap" style="display:none; margin-top:12px;">
+                        <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">
+                            Stay duration
+                        </label>
+                        <select id="durationSelect" class="duration-select">
+                            <option value="">Select duration…</option>
+                            <option value="1">1 month</option>
+                            <option value="2">2 months</option>
+                            <option value="3">3 months</option>
+                            <option value="6">6 months</option>
+                            <option value="12">12 months</option>
+                        </select>
+                    </div>
+
                     <p class="range-label" id="rangeLabel">Select your move-in and move-out dates</p>
 
                     <form id="bookingForm" th:action="@{'/properties/' + ${property.id} + '/book'}" method="post">
@@ -539,13 +566,16 @@
         if (!calEl) return; // student isn't allowed to book (not logged in / owner / not a student)
 
         const propertyId = calEl.dataset.propertyId;
-        const rtButtons = document.querySelectorAll('.rt-btn');
+        const rtButtons = document.querySelectorAll('.rental-toggle .rt-btn');
         const rentalTypeInput = document.getElementById('rentalTypeInput');
         const startInput = document.getElementById('startDateInput');
         const endInput = document.getElementById('endDateInput');
         const bookBtn = document.getElementById('bookBtn');
         const rangeLabel = document.getElementById('rangeLabel');
+        const durationWrap = document.getElementById('durationWrap');
+        const durationSelect = document.getElementById('durationSelect');
 
+        let currentMode = rentalTypeInput.value; // 'MONTHLY' or 'DAILY' — drives which selection behavior is active
         let bookedRanges = []; // [{startDate, endDate}] as Date objects
         let viewYear, viewMonth; // 0-indexed month for the currently displayed calendar page
         let selectedStart = null;
@@ -569,11 +599,55 @@
         viewYear = today.getFullYear();
         viewMonth = today.getMonth();
 
+        function addMonths(date, n) {
+            const d = new Date(date);
+            const targetMonth = d.getMonth() + n;
+            d.setMonth(targetMonth);
+            // If setMonth overflowed past the intended month (e.g. Jan 31 + 1 month
+            // rolling into March), clamp back to the last day of the intended month.
+            if (d.getMonth() !== ((targetMonth % 12) + 12) % 12) {
+                d.setDate(0);
+            }
+            return d;
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            rentalTypeInput.value = mode;
+            selectedStart = null;
+            selectedEnd = null;
+            durationSelect.value = '';
+            durationWrap.style.display = mode === 'MONTHLY' ? 'block' : 'none';
+            updateSelectionUI();
+            render();
+        }
+
+        durationWrap.style.display = currentMode === 'MONTHLY' ? 'block' : 'none';
+
+        durationSelect.addEventListener('change', () => {
+            if (!selectedStart || !durationSelect.value) return;
+            const months = parseInt(durationSelect.value, 10);
+            const computedEnd = addMonths(selectedStart, months);
+            computedEnd.setDate(computedEnd.getDate() - 1); // inclusive last day of stay
+
+            if (rangeHasConflict(selectedStart, computedEnd)) {
+                rangeLabel.textContent = 'That duration overlaps an unavailable date — try a shorter stay or a different move-in date.';
+                selectedEnd = null;
+                durationSelect.value = '';
+                bookBtn.disabled = true;
+                return;
+            }
+
+            selectedEnd = computedEnd;
+            updateSelectionUI();
+            render();
+        });
+
         rtButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 rtButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                rentalTypeInput.value = btn.dataset.type;
+                setMode(btn.dataset.type);
             });
         });
 
@@ -646,15 +720,25 @@
         function onDayClick(iso) {
             const clicked = new Date(iso + 'T00:00:00');
 
+            if (currentMode === 'MONTHLY') {
+                // Monthly: clicking always (re)sets the move-in date. The end date
+                // comes from the duration dropdown, not a second calendar click.
+                selectedStart = clicked;
+                selectedEnd = null;
+                durationSelect.value = '';
+                updateSelectionUI();
+                render();
+                return;
+            }
+
+            // Daily: two clicks define a range, same as a short-stay booking site.
             if (!selectedStart || (selectedStart && selectedEnd)) {
-                // Start a new selection
                 selectedStart = clicked;
                 selectedEnd = null;
             } else if (clicked < selectedStart) {
                 selectedStart = clicked;
                 selectedEnd = null;
             } else {
-                // Attempting to set the end date — reject if any day in between is booked
                 if (rangeHasConflict(selectedStart, clicked)) {
                     rangeLabel.textContent = 'Those dates include an unavailable day — pick again.';
                     selectedStart = clicked;
@@ -673,17 +757,23 @@
             if (selectedStart && selectedEnd) {
                 startInput.value = formatLocalDate(selectedStart);
                 endInput.value = formatLocalDate(selectedEnd);
-                rangeLabel.textContent = `${startInput.value} → ${endInput.value}`;
+                rangeLabel.textContent = currentMode === 'MONTHLY'
+                    ? `Move-in ${startInput.value} → Move-out ${endInput.value}`
+                    : `${startInput.value} → ${endInput.value}`;
                 bookBtn.disabled = false;
             } else if (selectedStart) {
                 startInput.value = '';
                 endInput.value = '';
-                rangeLabel.textContent = `Move-in: ${formatLocalDate(selectedStart)} — now pick your move-out date`;
+                rangeLabel.textContent = currentMode === 'MONTHLY'
+                    ? `Move-in: ${formatLocalDate(selectedStart)} — now choose a duration above`
+                    : `Move-in: ${formatLocalDate(selectedStart)} — now pick your move-out date`;
                 bookBtn.disabled = true;
             } else {
                 startInput.value = '';
                 endInput.value = '';
-                rangeLabel.textContent = 'Select your move-in and move-out dates';
+                rangeLabel.textContent = currentMode === 'MONTHLY'
+                    ? 'Select your move-in date, then choose a duration'
+                    : 'Select your move-in and move-out dates';
                 bookBtn.disabled = true;
             }
         }
@@ -695,9 +785,10 @@
                     start: new Date(r.startDate + 'T00:00:00'),
                     end: new Date(r.endDate + 'T00:00:00')
                 }));
+                updateSelectionUI();
                 render();
             })
-            .catch(() => render());
+            .catch(() => { updateSelectionUI(); render(); });
     })();
 </script>
 </body>
