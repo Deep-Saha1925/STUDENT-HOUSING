@@ -130,6 +130,20 @@
         .btn-cancel:hover { background: rgba(239,68,68,0.2); }
         [data-theme="dark"] .btn-cancel { color: #f87171; }
 
+        .btn-approve {
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #16a34a;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-approve:hover { background: rgba(34,197,94,0.22); }
+        [data-theme="dark"] .btn-approve { color: #4ade80; }
+
         .empty-state { text-align: center; color: var(--text-muted); padding: 40px 0; }
 
         .back-link {
@@ -156,21 +170,10 @@
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="bi bi-moon-fill" id="themeIcon"></i>
     </button>
-
-    <div th:if="${actionSuccess == 'approved'}" class="alert alert-success py-2 px-3 small" style="margin-bottom:14px;">
-        <i class="bi bi-check-circle-fill"></i> Booking approved.
-    </div>
-    <div th:if="${actionSuccess == 'rejected'}" class="alert alert-secondary py-2 px-3 small" style="margin-bottom:14px;">
-        <i class="bi bi-info-circle-fill"></i> Booking rejected.
-    </div>
-    <div th:if="${actionError != null}" class="alert alert-danger py-2 px-3 small" style="margin-bottom:14px;">
-        <i class="bi bi-x-circle-fill"></i> Action failed: <span th:text="${actionError}"></span>
-    </div>
-
 </div>
 
 <div class="container">
-    <div class="page-card">edit
+    <div class="page-card">
         <h3 class="page-title" th:text="${property.title}"></h3>
         <p class="page-sub">
             <i class="bi bi-geo-alt"></i>
@@ -180,6 +183,15 @@
 
         <div th:if="${cancelledSuccess}" class="alert alert-secondary py-2 px-3 small" style="margin-bottom:14px;">
             <i class="bi bi-info-circle-fill"></i> Booking cancelled.
+        </div>
+        <div th:if="${actionSuccess == 'approved'}" class="alert alert-success py-2 px-3 small" style="margin-bottom:14px;">
+            <i class="bi bi-check-circle-fill"></i> Booking approved.
+        </div>
+        <div th:if="${actionSuccess == 'rejected'}" class="alert alert-secondary py-2 px-3 small" style="margin-bottom:14px;">
+            <i class="bi bi-info-circle-fill"></i> Booking rejected.
+        </div>
+        <div th:if="${actionError != null}" class="alert alert-danger py-2 px-3 small" style="margin-bottom:14px;">
+            <i class="bi bi-x-circle-fill"></i> Action failed: <span th:text="${actionError}"></span>
         </div>
 
         <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
@@ -201,7 +213,22 @@
                 <span class="status-badge status-pending" th:if="${b.status.name() == 'PENDING'}">Pending</span>
                 <span class="status-badge status-cancelled" th:if="${b.status.name() == 'CANCELLED'}">Cancelled</span>
 
-                <form th:if="${b.status.name() != 'CANCELLED'}"
+                <form th:if="${b.status.name() == 'PENDING'}"
+                      th:action="@{'/properties/bookings/' + ${b.id} + '/approve'}" method="post">
+                    <input type="hidden" name="propertyId" th:value="${property.id}">
+                    <button type="submit" class="btn-approve">
+                        <i class="bi bi-check-circle"></i> Approve
+                    </button>
+                </form>
+                <form th:if="${b.status.name() == 'PENDING'}"
+                      th:action="@{'/properties/bookings/' + ${b.id} + '/reject'}" method="post"
+                      onsubmit="return confirm('Reject this booking request?');">
+                    <input type="hidden" name="propertyId" th:value="${property.id}">
+                    <button type="submit" class="btn-cancel">
+                        <i class="bi bi-x-circle"></i> Reject
+                    </button>
+                </form>
+                <form th:if="${b.status.name() == 'CONFIRMED'}"
                       th:action="@{'/properties/bookings/' + ${b.id} + '/cancel'}" method="post"
                       onsubmit="return confirm('Cancel this booking?');">
                     <input type="hidden" name="propertyId" th:value="${property.id}">
