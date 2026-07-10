@@ -1,2 +1,4 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+# Ignore all HTML files from the language statistics
+*.html linguist-detectable=false
