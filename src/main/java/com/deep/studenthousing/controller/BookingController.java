@@ -169,4 +169,26 @@ public class BookingController {
         model.addAttribute("monthlyBookings", bookings.stream().filter(b -> b.getRentalType() == RentalType.MONTHLY).toList());
         return "my-bookings";
     }
+
+    @GetMapping("/owner/{ownerId}/bookings/{propertyId}")
+    public String ownerViewBookings(@PathVariable Long ownerId,
+                                    @PathVariable Long propertyId,
+                                    @RequestParam(value = "cancelled", required = false) String cancelled,
+                                    @RequestParam(value = "actionSuccess", required = false) String actionSuccess,
+                                    @RequestParam(value = "actionError", required = false) String actionError,
+                                    Model model) {
+        Property property = propertyService.findById(propertyId);
+
+        if (!property.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized: Owner mismatch!");
+        }
+
+        model.addAttribute("property", property);
+        model.addAttribute("ownerId", ownerId);
+        model.addAttribute("bookings", bookingService.getBookingsForProperty(propertyId));
+        model.addAttribute("cancelledSuccess", "true".equals(cancelled));
+        model.addAttribute("actionSuccess", actionSuccess);
+        model.addAttribute("actionError", actionError);
+        return "property-bookings";
+    }
 }
