@@ -392,6 +392,34 @@
             .carousel-item img { max-height: 240px; }
             .btn-back { width: 100%; justify-content: center; }
         }
+
+        .type-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .type-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+        .type-tag-monthly {
+            background: rgba(99,102,241,0.12);
+            color: #6366f1;
+        }
+        .type-tag-daily {
+            background: rgba(255,94,98,0.12);
+            color: var(--accent);
+        }
+        [data-theme="dark"] .type-tag-monthly { color: #a5b4fc; }
+        [data-theme="dark"] .type-tag-daily { color: #ff8a8d; }
     </style>
 </head>
 <body>
@@ -431,6 +459,15 @@
                 <span th:text="${property.city}"></span>,
                 <span th:text="${property.area}"></span>
             </p>
+
+            <div class="type-tags">
+                <span class="type-tag type-tag-monthly" th:if="${property.availableMonthly}">
+                    <i class="bi bi-calendar3"></i> Monthly Rental
+                </span>
+                <span class="type-tag type-tag-daily" th:if="${property.availableDaily}">
+                    <i class="bi bi-calendar-week"></i> Daily Rental
+                </span>
+            </div>
 
             <div class="rent-wrap" th:if="${property.availableMonthly}">
                 <span class="rent-badge" th:text="'₹ ' + ${property.monthlyRent}"></span>
