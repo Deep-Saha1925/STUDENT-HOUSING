@@ -455,7 +455,10 @@
                     <td th:text="${p.city}"></td>
                     <td th:text="${p.area}"></td>
                     <td>
-                        <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent}"></span>
+                    <td>
+                        <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent} + '/mo'" th:if="${p.availableMonthly}"></span>
+                        <span class="badge-rent" th:text="'₹ ' + ${p.dailyRent} + '/day'" th:if="${p.availableDaily}"></span>
+                    </td>
                     </td>
                     <td>
                         <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
