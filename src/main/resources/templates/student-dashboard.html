@@ -6,7 +6,8 @@
     <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -99,7 +100,6 @@
             flex-shrink: 0;
         }
 
-        /* Nav actions — never shrink */
         .nav-actions {
             display: flex;
             align-items: center;
@@ -151,17 +151,31 @@
         }
         .btn-logout-nav:hover { background: rgba(255,94,98,0.28); color: #fff !important; }
 
-        /* Hide text labels on small screens */
         .btn-nav-text,
         .btn-logout-text { display: inline; }
 
         /* ── Hero ── */
         .hero {
             text-align: center;
-            padding: 52px 20px 36px;
+            padding: 56px 20px 34px;
             position: relative;
             z-index: 1;
+            overflow: hidden;
         }
+
+        .hero-skyline {
+            position: absolute;
+            left: 50%;
+            bottom: 6px;
+            transform: translateX(-50%);
+            width: min(720px, 92%);
+            height: 64px;
+            color: var(--text);
+            opacity: 0.07;
+            pointer-events: none;
+            z-index: -1;
+        }
+        [data-theme="dark"] .hero-skyline { opacity: 0.12; }
 
         .hero-eyebrow {
             display: inline-flex; align-items: center; gap: 6px;
@@ -189,13 +203,31 @@
             max-width: 480px; margin: 0 auto; line-height: 1.7;
         }
 
+        .value-chips {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .value-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.78rem; font-weight: 500;
+            padding: 7px 14px; border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+        .value-chip i { color: var(--accent); font-size: 0.85rem; }
+
         /* ── Dashboard cards ── */
         .dash-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            padding: 0 20px 60px;
-            max-width: 760px;
+            gap: 22px;
+            padding: 44px 20px 60px;
+            max-width: 780px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
@@ -206,21 +238,53 @@
             border: 1px solid var(--border);
             border-radius: 18px;
             box-shadow: var(--shadow);
-            padding: 28px 24px;
+            padding: 30px 24px 26px;
             text-align: center;
             transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.35s;
             display: flex; flex-direction: column; align-items: center;
+            position: relative;
         }
         .dash-card:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(0,0,0,0.1); }
         [data-theme="dark"] .dash-card:hover { box-shadow: 0 14px 36px rgba(0,0,0,0.5); }
 
-        .card-icon-wrap {
-            width: 60px; height: 60px; border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.6rem; margin-bottom: 16px;
+        .card-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            opacity: 0.7;
+            margin-bottom: 14px;
         }
-        .icon-blue  { background: rgba(59,130,246,0.1);  color: #3b82f6; }
-        .icon-green { background: rgba(34,197,94,0.1);   color: #16a34a; }
+
+        .card-icon-wrap {
+            width: 58px; height: 58px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-bottom: 6px;
+        }
+        .icon-blue   { background: rgba(59,130,246,0.1);  color: #3b82f6; }
+        .icon-green  { background: rgba(34,197,94,0.1);   color: #16a34a; }
+        .icon-coral  { background: rgba(255,94,98,0.1);   color: var(--accent); }
+
+        .ticket-divider {
+            position: relative;
+            width: calc(100% + 48px);
+            margin: 18px -24px 18px;
+            border-top: 2px dashed var(--border);
+        }
+        .ticket-divider::before,
+        .ticket-divider::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 18px; height: 18px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .ticket-divider::before { left: 0; transform: translate(-50%, -50%); }
+        .ticket-divider::after  { right: 0; transform: translate(50%, -50%); }
 
         .dash-card h4 {
             font-family: 'DM Serif Display', serif;
@@ -238,10 +302,12 @@
             font-family: 'DM Sans', sans-serif; border: none; cursor: pointer;
             width: 100%; justify-content: center;
         }
-        .btn-card-blue  { background: rgba(59,130,246,0.1); color: #3b82f6; border: 1.5px solid rgba(59,130,246,0.25); }
-        .btn-card-blue:hover  { background: rgba(59,130,246,0.2); color: #2563eb; }
-        .btn-card-green { background: rgba(34,197,94,0.1);  color: #16a34a; border: 1.5px solid rgba(34,197,94,0.25); }
-        .btn-card-green:hover { background: rgba(34,197,94,0.2);  color: #15803d; }
+        .btn-card-blue   { background: rgba(59,130,246,0.1); color: #3b82f6; border: 1.5px solid rgba(59,130,246,0.25); }
+        .btn-card-blue:hover   { background: rgba(59,130,246,0.2); color: #2563eb; }
+        .btn-card-green  { background: rgba(34,197,94,0.1);  color: #16a34a; border: 1.5px solid rgba(34,197,94,0.25); }
+        .btn-card-green:hover  { background: rgba(34,197,94,0.2);  color: #15803d; }
+        .btn-card-coral  { background: rgba(255,94,98,0.1); color: var(--accent); border: 1.5px solid rgba(255,94,98,0.25); }
+        .btn-card-coral:hover  { background: rgba(255,94,98,0.2); color: #e6484c; }
 
         /* ── Guest state ── */
         .guest-wrap {
@@ -260,23 +326,24 @@
         @media (max-width: 575px) {
             .header-bar { padding: 10px 14px; }
 
-            /* Hide text, keep icons only for Contact Admin + Logout */
             .btn-nav-text, .btn-logout-text { display: none; }
             .btn-nav, .btn-logout-nav { padding: 7px 9px; }
 
-            /* Hide welcome name on mobile */
             .welcome-name { display: none !important; }
 
-            .hero { padding: 36px 16px 28px; }
+            .hero { padding: 40px 16px 26px; }
             .hero p { font-size: 0.88rem; }
+            .hero-skyline { height: 46px; opacity: 0.06; }
+
+            .value-chips { gap: 8px; margin-top: 18px; }
+            .value-chip { font-size: 0.72rem; padding: 6px 11px; }
 
             .dash-grid {
                 grid-template-columns: 1fr;
-                padding: 0 16px 48px;
+                padding: 32px 16px 48px;
                 gap: 14px;
             }
 
-            /* Horizontal card on mobile */
             .dash-card {
                 flex-direction: row;
                 text-align: left;
@@ -285,15 +352,29 @@
                 gap: 16px;
                 border-radius: 14px;
             }
+            .card-tag { display: none; }
             .card-icon-wrap { width: 50px; height: 50px; font-size: 1.3rem; margin-bottom: 0; flex-shrink: 0; }
-            .card-body-wrap { flex: 1; min-width: 0; }
+            .ticket-divider {
+                width: 0;
+                height: auto;
+                align-self: stretch;
+                margin: 0;
+                border-top: none;
+                border-left: 2px dashed var(--border);
+            }
+            .ticket-divider::before,
+            .ticket-divider::after { display: none; }
+            .card-body-wrap { flex: 1; min-width: 0; padding-left: 16px; }
             .dash-card h4 { margin-bottom: 4px; font-size: 0.98rem; }
             .dash-card p  { margin-bottom: 10px; font-size: 0.82rem; }
         }
 
-        /* ── Very small ── */
         @media (max-width: 360px) {
             .navbar-brand { font-size: 1rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .dash-card, .theme-toggle { transition: none !important; }
         }
     </style>
 </head>
@@ -336,19 +417,36 @@
 </div>
 
 <!-- ── Hero ── -->
-<div class="hero" th:if="${user != null}">
+<div class="hero animate__animated animate__fadeIn" th:if="${user != null}">
+
+    <svg class="hero-skyline" viewBox="0 0 600 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M0 64 L0 40 L24 40 L24 24 L48 24 L48 40 L70 40 L70 12 L78 12 L78 4 L86 4 L86 12 L94 12 L94 40
+                 L120 40 L120 28 L150 28 L150 44 L150 44 L180 44 L180 20 L210 20 L210 44 L240 44 L240 8 L246 8 L246 0 L252 0 L252 8 L258 8 L258 44
+                 L290 44 L290 32 L320 32 L320 44 L350 44 L350 16 L380 16 L380 44 L410 44 L410 24 L440 24 L440 40 L470 40 L470 12 L478 12 L478 4 L486 4 L486 12 L494 12 L494 40
+                 L520 40 L520 28 L550 28 L550 44 L580 44 L580 32 L600 32 L600 64 Z"
+              fill="currentColor"/>
+    </svg>
+
     <div class="hero-eyebrow"><i class="bi bi-mortarboard-fill"></i> Student Dashboard</div>
-    <h3>Hello, <em th:text="${user.fullName}">Student</em> 👋</h3>
+    <h3><span id="greeting">Hello</span>, <em th:text="${user.fullName}">Student</em> 👋</h3>
     <p>Manage your profile, search for rental properties, and stay connected — all in one place.</p>
+
+    <div class="value-chips">
+        <span class="value-chip"><i class="bi bi-patch-check-fill"></i> Owner-verified listings</span>
+        <span class="value-chip"><i class="bi bi-geo-alt-fill"></i> GPS-based search</span>
+        <span class="value-chip"><i class="bi bi-calendar2-check-fill"></i> Monthly &amp; daily stays</span>
+    </div>
 </div>
 
 <!-- ── Cards ── -->
 <div class="dash-grid" th:if="${user != null}">
 
-    <div class="dash-card">
+    <div class="dash-card animate__animated animate__fadeInUp" style="animation-delay:0.05s;">
+        <span class="card-tag">Account</span>
         <div class="card-icon-wrap icon-blue">
             <i class="bi bi-person-circle"></i>
         </div>
+        <div class="ticket-divider"></div>
         <div class="card-body-wrap">
             <h4>My Profile</h4>
             <p>View or update your student profile information.</p>
@@ -358,10 +456,12 @@
         </div>
     </div>
 
-    <div class="dash-card">
+    <div class="dash-card animate__animated animate__fadeInUp" style="animation-delay:0.15s;">
+        <span class="card-tag">Discover</span>
         <div class="card-icon-wrap icon-green">
             <i class="bi bi-search"></i>
         </div>
+        <div class="ticket-divider"></div>
         <div class="card-body-wrap">
             <h4>Search Properties</h4>
             <p>Find available rental homes and explore property details.</p>
@@ -371,14 +471,16 @@
         </div>
     </div>
 
-    <div class="dash-card">
-        <div class="card-icon-wrap icon-green">
+    <div class="dash-card animate__animated animate__fadeInUp" style="animation-delay:0.25s;">
+        <span class="card-tag">Track</span>
+        <div class="card-icon-wrap icon-coral">
             <i class="bi bi-journal-check"></i>
         </div>
+        <div class="ticket-divider"></div>
         <div class="card-body-wrap">
             <h4>My Bookings</h4>
             <p>Track the status of your monthly and daily booking requests.</p>
-            <a th:href="@{/properties/my-bookings}" class="btn-card btn-card-green">
+            <a th:href="@{/properties/my-bookings}" class="btn-card btn-card-coral">
                 <i class="bi bi-journal-check"></i> View Bookings
             </a>
         </div>
@@ -406,6 +508,13 @@
         html.dataset.theme = theme;
         themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
         toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+
+    const greetingEl = document.getElementById('greeting');
+    if (greetingEl) {
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+        greetingEl.textContent = greeting;
     }
 </script>
 </body>
