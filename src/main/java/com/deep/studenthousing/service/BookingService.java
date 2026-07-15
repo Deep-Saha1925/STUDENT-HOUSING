@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -26,6 +28,15 @@ public class BookingService {
 
     public List<Booking> getBookingsForStudent(User student) {
         return bookingRepository.findByStudentOrderByStartDateDesc(student);
+    }
+
+    // Map of propertyId -> number of PENDING bookings, for every property this
+    // owner has. Used to show a notification dot on the owner's My Properties
+    // dashboard without an extra query per row.
+    public Map<Long, Long> getPendingBookingCountsByOwner(Long ownerId) {
+        return bookingRepository.findByProperty_Owner_IdAndStatus(ownerId, BookingStatus.PENDING)
+                .stream()
+                .collect(Collectors.groupingBy(b -> b.getProperty().getId(), Collectors.counting()));
     }
 
     public boolean isAvailable(Long propertyId, LocalDate startDate, LocalDate endDate) {
