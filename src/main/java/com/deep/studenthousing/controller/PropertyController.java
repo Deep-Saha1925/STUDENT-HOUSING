@@ -3,6 +3,7 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
+import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/properties")
@@ -22,11 +24,13 @@ public class PropertyController {
     private final UserService userService;
     private final PropertyService propertyService;
     private final ImageUploadService imageUploadService;
+    private final BookingService bookingService;
 
-    public PropertyController(UserService userService, PropertyService propertyService, ImageUploadService imageUploadService) {
+    public PropertyController(UserService userService, PropertyService propertyService, ImageUploadService imageUploadService, BookingService bookingService) {
         this.userService = userService;
         this.propertyService = propertyService;
         this.imageUploadService = imageUploadService;
+        this.bookingService = bookingService;
     }
 
     @GetMapping("/nearby")
@@ -65,9 +69,11 @@ public class PropertyController {
 
         List<Property> properties = userService.findByOwner(owner);
 
+        // Add owner, ownerId, and properties to model
         model.addAttribute("owner", owner);
         model.addAttribute("ownerId", ownerId);
         model.addAttribute("properties", properties);
+        model.addAttribute("pendingCounts", bookingService.getPendingBookingCountsByOwner(ownerId));
 
         return "owner-properties";
     }
@@ -158,6 +164,7 @@ public class PropertyController {
         if (images != null && images.length > 0 && !images[0].isEmpty()) {
             List<String> imageUrls = imageUploadService.uploadMultipleImages(images, ownerId, propertyId);
 
+            // Append new images to existing ones
             if (property.getImageUrls() != null) {
                 property.getImageUrls().addAll(imageUrls);
             } else {
@@ -177,13 +184,17 @@ public class PropertyController {
         Property property = propertyService.findById(propertyId);
 
         if (property.getOwner().getId().equals(ownerId)) {
+            // Remove image from property
             property.getImageUrls().remove(imageUrl);
             propertyService.save(property);
+
+            // (Optional) Delete from Cloudinary
             imageUploadService.deleteImage(imageUrl);
         }
 
         return "redirect:/properties/owner/" + ownerId + "/edit/" + propertyId;
     }
+
 
     // Server-side safety net (client JS already does this, but never trust the client alone):
     // an unavailable rental type should never carry a rent value, and a listing
@@ -206,7 +217,7 @@ public class PropertyController {
                                      @PathVariable Long propertyId,
                                      @RequestParam(value = "available", required = false) String available) {
         Property property = propertyService.findById(propertyId);
-        property.setAvailable(available != null);
+        property.setAvailable(available != null); // Checkbox checked = true, else false
         propertyService.save(property);
         return "redirect:/properties/owner/" + ownerId;
     }
