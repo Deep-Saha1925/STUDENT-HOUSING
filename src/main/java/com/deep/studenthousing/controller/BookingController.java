@@ -5,6 +5,7 @@ import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.RentalType;
 import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
+import com.deep.studenthousing.exception.UnauthorizedActionException;
 import com.deep.studenthousing.repository.UserRepository;
 import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.PropertyService;
@@ -42,7 +43,7 @@ public class BookingController {
         Property property = propertyService.findById(propertyId);
 
         if (!property.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Unauthorized: Owner mismatch!");
+            throw new UnauthorizedActionException("This booking list belongs to a different owner account.");
         }
 
         model.addAttribute("property", property);
