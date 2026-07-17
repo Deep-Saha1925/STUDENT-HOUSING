@@ -297,6 +297,60 @@
         [data-theme="dark"] .btn-edit { color: #fbbf24; }
         [data-theme="dark"] .btn-edit:hover { color: #fcd34d; }
 
+        /* Bookings button */
+        .btn-bookings {
+            background: rgba(59,130,246,0.12);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: #2563eb;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 7px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            margin-left: 6px;
+            position: relative;
+        }
+        .btn-bookings:hover {
+            background: rgba(59,130,246,0.25);
+            border-color: rgba(59,130,246,0.5);
+            color: #1d4ed8;
+        }
+        [data-theme="dark"] .btn-bookings { color: #60a5fa; }
+        [data-theme="dark"] .btn-bookings:hover { color: #93c5fd; }
+
+        /* Pending-request notification badge */
+        .notif-dot {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.64rem;
+            font-weight: 700;
+            min-width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+            line-height: 1;
+            box-shadow: 0 0 0 2px var(--card-bg);
+            animation: notif-pulse 1.8s ease-in-out infinite;
+        }
+        @keyframes notif-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .notif-dot { animation: none; }
+        }
+
         /* Add property button */
         .btn-add {
             background: linear-gradient(135deg, var(--accent-2), var(--accent));
@@ -374,7 +428,6 @@
 
         <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
 
-            <!-- ✅ UNCHANGED: owner name -->
             <span class="welcome-text">
                 👋 Welcome, <strong th:text="${owner.fullName}"></strong>
             </span>
@@ -384,17 +437,14 @@
                 <i class="bi bi-moon-fill" id="themeIcon"></i>
             </button>
 
-            <!-- ✅ UNCHANGED: View Profile link -->
             <a th:href="@{'/profile/' + ${owner.id}}" class="btn-nav">
                 <i class="bi bi-person-circle"></i> Profile
             </a>
 
-            <!-- ✅ UNCHANGED: Contact Admin link -->
             <a th:href="@{/profile/admin}" class="btn-nav">
                 <i class="bi bi-headset"></i> Contact Admin
             </a>
 
-            <!-- ✅ UNCHANGED: logout form -->
             <form th:action="@{/logout}" method="post" class="d-inline">
                 <button type="submit" class="btn-logout-nav">
                     <i class="bi bi-box-arrow-right"></i> Logout
@@ -429,16 +479,14 @@
                 </thead>
                 <tbody>
 
-                <!-- ✅ UNCHANGED: th:each, all th: bindings -->
                 <tr th:each="p : ${properties}">
                     <td th:text="${p.title}"></td>
                     <td th:text="${p.city}"></td>
                     <td th:text="${p.area}"></td>
                     <td>
-                        <span class="badge-rent" th:text="'₹ ' + ${p.rent}"></span>
+                        <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent} + '/mo'" th:if="${p.availableMonthly}"></span> <span class="badge-rent" th:text="'₹ ' + ${p.dailyRent} + '/day'" th:if="${p.availableDaily}"></span>
                     </td>
                     <td>
-                        <!-- ✅ UNCHANGED: availability toggle form -->
                         <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
                             <input type="hidden" name="_method" value="patch"/>
                             <div class="form-check form-switch">
@@ -451,9 +499,12 @@
                         </form>
                     </td>
                     <td>
-                        <!-- ✅ UNCHANGED: edit link -->
                         <a th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}" class="btn-edit">
                             <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a th:href="@{'/properties/owner/' + ${ownerId} + '/bookings/' + ${p.id}}" class="btn-bookings">
+                            <i class="bi bi-calendar-week"></i> Bookings
+                            <span class="notif-dot" th:if="${pendingCounts.get(p.id)} != null" th:text="${pendingCounts.get(p.id)}"></span>
                         </a>
                     </td>
                 </tr>
@@ -473,7 +524,6 @@
         </div>
     </div>
 
-    <!-- ✅ UNCHANGED: Add property link -->
     <div class="text-center mt-4 mb-5">
         <a th:href="@{'/properties/owner/' + ${ownerId} + '/add'}" class="btn-add">
             <i class="bi bi-plus-circle"></i> Add New Property

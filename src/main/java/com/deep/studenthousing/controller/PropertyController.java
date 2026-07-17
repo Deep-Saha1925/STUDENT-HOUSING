@@ -3,6 +3,8 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
+import com.deep.studenthousing.exception.UnauthorizedActionException;
+import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/properties")
@@ -22,11 +25,13 @@ public class PropertyController {
     private final UserService userService;
     private final PropertyService propertyService;
     private final ImageUploadService imageUploadService;
+    private final BookingService bookingService;
 
-    public PropertyController(UserService userService, PropertyService propertyService, ImageUploadService imageUploadService) {
+    public PropertyController(UserService userService, PropertyService propertyService, ImageUploadService imageUploadService, BookingService bookingService) {
         this.userService = userService;
         this.propertyService = propertyService;
         this.imageUploadService = imageUploadService;
+        this.bookingService = bookingService;
     }
 
     @GetMapping("/nearby")
@@ -69,6 +74,7 @@ public class PropertyController {
         model.addAttribute("owner", owner);
         model.addAttribute("ownerId", ownerId);
         model.addAttribute("properties", properties);
+        model.addAttribute("pendingCounts", bookingService.getPendingBookingCountsByOwner(ownerId));
 
         return "owner-properties";
     }
@@ -100,6 +106,7 @@ public class PropertyController {
         }
 
         property.setOwner(owner);
+        normalizeRentalFields(property);
         propertyService.save(property);
 
         if(images != null && images.length > 0){
@@ -120,7 +127,7 @@ public class PropertyController {
         Property property = propertyService.findById(propertyId);
 
         if (!property.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Unauthorized: Owner mismatch!");
+            throw new UnauthorizedActionException("This property belongs to a different owner account.");
         }
 
         model.addAttribute("property", property);
@@ -136,11 +143,11 @@ public class PropertyController {
         Property property = propertyService.findById(propertyId);
 
         if (property.getOwner().getRole() != Role.OWNER) {
-            throw new RuntimeException("Unauthorized: Only Owners can update properties.");
+            throw new UnauthorizedActionException("Only owner accounts can update properties.");
         }
 
         if (!property.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Unauthorized: Owner mismatch!");
+            throw new UnauthorizedActionException("This property belongs to a different owner account.");
         }
 
         // Update fields
@@ -148,7 +155,11 @@ public class PropertyController {
         property.setDescription(updatedProperty.getDescription());
         property.setCity(updatedProperty.getCity());
         property.setArea(updatedProperty.getArea());
-        property.setRent(updatedProperty.getRent());
+        property.setMonthlyRent(updatedProperty.getMonthlyRent());
+        property.setDailyRent(updatedProperty.getDailyRent());
+        property.setAvailableMonthly(updatedProperty.isAvailableMonthly());
+        property.setAvailableDaily(updatedProperty.isAvailableDaily());
+        normalizeRentalFields(property);
 
         // Handle new image uploads
         if (images != null && images.length > 0 && !images[0].isEmpty()) {
@@ -186,6 +197,22 @@ public class PropertyController {
     }
 
 
+    // Server-side safety net (client JS already does this, but never trust the client alone):
+    // an unavailable rental type should never carry a rent value, and a listing
+    // needs to offer at least one type or it isn't bookable at all.
+    private void normalizeRentalFields(Property property) {
+        if (!property.isAvailableMonthly()) {
+            property.setMonthlyRent(0);
+        }
+        if (!property.isAvailableDaily()) {
+            property.setDailyRent(null);
+        }
+        if (!property.isAvailableMonthly() && !property.isAvailableDaily()) {
+            // Fall back to monthly rather than silently saving an unbookable property.
+            property.setAvailableMonthly(true);
+        }
+    }
+
     @PostMapping("/owner/{ownerId}/availability/{propertyId}")
     public String toggleAvailability(@PathVariable Long ownerId,
                                      @PathVariable Long propertyId,
@@ -198,9 +225,43 @@ public class PropertyController {
 
     //view property
     @GetMapping("/{id}")
-    public String viewProperty(@PathVariable Long id, Model model){
+    public String viewProperty(@PathVariable Long id, Model model,
+                               org.springframework.security.core.Authentication authentication,
+                               @RequestParam(value = "booked", required = false) String booked,
+                               @RequestParam(value = "reason", required = false) String reason,
+                               @RequestParam(value = "cancelled", required = false) String cancelled){
         Property property = propertyService.findById(id);
         model.addAttribute("property", property);
+
+        boolean loggedIn = authentication != null;
+        boolean isStudentViewer = false;
+        boolean isOwnProperty = false;
+        User currentUser = null;
+
+        if (loggedIn) {
+            currentUser = userService.findByEmail(authentication.getName());
+            if (currentUser != null) {
+                model.addAttribute("currentUser", currentUser);
+                isStudentViewer = currentUser.getRole() == Role.STUDENT;
+                isOwnProperty = property.getOwner() != null && property.getOwner().getId().equals(currentUser.getId());
+            }
+        }
+
+        model.addAttribute("loggedIn", loggedIn);
+        model.addAttribute("isStudentViewer", isStudentViewer);
+        model.addAttribute("isOwnProperty", isOwnProperty);
+        model.addAttribute("canBook", isStudentViewer && !isOwnProperty);
+
+        if ("success".equals(booked)) {
+            model.addAttribute("bookedSuccess", true);
+        } else if ("error".equals(booked)) {
+            model.addAttribute("bookedError", true);
+            model.addAttribute("bookedErrorReason", reason);
+        }
+        if ("true".equals(cancelled)) {
+            model.addAttribute("cancelledSuccess", true);
+        }
+
         return "property-details";
     }
 }

@@ -365,7 +365,7 @@
           <td th:text="${p.city}"></td>
           <td th:text="${p.area}"></td>
           <td>
-            <span class="badge-rent" th:text="'₹ ' + ${p.rent}"></span>
+            <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent}"></span>
           </td>
           <td th:text="${p.owner.fullName}"></td>
         </tr>
@@ -380,7 +380,7 @@
            th:onclick="|window.location.href='/properties/${p.id}'|">
         <div class="prop-card-top">
           <span class="prop-title" th:text="${p.title}"></span>
-          <span class="badge-rent" th:text="'₹ ' + ${p.rent}"></span>
+          <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent}"></span>
         </div>
         <div class="prop-meta">
           <i class="bi bi-geo-alt"></i>

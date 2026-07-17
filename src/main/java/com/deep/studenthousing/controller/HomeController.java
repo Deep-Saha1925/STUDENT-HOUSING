@@ -34,7 +34,7 @@ public class HomeController {
         }
 
         try {
-            List<Property> properties = propertyService.searchProperties(city, rent)
+            List<Property> properties = propertyService.searchProperties(city, rent, null)
                     .stream()
                     .filter(Property::isAvailable)
                     .toList();

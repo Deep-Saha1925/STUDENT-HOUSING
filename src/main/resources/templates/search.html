@@ -240,6 +240,11 @@
                placeholder="Enter city / location" th:value="${city}">
         <input type="number" class="form-control" id="rentInput" name="rent"
                placeholder="Max Rent (₹)" th:value="${rent}">
+        <select class="radius-select" id="rentalTypeSelect">
+          <option value="" th:selected="${rentalType == null}">Any rental type</option>
+          <option value="MONTHLY" th:selected="${rentalType == 'MONTHLY'}">Monthly only</option>
+          <option value="DAILY" th:selected="${rentalType == 'DAILY'}">Daily only</option>
+        </select>
         <button type="submit" class="btn-search">
           <i class="bi bi-search"></i> Search
         </button>
@@ -293,8 +298,9 @@
       e.preventDefault();
       const city = document.getElementById("cityInput").value;
       const rent = document.getElementById("rentInput").value;
+      const rentalType = document.getElementById("rentalTypeSelect").value;
       setStatus(''); showLoading();
-      fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}`)
+      fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}&rentalType=${encodeURIComponent(rentalType)}`)
               .then(r => r.text()).then(html => setResults(html, null))
               .catch(err => console.error("Search error:", err));
     });

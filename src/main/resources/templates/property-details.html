@@ -183,6 +183,121 @@
             color: var(--text-muted);
         }
 
+        /* ── Booking widget ── */
+        .rental-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .rt-btn {
+            flex: 1;
+            padding: 9px 14px;
+            border-radius: 9px;
+            border: 1.5px solid var(--border);
+            background: var(--owner-bg);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .rt-btn.active {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .duration-select {
+            width: 100%;
+            padding: 9px 14px;
+            border-radius: 9px;
+            border: 1.5px solid var(--border);
+            background: var(--owner-bg);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .booking-calendar {
+            background: var(--owner-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+        }
+        .cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        .cal-nav {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 2px 8px;
+        }
+        .cal-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+        .cal-dow {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            padding: 4px 0;
+            font-weight: 600;
+        }
+        .cal-day {
+            padding: 8px 0;
+            border-radius: 7px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            color: var(--text);
+        }
+        .cal-day:hover:not(.disabled):not(.empty) { background: rgba(255,94,98,0.15); }
+        .cal-day.empty { cursor: default; }
+        .cal-day.disabled { color: var(--text-muted); opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
+        .cal-day.selected-start,
+        .cal-day.selected-end {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+            color: #fff;
+            font-weight: 700;
+        }
+        .cal-day.in-range { background: rgba(255,94,98,0.18); }
+
+        .range-label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: 12px 0;
+        }
+
+        .btn-book {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+            border: none;
+            color: #fff;
+            padding: 11px 26px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-book:disabled { opacity: 0.5; cursor: not-allowed; }
+
         hr { border-color: var(--hr-color); margin: 20px 0; }
 
         .about-title {
@@ -277,6 +392,34 @@
             .carousel-item img { max-height: 240px; }
             .btn-back { width: 100%; justify-content: center; }
         }
+
+        .type-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .type-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+        .type-tag-monthly {
+            background: rgba(99,102,241,0.12);
+            color: #6366f1;
+        }
+        .type-tag-daily {
+            background: rgba(255,94,98,0.12);
+            color: var(--accent);
+        }
+        [data-theme="dark"] .type-tag-monthly { color: #a5b4fc; }
+        [data-theme="dark"] .type-tag-daily { color: #ff8a8d; }
     </style>
 </head>
 <body>
@@ -317,9 +460,22 @@
                 <span th:text="${property.area}"></span>
             </p>
 
-            <div class="rent-wrap">
-                <span class="rent-badge" th:text="'₹ ' + ${property.rent}"></span>
+            <div class="type-tags">
+                <span class="type-tag type-tag-monthly" th:if="${property.availableMonthly}">
+                    <i class="bi bi-calendar3"></i> Monthly Rental
+                </span>
+                <span class="type-tag type-tag-daily" th:if="${property.availableDaily}">
+                    <i class="bi bi-calendar-week"></i> Daily Rental
+                </span>
+            </div>
+
+            <div class="rent-wrap" th:if="${property.availableMonthly}">
+                <span class="rent-badge" th:text="'₹ ' + ${property.monthlyRent}"></span>
                 <span class="rent-label">/ month</span>
+            </div>
+            <div class="rent-wrap" th:if="${property.availableDaily}">
+                <span class="rent-badge" th:text="'₹ ' + ${property.dailyRent}"></span>
+                <span class="rent-label">/ day</span>
             </div>
 
             <div th:if="${property.description}" class="mt-3 mb-2">
@@ -327,6 +483,72 @@
                     <i class="bi bi-info-circle"></i> About this Property
                 </p>
                 <p class="about-text" th:text="${property.description}"></p>
+            </div>
+
+            <hr>
+
+            <div class="booking-section" th:if="${property.availableMonthly or property.availableDaily}">
+                <p class="about-title"><i class="bi bi-calendar-check"></i> Book This Property</p>
+
+                <div class="alert alert-success py-2 px-3 small" th:if="${bookedSuccess}">
+                    <i class="bi bi-hourglass-split"></i> Booking request sent! The owner needs to confirm it — you'll see the status update once they do.
+                </div>
+                <div class="alert alert-danger py-2 px-3 small" th:if="${bookedError}">
+                    <i class="bi bi-x-circle-fill"></i> Booking failed: <span th:text="${bookedErrorReason}"></span>
+                </div>
+                <div class="alert alert-secondary py-2 px-3 small" th:if="${cancelledSuccess}">
+                    <i class="bi bi-info-circle-fill"></i> Booking cancelled.
+                </div>
+
+                <div th:if="${canBook}">
+                    <div class="rental-toggle" th:if="${property.availableMonthly and property.availableDaily}">
+                        <button type="button" class="rt-btn active" data-type="MONTHLY">Monthly</button>
+                        <button type="button" class="rt-btn" data-type="DAILY">Daily</button>
+                    </div>
+
+                    <div id="bookingCalendar" class="booking-calendar"
+                         th:data-property-id="${property.id}"
+                         th:data-monthly-only="${property.availableMonthly and !property.availableDaily}"
+                         th:data-daily-only="${!property.availableMonthly and property.availableDaily}"></div>
+
+                    <div id="durationWrap" style="display:none; margin-top:12px;">
+                        <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">
+                            Stay duration
+                        </label>
+                        <select id="durationSelect" class="duration-select">
+                            <option value="">Select duration…</option>
+                            <option value="1">1 month</option>
+                            <option value="2">2 months</option>
+                            <option value="3">3 months</option>
+                            <option value="6">6 months</option>
+                            <option value="12">12 months</option>
+                        </select>
+                    </div>
+
+                    <p class="range-label" id="rangeLabel">Select your move-in and move-out dates</p>
+
+                    <form id="bookingForm" th:action="@{'/properties/' + ${property.id} + '/book'}" method="post">
+                        <input type="hidden" name="rentalType" id="rentalTypeInput"
+                               th:value="${property.availableMonthly} ? 'MONTHLY' : 'DAILY'">
+                        <input type="hidden" name="startDate" id="startDateInput">
+                        <input type="hidden" name="endDate" id="endDateInput">
+                        <button type="submit" class="btn-book" id="bookBtn" disabled>
+                            <i class="bi bi-check2-circle"></i> Request to Book
+                        </button>
+                    </form>
+                </div>
+
+                <div th:unless="${canBook}">
+                    <p class="text-muted small mb-0" th:if="${!loggedIn}">
+                        <a th:href="@{/login}">Log in as a student</a> to book this property.
+                    </p>
+                    <p class="text-muted small mb-0" th:if="${loggedIn and !isStudentViewer}">
+                        Only students can book properties.
+                    </p>
+                    <p class="text-muted small mb-0" th:if="${loggedIn and isStudentViewer and isOwnProperty}">
+                        You can't book your own property.
+                    </p>
+                </div>
             </div>
 
             <hr>
@@ -374,6 +596,237 @@
         themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
         toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     }
+
+    // ── Booking calendar widget ──
+    (function () {
+        const calEl = document.getElementById('bookingCalendar');
+        if (!calEl) return; // student isn't allowed to book (not logged in / owner / not a student)
+
+        const propertyId = calEl.dataset.propertyId;
+        const rtButtons = document.querySelectorAll('.rental-toggle .rt-btn');
+        const rentalTypeInput = document.getElementById('rentalTypeInput');
+        const startInput = document.getElementById('startDateInput');
+        const endInput = document.getElementById('endDateInput');
+        const bookBtn = document.getElementById('bookBtn');
+        const rangeLabel = document.getElementById('rangeLabel');
+        const durationWrap = document.getElementById('durationWrap');
+        const durationSelect = document.getElementById('durationSelect');
+
+        let currentMode = rentalTypeInput.value; // 'MONTHLY' or 'DAILY' — drives which selection behavior is active
+        let bookedRanges = []; // [{startDate, endDate}] as Date objects
+        let viewYear, viewMonth; // 0-indexed month for the currently displayed calendar page
+        let selectedStart = null;
+        let selectedEnd = null;
+
+        // NEVER use toISOString() for local calendar dates — it converts to UTC first,
+        // which silently shifts the date back a day in any timezone ahead of UTC (e.g. IST).
+        function formatLocalDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const MAX_MONTHS_AHEAD = 12;
+        const minViewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        const maxViewDate = new Date(today.getFullYear(), today.getMonth() + MAX_MONTHS_AHEAD, 1);
+
+        viewYear = today.getFullYear();
+        viewMonth = today.getMonth();
+
+        function addMonths(date, n) {
+            const d = new Date(date);
+            const targetMonth = d.getMonth() + n;
+            d.setMonth(targetMonth);
+            // If setMonth overflowed past the intended month (e.g. Jan 31 + 1 month
+            // rolling into March), clamp back to the last day of the intended month.
+            if (d.getMonth() !== ((targetMonth % 12) + 12) % 12) {
+                d.setDate(0);
+            }
+            return d;
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            rentalTypeInput.value = mode;
+            selectedStart = null;
+            selectedEnd = null;
+            durationSelect.value = '';
+            durationWrap.style.display = mode === 'MONTHLY' ? 'block' : 'none';
+            updateSelectionUI();
+            render();
+        }
+
+        durationWrap.style.display = currentMode === 'MONTHLY' ? 'block' : 'none';
+
+        durationSelect.addEventListener('change', () => {
+            if (!selectedStart || !durationSelect.value) return;
+            const months = parseInt(durationSelect.value, 10);
+            const computedEnd = addMonths(selectedStart, months);
+            computedEnd.setDate(computedEnd.getDate() - 1); // inclusive last day of stay
+
+            if (rangeHasConflict(selectedStart, computedEnd)) {
+                rangeLabel.textContent = 'That duration overlaps an unavailable date — try a shorter stay or a different move-in date.';
+                selectedEnd = null;
+                durationSelect.value = '';
+                bookBtn.disabled = true;
+                return;
+            }
+
+            selectedEnd = computedEnd;
+            updateSelectionUI();
+            render();
+        });
+
+        rtButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                rtButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                setMode(btn.dataset.type);
+            });
+        });
+
+        function isBooked(date) {
+            return bookedRanges.some(r => date >= r.start && date <= r.end);
+        }
+
+        function isPast(date) {
+            return date < today;
+        }
+
+        function rangeHasConflict(start, end) {
+            return bookedRanges.some(r => start <= r.end && end >= r.start);
+        }
+
+        function render() {
+            const firstOfMonth = new Date(viewYear, viewMonth, 1);
+            const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+            const startWeekday = firstOfMonth.getDay();
+            const monthName = firstOfMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const atMin = new Date(viewYear, viewMonth, 1) <= minViewDate;
+            const atMax = new Date(viewYear, viewMonth, 1) >= maxViewDate;
+
+            let html = `<div class="cal-header">
+                <button type="button" class="cal-nav" id="calPrev" ${atMin ? 'disabled' : ''}>&#8249;</button>
+                <span>${monthName}</span>
+                <button type="button" class="cal-nav" id="calNext" ${atMax ? 'disabled' : ''}>&#8250;</button>
+            </div>
+            <div class="cal-grid">`;
+
+            ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => html += `<div class="cal-dow">${d}</div>`);
+
+            for (let i = 0; i < startWeekday; i++) html += `<div class="cal-day empty"></div>`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(viewYear, viewMonth, d);
+                const iso = formatLocalDate(date);
+                const disabled = isPast(date) || isBooked(date);
+
+                let cls = 'cal-day';
+                if (disabled) cls += ' disabled';
+                if (selectedStart && date.getTime() === selectedStart.getTime()) cls += ' selected-start';
+                if (selectedEnd && date.getTime() === selectedEnd.getTime()) cls += ' selected-end';
+                if (selectedStart && selectedEnd && date > selectedStart && date < selectedEnd) cls += ' in-range';
+
+                html += `<div class="${cls}" data-date="${iso}">${d}</div>`;
+            }
+
+            html += `</div>`; // close .cal-grid
+
+            calEl.innerHTML = html;
+
+            document.getElementById('calPrev').addEventListener('click', () => {
+                viewMonth--;
+                if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+                render();
+            });
+            document.getElementById('calNext').addEventListener('click', () => {
+                viewMonth++;
+                if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+                render();
+            });
+
+            calEl.querySelectorAll('.cal-day:not(.disabled):not(.empty)').forEach(cell => {
+                cell.addEventListener('click', () => onDayClick(cell.dataset.date));
+            });
+        }
+
+        function onDayClick(iso) {
+            const clicked = new Date(iso + 'T00:00:00');
+
+            if (currentMode === 'MONTHLY') {
+                // Monthly: clicking always (re)sets the move-in date. The end date
+                // comes from the duration dropdown, not a second calendar click.
+                selectedStart = clicked;
+                selectedEnd = null;
+                durationSelect.value = '';
+                updateSelectionUI();
+                render();
+                return;
+            }
+
+            // Daily: two clicks define a range, same as a short-stay booking site.
+            if (!selectedStart || (selectedStart && selectedEnd)) {
+                selectedStart = clicked;
+                selectedEnd = null;
+            } else if (clicked < selectedStart) {
+                selectedStart = clicked;
+                selectedEnd = null;
+            } else {
+                if (rangeHasConflict(selectedStart, clicked)) {
+                    rangeLabel.textContent = 'Those dates include an unavailable day — pick again.';
+                    selectedStart = clicked;
+                    selectedEnd = null;
+                    render();
+                    return;
+                }
+                selectedEnd = clicked;
+            }
+
+            updateSelectionUI();
+            render();
+        }
+
+        function updateSelectionUI() {
+            if (selectedStart && selectedEnd) {
+                startInput.value = formatLocalDate(selectedStart);
+                endInput.value = formatLocalDate(selectedEnd);
+                rangeLabel.textContent = currentMode === 'MONTHLY'
+                    ? `Move-in ${startInput.value} → Move-out ${endInput.value}`
+                    : `${startInput.value} → ${endInput.value}`;
+                bookBtn.disabled = false;
+            } else if (selectedStart) {
+                startInput.value = '';
+                endInput.value = '';
+                rangeLabel.textContent = currentMode === 'MONTHLY'
+                    ? `Move-in: ${formatLocalDate(selectedStart)} — now choose a duration above`
+                    : `Move-in: ${formatLocalDate(selectedStart)} — now pick your move-out date`;
+                bookBtn.disabled = true;
+            } else {
+                startInput.value = '';
+                endInput.value = '';
+                rangeLabel.textContent = currentMode === 'MONTHLY'
+                    ? 'Select your move-in date, then choose a duration'
+                    : 'Select your move-in and move-out dates';
+                bookBtn.disabled = true;
+            }
+        }
+
+        fetch(`/properties/${propertyId}/booked-dates`)
+            .then(res => res.json())
+            .then(data => {
+                bookedRanges = data.map(r => ({
+                    start: new Date(r.startDate + 'T00:00:00'),
+                    end: new Date(r.endDate + 'T00:00:00')
+                }));
+                updateSelectionUI();
+                render();
+            })
+            .catch(() => { updateSelectionUI(); render(); });
+    })();
 </script>
 </body>
 </html>

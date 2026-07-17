@@ -20,11 +20,15 @@ public class SearchController {
 
     @GetMapping("/student-search")
     public String searchPropertiesByStudent(@RequestParam(value = "city", required = false) String city,
-                                   @RequestParam(value = "rent", required = false) String rentStr,
-                                   Model model) {
+                                            @RequestParam(value = "rent", required = false) String rentStr,
+                                            @RequestParam(value = "rentalType", required = false) String rentalType,
+                                            Model model) {
         // Clean params
         if (city != null && city.trim().isEmpty()) {
             city = null;
+        }
+        if (rentalType != null && rentalType.trim().isEmpty()) {
+            rentalType = null;
         }
 
         Double rent = null;
@@ -33,22 +37,29 @@ public class SearchController {
         }
 
         // Call service
-        List<Property> properties = propertyService.searchProperties(city, rent)
+        List<Property> properties = propertyService.searchProperties(city, rent, rentalType)
                 .stream()
                 .filter(Property::isAvailable)
                 .toList();
 
         model.addAttribute("properties", properties);
+        model.addAttribute("city", city);
+        model.addAttribute("rent", rent);
+        model.addAttribute("rentalType", rentalType);
         return "search";
     }
 
     @GetMapping("/search")
     public String searchProperties(@RequestParam(value = "city", required = false) String city,
                                    @RequestParam(value = "rent", required = false) String rentStr,
+                                   @RequestParam(value = "rentalType", required = false) String rentalType,
                                    Model model) {
         // Clean params
         if (city != null && city.trim().isEmpty()) {
             city = null;
+        }
+        if (rentalType != null && rentalType.trim().isEmpty()) {
+            rentalType = null;
         }
 
         Double rent = null;
@@ -57,10 +68,10 @@ public class SearchController {
         }
 
         // Calling service
-        List<Property> properties = propertyService.searchProperties(city, rent)
-                                                    .stream()
-                                                    .filter(Property::isAvailable)
-                                                    .toList();
+        List<Property> properties = propertyService.searchProperties(city, rent, rentalType)
+                .stream()
+                .filter(Property::isAvailable)
+                .toList();
 
         model.addAttribute("properties", properties);
         return "fragments/property-list :: propertyList";
