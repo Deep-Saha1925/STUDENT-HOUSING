@@ -3,6 +3,7 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
+import com.deep.studenthousing.exception.UnauthorizedActionException;
 import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
@@ -126,7 +127,7 @@ public class PropertyController {
         Property property = propertyService.findById(propertyId);
 
         if (!property.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Unauthorized: Owner mismatch!");
+            throw new UnauthorizedActionException("This property belongs to a different owner account.");
         }
 
         model.addAttribute("property", property);
@@ -142,11 +143,11 @@ public class PropertyController {
         Property property = propertyService.findById(propertyId);
 
         if (property.getOwner().getRole() != Role.OWNER) {
-            throw new RuntimeException("Unauthorized: Only Owners can update properties.");
+            throw new UnauthorizedActionException("Only owner accounts can update properties.");
         }
 
         if (!property.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Unauthorized: Owner mismatch!");
+            throw new UnauthorizedActionException("This property belongs to a different owner account.");
         }
 
         // Update fields
