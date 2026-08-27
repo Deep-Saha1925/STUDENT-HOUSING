@@ -1813,7 +1813,31 @@
 
     </div>
 
+    <!-- =========================================================
+         ADD PROPERTY
+    ========================================================= -->
 
+    <div
+            class="text-center mt-4 mb-5">
+
+
+        <a
+                th:href="@{'/properties/owner/' + ${ownerId} + '/add'}"
+                class="btn-add">
+
+
+            <i
+                    class="bi bi-plus-circle">
+            </i>
+
+
+            Add New Property
+
+
+        </a>
+
+
+    </div>
 
     <!-- =========================================================
          PROPERTY SECTION
@@ -2063,31 +2087,7 @@
 
 
 
-    <!-- =========================================================
-         ADD PROPERTY
-    ========================================================= -->
 
-    <div
-            class="text-center mt-4 mb-5">
-
-
-        <a
-                th:href="@{'/properties/owner/' + ${ownerId} + '/add'}"
-                class="btn-add">
-
-
-            <i
-                    class="bi bi-plus-circle">
-            </i>
-
-
-            Add New Property
-
-
-        </a>
-
-
-    </div>
 
 
 </div>
