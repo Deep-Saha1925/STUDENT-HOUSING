@@ -1,744 +1,2102 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
+
     <title>Owner Dashboard</title>
-    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon"
+          type="image/svg+xml"
+          th:href="@{/favicon.svg}">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+          rel="stylesheet">
+
     <!-- Animate.css -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+          rel="stylesheet">
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+          rel="stylesheet">
+
 
     <style>
+
+        /* =========================================================
+           THEME VARIABLES
+        ========================================================= */
+
         :root {
-            --accent:     #ff5e62;
-            --accent-2:   #ff9966;
-            --bg:         #f5f2ef;
-            --bg-alt:     #ffffff;
-            --text:       #1a1a1a;
+
+            --accent: #ff5e62;
+            --accent-2: #ff9966;
+
+            --bg: #f5f2ef;
+            --bg-alt: #ffffff;
+
+            --text: #1a1a1a;
             --text-muted: #777;
-            --border:     rgba(0,0,0,0.08);
-            --nav-bg:     #1a1a1a;
-            --card-bg:    #ffffff;
-            --card-shadow:0 4px 24px rgba(0,0,0,0.07);
-            --thead-bg:   #1a1a1a;
+
+            --border: rgba(0, 0, 0, 0.08);
+
+            --nav-bg: #1a1a1a;
+
+            --card-bg: #ffffff;
+
+            --card-shadow:
+                    0 4px 24px rgba(0, 0, 0, 0.07);
+
+            --thead-bg: #1a1a1a;
             --thead-text: #f0ede8;
-            --row-hover:  #fdf6f3;
-            --input-bg:   #f5f2ef;
-        }
-        [data-theme="dark"] {
-            --bg:         #111112;
-            --bg-alt:     #18181b;
-            --text:       #f0ede8;
-            --text-muted: #888;
-            --border:     rgba(255,255,255,0.07);
-            --nav-bg:     #0d0d0e;
-            --card-bg:    #1e1e22;
-            --card-shadow:0 4px 24px rgba(0,0,0,0.4);
-            --thead-bg:   #111112;
-            --thead-text: #f0ede8;
-            --row-hover:  #26252a;
-            --input-bg:   #26252a;
+
+            --row-hover: #fdf6f3;
+
+            --input-bg: #f5f2ef;
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
+
+        [data-theme="dark"] {
+
+            --bg: #111112;
+            --bg-alt: #18181b;
+
+            --text: #f0ede8;
+            --text-muted: #888;
+
+            --border: rgba(255, 255, 255, 0.07);
+
+            --nav-bg: #0d0d0e;
+
+            --card-bg: #1e1e22;
+
+            --card-shadow:
+                    0 4px 24px rgba(0, 0, 0, 0.4);
+
+            --thead-bg: #111112;
+            --thead-text: #f0ede8;
+
+            --row-hover: #26252a;
+
+            --input-bg: #26252a;
+        }
+
+
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
 
         body {
+
             font-family: 'DM Sans', sans-serif;
+
             background: var(--bg);
+
             color: var(--text);
+
             min-height: 100vh;
-            transition: background 0.35s, color 0.35s;
+
+            margin: 0;
+
+            transition:
+                    background 0.35s ease,
+                    color 0.35s ease;
         }
 
-        /* ── Navbar ── */
+
+        /* =========================================================
+           NAVBAR
+        ========================================================= */
+
         .navbar {
+
             background: var(--nav-bg) !important;
+
             padding: 14px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+
+            border-bottom:
+                    1px solid rgba(255, 255, 255, 0.05);
+
             position: sticky;
+
             top: 0;
+
             z-index: 1000;
         }
 
+
         .navbar-brand {
-            font-family: 'DM Serif Display', serif;
+
+            font-family:
+                    'DM Serif Display',
+                    serif;
+
             font-size: 1.3rem;
+
             color: #f0ede8 !important;
+
             display: flex;
+
             align-items: center;
+
             gap: 9px;
+
             letter-spacing: -0.3px;
+
+            text-decoration: none;
         }
 
+
         .brand-dot {
-            width: 9px; height: 9px;
+
+            width: 9px;
+
+            height: 9px;
+
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            var(--accent-2),
+                            var(--accent)
+                    );
+
             flex-shrink: 0;
+
             display: inline-block;
         }
 
+
         .welcome-text {
-            color: rgba(255,255,255,0.65);
+
+            color:
+                    rgba(255, 255, 255, 0.65);
+
             font-size: 0.88rem;
+
             font-weight: 400;
         }
 
+
         .welcome-text strong {
+
             color: #fff;
+
             font-weight: 600;
         }
 
-        /* Nav buttons */
+
+        /* =========================================================
+           NAV BUTTONS
+        ========================================================= */
+
         .btn-nav {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
+
+            background:
+                    rgba(255, 255, 255, 0.08);
+
+            border:
+                    1px solid rgba(255, 255, 255, 0.12);
+
             color: #fff !important;
+
             padding: 7px 14px;
+
             font-size: 0.82rem;
+
             font-weight: 500;
+
             border-radius: 8px;
+
             text-decoration: none;
+
             display: inline-flex;
+
             align-items: center;
+
             gap: 6px;
+
             transition: all 0.2s;
+
             white-space: nowrap;
         }
+
 
         .btn-nav:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.25);
+
+            background:
+                    rgba(255, 255, 255, 0.15);
+
+            border-color:
+                    rgba(255, 255, 255, 0.25);
         }
 
+
         .btn-logout-nav {
-            background: rgba(255,94,98,0.15);
-            border: 1px solid rgba(255,94,98,0.3);
+
+            background:
+                    rgba(255, 94, 98, 0.15);
+
+            border:
+                    1px solid rgba(255, 94, 98, 0.3);
+
             color: #ff7c7e !important;
+
             padding: 7px 14px;
+
             font-size: 0.82rem;
+
             font-weight: 500;
+
             border-radius: 8px;
+
             display: inline-flex;
+
             align-items: center;
+
             gap: 6px;
+
             cursor: pointer;
+
             transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
+
+            font-family:
+                    'DM Sans',
+                    sans-serif;
+
             white-space: nowrap;
         }
 
+
         .btn-logout-nav:hover {
-            background: rgba(255,94,98,0.28);
-            border-color: rgba(255,94,98,0.5);
+
+            background:
+                    rgba(255, 94, 98, 0.28);
+
+            border-color:
+                    rgba(255, 94, 98, 0.5);
+
             color: #fff !important;
         }
 
-        /* Theme toggle */
+
+        /* =========================================================
+           THEME TOGGLE
+        ========================================================= */
+
         .theme-toggle {
-            width: 36px; height: 36px;
+
+            width: 36px;
+
+            height: 36px;
+
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.07);
+
+            border:
+                    1px solid rgba(255, 255, 255, 0.12);
+
+            background:
+                    rgba(255, 255, 255, 0.07);
+
             color: #fff;
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             cursor: pointer;
+
             font-size: 0.95rem;
+
             transition: all 0.25s;
+
             flex-shrink: 0;
         }
 
+
         .theme-toggle:hover {
-            background: rgba(255,255,255,0.15);
+
+            background:
+                    rgba(255, 255, 255, 0.15);
+
             transform: rotate(20deg);
         }
 
-        /* ── Page header ── */
+
+        /* =========================================================
+           PAGE HEADER
+        ========================================================= */
+
         .page-header {
+
             padding: 42px 0 28px;
+
             text-align: center;
         }
 
+
         .page-header h2 {
-            font-family: 'DM Serif Display', serif;
-            font-size: clamp(1.7rem, 3vw, 2.3rem);
+
+            font-family:
+                    'DM Serif Display',
+                    serif;
+
+            font-size:
+                    clamp(1.7rem, 3vw, 2.3rem);
+
             font-weight: 400;
+
             color: var(--text);
+
             letter-spacing: -0.5px;
+
             margin-bottom: 6px;
         }
 
+
         .page-header p {
-            color: var(--text-muted) !important;
+
+            color:
+                    var(--text-muted) !important;
+
             font-size: 0.92rem;
+
             font-weight: 300;
+
             margin: 0;
         }
 
-        /* Force body text to respect theme — but NOT thead */
+
+        /* =========================================================
+           THEME TEXT
+        ========================================================= */
+
         .container p,
         .container h2,
         .container h3,
         .container h4,
         .container label,
         .container span:not(.badge-rent) {
+
             color: var(--text);
         }
+
 
         .container .text-muted {
-            color: var(--text-muted) !important;
+
+            color:
+                    var(--text-muted) !important;
         }
 
-        /* Always keep thead white regardless of theme */
-        .table thead th {
-            background: var(--thead-bg) !important;
-            color: var(--thead-text) !important;
-        }
 
-        /* ── Card ── */
+        /* =========================================================
+           DESKTOP DASHBOARD CARD
+        ========================================================= */
+
         .dash-card {
+
             background: var(--card-bg);
-            border: 1px solid var(--border);
+
+            border:
+                    1px solid var(--border);
+
             border-radius: 16px;
-            box-shadow: var(--card-shadow);
+
+            box-shadow:
+                    var(--card-shadow);
+
             padding: 28px;
-            transition: background 0.35s;
+
+            transition:
+                    background 0.35s ease;
         }
 
-        /* ── Table ── */
+
+        /* =========================================================
+           TABLE
+        ========================================================= */
+
         .table {
+
             color: var(--text);
+
+            margin: 0;
+
+            width: 100%;
+        }
+
+
+        .table thead tr {
+
+            background:
+                    var(--thead-bg);
+        }
+
+
+        .table thead th {
+
+            background:
+                    var(--thead-bg) !important;
+
+            color:
+                    var(--thead-text) !important;
+
+            font-weight: 500;
+
+            font-size: 0.82rem;
+
+            letter-spacing: 0.5px;
+
+            text-transform: uppercase;
+
+            padding: 14px 16px;
+
+            border: none;
+        }
+
+
+        .table thead th:first-child {
+
+            border-radius:
+                    10px 0 0 10px;
+        }
+
+
+        .table thead th:last-child {
+
+            border-radius:
+                    0 10px 10px 0;
+        }
+
+
+        .table tbody tr {
+
+            border-bottom:
+                    1px solid var(--border);
+
+            transition:
+                    background 0.15s;
+        }
+
+
+        .table tbody tr:hover {
+
+            background:
+                    var(--row-hover);
+        }
+
+
+        .table tbody tr:last-child {
+
+            border-bottom: none;
+        }
+
+
+        .table tbody td {
+
+            padding: 14px 16px;
+
+            font-size: 0.88rem;
+
+            vertical-align: middle;
+
+            border: none;
+
+            color: var(--text);
+        }
+
+
+        /* =========================================================
+           RENT BADGES
+        ========================================================= */
+
+        .rent-options {
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            justify-content: flex-start;
+
+            gap: 4px;
+        }
+
+
+        .badge-rent {
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            #22c55e,
+                            #16a34a
+                    );
+
+            color: #fff !important;
+
+            font-size: 0.8rem;
+
+            padding: 5px 10px;
+
+            border-radius: 6px;
+
+            font-weight: 600;
+
+            display: inline-block;
+
             margin: 0;
         }
 
-        .table thead tr {
-            background: var(--thead-bg);
-        }
 
-        .table thead th {
-            background: var(--thead-bg);
-            color: var(--thead-text);
-            font-weight: 500;
-            font-size: 0.82rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            padding: 14px 16px;
-            border: none;
-        }
+        /* =========================================================
+           AVAILABILITY
+        ========================================================= */
 
-        .table thead th:first-child { border-radius: 10px 0 0 10px; }
-        .table thead th:last-child  { border-radius: 0 10px 10px 0; }
-
-        .table tbody tr {
-            border-bottom: 1px solid var(--border);
-            transition: background 0.15s;
-        }
-
-        .table tbody tr:hover { background: var(--row-hover); }
-        .table tbody tr:last-child { border-bottom: none; }
-
-        .table tbody td {
-            padding: 14px 16px;
-            font-size: 0.88rem;
-            vertical-align: middle;
-            border: none;
-            color: var(--text);
-        }
-
-        /* Rent badge */
-        .badge-rent {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #fff;
-            font-size: 0.8rem;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-weight: 600;
-            display: inline-block;
-            margin: 2px 4px 2px 0;
-        }
-
-        /* Availability toggle */
         .form-check-input {
+
             width: 38px;
+
             height: 20px;
+
             cursor: pointer;
         }
 
+
         .form-check-input:checked {
-            background-color: var(--accent);
-            border-color: var(--accent);
+
+            background-color:
+                    var(--accent);
+
+            border-color:
+                    var(--accent);
         }
 
-        /* Edit button */
+
+        /* =========================================================
+           EDIT BUTTON
+        ========================================================= */
+
         .btn-edit {
-            background: rgba(255,153,102,0.12);
-            border: 1px solid rgba(255,153,102,0.3);
+
+            background:
+                    rgba(255, 153, 102, 0.12);
+
+            border:
+                    1px solid rgba(255, 153, 102, 0.3);
+
             color: #d97706;
+
             padding: 6px 14px;
+
             font-size: 0.8rem;
+
             font-weight: 500;
+
             border-radius: 7px;
+
             text-decoration: none;
+
             display: inline-flex;
+
             align-items: center;
+
             gap: 5px;
+
             transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
+
+            font-family:
+                    'DM Sans',
+                    sans-serif;
+
             white-space: nowrap;
         }
 
+
         .btn-edit:hover {
-            background: rgba(255,153,102,0.25);
-            border-color: rgba(255,153,102,0.5);
+
+            background:
+                    rgba(255, 153, 102, 0.25);
+
+            border-color:
+                    rgba(255, 153, 102, 0.5);
+
             color: #b45309;
         }
 
-        [data-theme="dark"] .btn-edit { color: #fbbf24; }
-        [data-theme="dark"] .btn-edit:hover { color: #fcd34d; }
 
-        /* Bookings button */
+        [data-theme="dark"] .btn-edit {
+
+            color: #fbbf24;
+        }
+
+
+        [data-theme="dark"] .btn-edit:hover {
+
+            color: #fcd34d;
+        }
+
+
+        /* =========================================================
+           BOOKINGS BUTTON
+        ========================================================= */
+
         .btn-bookings {
-            background: rgba(59,130,246,0.12);
-            border: 1px solid rgba(59,130,246,0.3);
+
+            background:
+                    rgba(59, 130, 246, 0.12);
+
+            border:
+                    1px solid rgba(59, 130, 246, 0.3);
+
             color: #2563eb;
+
             padding: 6px 14px;
+
             font-size: 0.8rem;
+
             font-weight: 500;
+
             border-radius: 7px;
+
             text-decoration: none;
+
             display: inline-flex;
+
             align-items: center;
+
             gap: 5px;
+
             transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
+
+            font-family:
+                    'DM Sans',
+                    sans-serif;
+
             margin-left: 6px;
+
             position: relative;
+
             white-space: nowrap;
         }
+
+
         .btn-bookings:hover {
-            background: rgba(59,130,246,0.25);
-            border-color: rgba(59,130,246,0.5);
+
+            background:
+                    rgba(59, 130, 246, 0.25);
+
+            border-color:
+                    rgba(59, 130, 246, 0.5);
+
             color: #1d4ed8;
         }
-        [data-theme="dark"] .btn-bookings { color: #60a5fa; }
-        [data-theme="dark"] .btn-bookings:hover { color: #93c5fd; }
 
-        /* Pending-request notification badge */
+
+        [data-theme="dark"] .btn-bookings {
+
+            color: #60a5fa;
+        }
+
+
+        [data-theme="dark"] .btn-bookings:hover {
+
+            color: #93c5fd;
+        }
+
+
+        /* =========================================================
+           NOTIFICATION BADGE
+        ========================================================= */
+
         .notif-dot {
+
             position: absolute;
+
             top: -7px;
+
             right: -7px;
+
             background: #ef4444;
+
             color: #fff;
+
             font-size: 0.64rem;
+
             font-weight: 700;
+
             min-width: 17px;
+
             height: 17px;
+
             border-radius: 50%;
+
             display: inline-flex;
+
             align-items: center;
+
             justify-content: center;
+
             padding: 0 3px;
+
             line-height: 1;
-            box-shadow: 0 0 0 2px var(--card-bg);
-            animation: notif-pulse 1.8s ease-in-out infinite;
-        }
-        @keyframes notif-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.12); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .notif-dot { animation: none; }
+
+            box-shadow:
+                    0 0 0 2px var(--card-bg);
+
+            animation:
+                    notif-pulse 1.8s
+                    ease-in-out infinite;
         }
 
-        /* Add property button */
-        .btn-add {
-            background: linear-gradient(135deg, var(--accent-2), var(--accent));
-            border: none;
-            color: #fff !important;
-            padding: 12px 28px;
-            font-size: 0.92rem;
-            font-weight: 600;
-            border-radius: 10px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.25s;
-            box-shadow: 0 6px 20px rgba(255,94,98,0.28);
-            font-family: 'DM Sans', sans-serif;
+
+        @keyframes notif-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.12);
+            }
         }
+
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .notif-dot {
+                animation: none;
+            }
+        }
+
+
+        /* =========================================================
+           ADD PROPERTY BUTTON
+        ========================================================= */
+
+        .btn-add {
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            var(--accent-2),
+                            var(--accent)
+                    );
+
+            border: none;
+
+            color: #fff !important;
+
+            padding: 12px 28px;
+
+            font-size: 0.92rem;
+
+            font-weight: 600;
+
+            border-radius: 10px;
+
+            text-decoration: none;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            transition: all 0.25s;
+
+            box-shadow:
+                    0 6px 20px
+                    rgba(255, 94, 98, 0.28);
+
+            font-family:
+                    'DM Sans',
+                    sans-serif;
+        }
+
 
         .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 28px rgba(255,94,98,0.36);
+
+            transform:
+                    translateY(-2px);
+
+            box-shadow:
+                    0 10px 28px
+                    rgba(255, 94, 98, 0.36);
+
             opacity: 0.95;
         }
 
-        /* Empty state */
+
+        /* =========================================================
+           EMPTY STATE
+        ========================================================= */
+
         .empty-state {
+
             text-align: center;
+
             padding: 50px 20px;
+
             color: var(--text-muted);
         }
 
+
         .empty-state i {
+
             font-size: 2.5rem;
+
             margin-bottom: 12px;
+
             opacity: 0.4;
         }
 
-        /* ── Force Bootstrap table to respect theme variables ── */
+
+        /* =========================================================
+           BOOTSTRAP TABLE OVERRIDES
+        ========================================================= */
+
         .table > :not(caption) > * > * {
-            background-color: transparent !important;
-            color: var(--text) !important;
-            border-color: var(--border) !important;
+
+            background-color:
+                    transparent !important;
+
+            color:
+                    var(--text) !important;
+
+            border-color:
+                    var(--border) !important;
         }
+
 
         .table tbody td,
         .table tbody td span,
         .table tbody td a,
         .table tbody tr td {
-            color: var(--text) !important;
+
+            color:
+                    var(--text) !important;
         }
+
+
+        .badge-rent {
+
+            color: #fff !important;
+        }
+
 
         .table-responsive {
-            background: var(--card-bg);
+
+            background:
+                    var(--card-bg);
+
             border-radius: 10px;
-            transition: background 0.35s;
+
+            transition:
+                    background 0.35s;
         }
 
-        /* Welcome text in navbar */
+
+        /* =========================================================
+           NAVBAR WELCOME TEXT
+        ========================================================= */
+
         .welcome-text,
         .welcome-text strong {
-            color: rgba(255,255,255,0.85) !important;
+
+            color:
+                    rgba(255, 255, 255, 0.85) !important;
         }
 
-        /* ══════════════════════════════════════════════
-           MOBILE RESPONSIVE STYLES
-           ══════════════════════════════════════════════ */
 
-        /* ── Tablet & below: navbar tidy-up ── */
+        /* =========================================================
+           TABLET
+        ========================================================= */
+
         @media (max-width: 991.98px) {
+
             .navbar {
-                padding: 12px 16px;
+
+                padding:
+                        12px 16px;
             }
+
+
             .navbar .container-fluid {
+
                 flex-wrap: wrap;
+
                 row-gap: 10px;
             }
+
+
             .navbar-brand {
+
                 font-size: 1.15rem;
             }
-            .ms-auto {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .welcome-text {
-                order: 1;
-                width: 100%;
-                text-align: center;
-                font-size: 0.8rem;
-                order: 3;
-            }
+
+
             .navbar .ms-auto {
+
+                width: 100%;
+
                 display: flex;
+
+                justify-content:
+                        space-between;
+
+                align-items: center;
+            }
+
+
+            .welcome-text {
+
+                font-size: 0.8rem;
             }
         }
 
-        /* ── Mobile phones ── */
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
         @media (max-width: 575.98px) {
-            .navbar {
-                padding: 10px 12px;
-            }
-            .navbar-brand {
-                font-size: 1.05rem;
-            }
-            .navbar-brand span:not(.brand-dot) {
-                display: none; /* hide "Owner Dashboard" text label, keep it in page header */
+
+
+            /* -----------------------------
+               BODY
+            ----------------------------- */
+
+            body {
+
+                overflow-x: hidden;
             }
 
-            .ms-auto {
-                display: flex;
-                align-items: center;
-                justify-content: center;
+
+            /* -----------------------------
+               NAVBAR
+            ----------------------------- */
+
+            .navbar {
+
+                padding:
+                        10px 12px;
+            }
+
+
+            .navbar .container-fluid {
+
                 gap: 8px !important;
             }
 
-            .welcome-text {
-                order: 4;
-                font-size: 0.75rem;
-                padding-top: 4px;
+
+            .navbar-brand {
+
+                font-size: 1.05rem;
             }
 
-            /* Turn nav links into compact icon-only buttons */
-            .btn-nav, .btn-logout-nav {
-                padding: 8px;
-                width: 38px;
-                height: 38px;
-                justify-content: center;
-                font-size: 0.9rem;
-            }
-            .btn-nav span, .btn-logout-nav span,
-            .btn-nav .nav-label, .btn-logout-nav .nav-label {
+
+            .navbar-brand span:not(.brand-dot) {
+
                 display: none;
             }
 
-            .theme-toggle {
-                width: 34px;
-                height: 34px;
+
+            .navbar .ms-auto {
+
+                width: auto;
+
+                margin-left: auto !important;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: flex-end;
+
+                gap: 7px !important;
+
+                flex-wrap: nowrap;
             }
 
-            /* Page header */
+
+            .welcome-text {
+
+                position: absolute;
+
+                left: 0;
+
+                right: 0;
+
+                top: 58px;
+
+                text-align: center;
+
+                font-size: 0.72rem;
+
+                padding: 0;
+
+                z-index: 2;
+            }
+
+
+            .btn-nav,
+            .btn-logout-nav {
+
+                width: 36px;
+
+                height: 36px;
+
+                padding: 0;
+
+                justify-content: center;
+
+                border-radius: 8px;
+            }
+
+
+            .btn-nav span,
+            .btn-logout-nav span,
+            .btn-nav .nav-label,
+            .btn-logout-nav .nav-label {
+
+                display: none;
+            }
+
+
+            .theme-toggle {
+
+                width: 36px;
+
+                height: 36px;
+
+                flex-shrink: 0;
+            }
+
+
+            /* -----------------------------
+               PAGE HEADER
+            ----------------------------- */
+
             .page-header {
-                padding: 26px 12px 20px;
+
+                padding:
+                        38px 12px 22px;
             }
+
+
             .page-header h2 {
-                font-size: 1.5rem;
+
+                font-size: 1.55rem;
+
+                margin-bottom: 5px;
             }
+
+
             .page-header p {
-                font-size: 0.82rem;
+
+                font-size: 0.8rem;
             }
+
+
+            /* -----------------------------
+               CONTAINER
+            ----------------------------- */
 
             .container {
+
+                width: 100%;
+
+                max-width: 100%;
+
                 padding-left: 12px;
+
                 padding-right: 12px;
             }
 
+
+            /* =====================================================
+               IMPORTANT:
+               REMOVE DESKTOP CARD WRAPPER ON MOBILE
+            ===================================================== */
+
             .dash-card {
-                padding: 14px;
-                border-radius: 14px;
+
+                padding: 0;
+
+                background: transparent;
+
+                border: none;
+
+                box-shadow: none;
             }
 
-            /* ── Transform table into stacked cards ── */
+
+            /* -----------------------------
+               TABLE WRAPPER
+            ----------------------------- */
+
             .table-responsive {
+
                 overflow: visible;
+
+                background: transparent;
+
+                border-radius: 0;
             }
-            .table thead {
-                display: none; /* hide header row on mobile */
-            }
-            .table, .table tbody, .table tbody tr, .table tbody td {
-                display: block;
+
+
+            /* -----------------------------
+               TABLE
+            ----------------------------- */
+
+            .table {
+
                 width: 100%;
+
+                margin: 0;
+
+                border-collapse: separate;
+
+                border-spacing: 0;
             }
-            .table tbody tr {
-                background: var(--card-bg);
-                border: 1px solid var(--border);
-                border-radius: 12px;
-                margin-bottom: 14px;
-                padding: 6px 4px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-            }
-            .table tbody tr:hover { background: var(--card-bg); }
-            .table tbody td {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 10px;
-                padding: 10px 14px;
-                border-bottom: 1px solid var(--border) !important;
-                text-align: right;
-            }
-            .table tbody tr td:last-child {
-                border-bottom: none !important;
-            }
-            /* Label each cell using data-label attribute */
-            .table tbody td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                font-size: 0.72rem;
-                text-transform: uppercase;
-                letter-spacing: 0.4px;
-                color: var(--text-muted);
-                text-align: left;
-                flex-shrink: 0;
-            }
-            /* Title cell stands out a bit */
-            .table tbody td[data-label="Title"] {
-                font-weight: 600;
-                font-size: 0.95rem;
-            }
-            /* Actions cell: stack buttons full width, no label */
-            .table tbody td[data-label="Actions"] {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .table tbody td[data-label="Actions"]::before {
+
+
+            /* Hide desktop headings */
+
+            .table thead {
+
                 display: none;
             }
-            .table tbody td[data-label="Actions"] .btn-edit,
-            .table tbody td[data-label="Actions"] .btn-bookings {
-                justify-content: center;
+
+
+            /*
+             * KEY FIX:
+             *
+             * Turn tbody into a vertical flex container.
+             * The GAP creates physical separation between
+             * every property card.
+             */
+
+            .table tbody {
+
+                display: flex;
+
+                flex-direction: column;
+
+                gap: 16px;
+
                 width: 100%;
-                margin-left: 0;
-                padding: 9px 14px;
             }
-            /* Empty state cell shouldn't act like a labeled row */
-            .table tbody tr:has(.empty-state) {
-                border: none;
-                box-shadow: none;
-                background: transparent;
-            }
-            .table tbody tr:has(.empty-state) td {
+
+
+            /* =====================================================
+               EACH PROPERTY IS NOW ITS OWN CARD
+            ===================================================== */
+
+            .table tbody tr {
+
                 display: block;
-                text-align: center;
+
+                width: 100%;
+
+                margin: 0;
+
+                padding: 0;
+
+                background:
+                        var(--card-bg);
+
+                border:
+                        1px solid var(--border);
+
+                border-radius: 16px;
+
+                box-shadow:
+                        0 4px 16px
+                        rgba(0, 0, 0, 0.06);
+
+                overflow: hidden;
+
+                transition:
+                        transform 0.2s ease,
+                        box-shadow 0.2s ease,
+                        background 0.35s ease;
             }
+
+
+            .table tbody tr:hover {
+
+                background:
+                        var(--card-bg);
+
+                transform:
+                        translateY(-2px);
+
+                box-shadow:
+                        0 7px 22px
+                        rgba(0, 0, 0, 0.09);
+            }
+
+
+            /* =====================================================
+               CARD CELLS
+            ===================================================== */
+
+            .table tbody tr td {
+
+                display: flex;
+
+                width: 100%;
+
+                align-items: center;
+
+                justify-content: space-between;
+
+                min-height: 48px;
+
+                padding:
+                        11px 16px;
+
+                background:
+                        transparent !important;
+
+                border: none !important;
+
+                border-bottom:
+                        1px solid var(--border) !important;
+
+                color:
+                        var(--text) !important;
+
+                font-size: 0.86rem;
+
+                text-align: right;
+
+                gap: 16px;
+            }
+
+
+            /* Remove last divider */
+
+            .table tbody tr td:last-child {
+
+                border-bottom:
+                        none !important;
+            }
+
+
+            /* =====================================================
+               MOBILE LABELS
+            ===================================================== */
+
+            .table tbody tr td::before {
+
+                content:
+                        attr(data-label);
+
+                flex:
+                        0 0 auto;
+
+                color:
+                        var(--text-muted);
+
+                font-size:
+                        0.68rem;
+
+                font-weight: 600;
+
+                text-transform:
+                        uppercase;
+
+                letter-spacing:
+                        0.5px;
+
+                text-align:
+                        left;
+            }
+
+
+            /* =====================================================
+               PROPERTY TITLE
+            ===================================================== */
+
+            .table tbody tr td[data-label="Title"] {
+
+                display: block;
+
+                padding:
+                        17px 16px 14px;
+
+                font-size:
+                        1rem;
+
+                font-weight:
+                        600;
+
+                text-align:
+                        left;
+
+                background:
+                        linear-gradient(
+                                135deg,
+                                rgba(255, 153, 102, 0.08),
+                                rgba(255, 94, 98, 0.04)
+                        ) !important;
+            }
+
+
+            .table tbody tr td[data-label="Title"]::before {
+
+                display: block;
+
+                content:
+                        "PROPERTY";
+
+                margin-bottom:
+                        4px;
+
+                font-size:
+                        0.62rem;
+
+                color:
+                        var(--accent);
+            }
+
+
+            /* =====================================================
+               CITY / AREA
+            ===================================================== */
+
+            .table tbody tr td[data-label="City"],
+            .table tbody tr td[data-label="Area"] {
+
+                min-height:
+                        44px;
+            }
+
+
+            /* =====================================================
+               RENT
+            ===================================================== */
+
+            .table tbody tr td[data-label="Rent (₹)"] {
+
+                align-items:
+                        flex-start;
+            }
+
+
+            .rent-options {
+
+                display: flex;
+
+                flex-direction: column;
+
+                align-items: flex-end;
+
+                gap: 3px;
+            }
+
+
+            .rent-options .badge-rent {
+
+                margin: 0;
+
+                font-size:
+                        0.72rem;
+
+                padding:
+                        5px 9px;
+
+                border-radius:
+                        6px;
+            }
+
+
+            /* =====================================================
+               AVAILABILITY
+            ===================================================== */
+
+            .table tbody tr td[data-label="Available"] {
+
+                min-height:
+                        54px;
+            }
+
+
+            .table tbody tr td[data-label="Available"]
+            .form-check {
+
+                margin: 0;
+            }
+
+
+            .form-check-input {
+
+                width:
+                        42px;
+
+                height:
+                        22px;
+            }
+
+
+            /* =====================================================
+               ACTIONS
+            ===================================================== */
+
+            .table tbody tr td[data-label="Actions"] {
+
+                display: grid;
+
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap:
+                        8px;
+
+                padding:
+                        13px 16px 16px;
+
+                background:
+                        rgba(0, 0, 0, 0.015) !important;
+            }
+
+
+            .table tbody tr td[data-label="Actions"]::before {
+
+                display: none;
+            }
+
+
+            .table tbody tr td[data-label="Actions"]
+            .btn-edit,
+
+            .table tbody tr td[data-label="Actions"]
+            .btn-bookings {
+
+                width: 100%;
+
+                min-height: 40px;
+
+                margin: 0;
+
+                padding:
+                        9px 8px;
+
+                justify-content:
+                        center;
+
+                border-radius:
+                        8px;
+
+                font-size:
+                        0.76rem;
+            }
+
+
+            /* =====================================================
+               NOTIFICATION
+            ===================================================== */
+
+            .notif-dot {
+
+                top:
+                        -6px;
+
+                right:
+                        -5px;
+            }
+
+
+            /* =====================================================
+               EMPTY STATE
+            ===================================================== */
+
+            .table tbody tr:has(.empty-state) {
+
+                display: block;
+
+                margin: 0;
+
+                padding: 0;
+
+                background:
+                        transparent;
+
+                border: none;
+
+                box-shadow: none;
+            }
+
+
+            .table tbody tr:has(.empty-state) td {
+
+                display: block;
+
+                padding:
+                        45px 15px;
+
+                border: none !important;
+
+                text-align:
+                        center;
+            }
+
+
             .table tbody tr:has(.empty-state) td::before {
-                content: none;
+
+                display: none;
             }
+
+
+            .empty-state {
+
+                padding:
+                        25px 10px;
+            }
+
+
+            /* =====================================================
+               ADD PROPERTY
+            ===================================================== */
+
+            .text-center.mt-4.mb-5 {
+
+                margin-top:
+                        20px !important;
+
+                margin-bottom:
+                        30px !important;
+            }
+
 
             .btn-add {
-                width: 100%;
-                justify-content: center;
-                padding: 13px 20px;
+
+                width:
+                        100%;
+
+                justify-content:
+                        center;
+
+                padding:
+                        13px 20px;
+
+                border-radius:
+                        10px;
+
+                font-size:
+                        0.88rem;
             }
         }
+
+
+        /* =========================================================
+           VERY SMALL PHONES
+        ========================================================= */
+
+        @media (max-width: 380px) {
+
+            .table tbody {
+
+                gap:
+                        13px;
+            }
+
+
+            .table tbody tr td {
+
+                padding-left:
+                        13px;
+
+                padding-right:
+                        13px;
+
+                gap:
+                        10px;
+            }
+
+
+            .table tbody tr td[data-label="Actions"] {
+
+                padding-left:
+                        13px;
+
+                padding-right:
+                        13px;
+            }
+
+
+            .table tbody tr td[data-label="Actions"]
+            .btn-edit,
+
+            .table tbody tr td[data-label="Actions"]
+            .btn-bookings {
+
+                font-size:
+                        0.7rem;
+
+                padding:
+                        8px 5px;
+            }
+        }
+
     </style>
+
 </head>
+
+
 <body>
 
-<!-- ── Navbar ── -->
+
+<!-- =============================================================
+     NAVBAR
+============================================================= -->
+
 <nav class="navbar navbar-expand-lg">
+
     <div class="container-fluid d-flex align-items-center gap-3">
 
-        <a class="navbar-brand" href="#">
+
+        <!-- Brand -->
+
+        <a class="navbar-brand"
+           href="#">
+
             <span class="brand-dot"></span>
-            <span>Owner Dashboard</span>
+
+            <span>
+                Owner Dashboard
+            </span>
+
         </a>
+
+
+        <!-- Navigation -->
 
         <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
 
+
+            <!-- Welcome -->
+
             <span class="welcome-text">
-                👋 Welcome, <strong th:text="${owner.fullName}"></strong>
+
+                👋 Welcome,
+
+                <strong th:text="${owner.fullName}">
+                </strong>
+
             </span>
 
-            <!-- Theme toggle -->
-            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-                <i class="bi bi-moon-fill" id="themeIcon"></i>
+
+            <!-- Theme -->
+
+            <button
+                    class="theme-toggle"
+                    id="themeToggle"
+                    type="button"
+                    aria-label="Toggle theme">
+
+                <i
+                        class="bi bi-moon-fill"
+                        id="themeIcon">
+                </i>
+
             </button>
 
-            <a th:href="@{'/profile/' + ${owner.id}}" class="btn-nav" title="Profile">
-                <i class="bi bi-person-circle"></i> <span class="nav-label">Profile</span>
+
+            <!-- Profile -->
+
+            <a
+                    th:href="@{'/profile/' + ${owner.id}}"
+                    class="btn-nav"
+                    title="Profile">
+
+                <i class="bi bi-person-circle"></i>
+
+                <span class="nav-label">
+                    Profile
+                </span>
+
             </a>
 
-            <a th:href="@{/profile/admin}" class="btn-nav" title="Contact Admin">
-                <i class="bi bi-headset"></i> <span class="nav-label">Contact Admin</span>
+
+            <!-- Contact Admin -->
+
+            <a
+                    th:href="@{/profile/admin}"
+                    class="btn-nav"
+                    title="Contact Admin">
+
+                <i class="bi bi-headset"></i>
+
+                <span class="nav-label">
+                    Contact Admin
+                </span>
+
             </a>
 
-            <form th:action="@{/logout}" method="post" class="d-inline">
-                <button type="submit" class="btn-logout-nav" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i> <span class="nav-label">Logout</span>
+
+            <!-- Logout -->
+
+            <form
+                    th:action="@{/logout}"
+                    method="post"
+                    class="d-inline">
+
+                <button
+                        type="submit"
+                        class="btn-logout-nav"
+                        title="Logout">
+
+                    <i class="bi bi-box-arrow-right"></i>
+
+                    <span class="nav-label">
+                        Logout
+                    </span>
+
                 </button>
+
             </form>
 
+
         </div>
+
     </div>
+
 </nav>
 
-<!-- ── Main ── -->
+
+
+<!-- =============================================================
+     MAIN
+============================================================= -->
+
 <div class="container mt-2">
 
-    <div class="page-header animate__animated animate__fadeInDown">
-        <h2>My Properties</h2>
-        <p>Manage and update all your listed properties</p>
+
+    <!-- Page Header -->
+
+    <div
+            class="page-header animate__animated animate__fadeInDown">
+
+        <h2>
+            My Properties
+        </h2>
+
+        <p>
+            Manage and update all your listed properties
+        </p>
+
     </div>
 
-    <!-- ── Table card ── -->
-    <div class="dash-card animate__animated animate__fadeInUp">
+
+
+    <!-- =========================================================
+         PROPERTY SECTION
+    ========================================================= -->
+
+    <div
+            class="dash-card animate__animated animate__fadeInUp">
+
+
         <div class="table-responsive">
+
+
             <table class="table">
+
+
+                <!-- Desktop Header -->
+
                 <thead>
+
                 <tr>
-                    <th>Title</th>
-                    <th>City</th>
-                    <th>Area</th>
-                    <th>Rent (₹)</th>
-                    <th>Available</th>
-                    <th>Actions</th>
+
+                    <th>
+                        Title
+                    </th>
+
+                    <th>
+                        City
+                    </th>
+
+                    <th>
+                        Area
+                    </th>
+
+                    <th>
+                        Rent (₹)
+                    </th>
+
+                    <th>
+                        Available
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+
                 </tr>
+
                 </thead>
+
+
+
+                <!-- =================================================
+                     PROPERTY LIST
+                ================================================= -->
+
                 <tbody>
 
+
+                <!-- Property -->
+
                 <tr th:each="p : ${properties}">
-                    <td data-label="Title" th:text="${p.title}"></td>
-                    <td data-label="City" th:text="${p.city}"></td>
-                    <td data-label="Area" th:text="${p.area}"></td>
+
+
+                    <!-- Title -->
+
+                    <td
+                            data-label="Title"
+                            th:text="${p.title}">
+                    </td>
+
+
+                    <!-- City -->
+
+                    <td
+                            data-label="City"
+                            th:text="${p.city}">
+                    </td>
+
+
+                    <!-- Area -->
+
+                    <td
+                            data-label="Area"
+                            th:text="${p.area}">
+                    </td>
+
+
+                    <!-- Rent -->
+
                     <td data-label="Rent (₹)">
-                        <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent} + '/mo'" th:if="${p.availableMonthly}"></span> <span class="badge-rent" th:text="'₹ ' + ${p.dailyRent} + '/day'" th:if="${p.availableDaily}"></span>
+
+                        <div class="rent-options">
+
+
+                            <!-- Monthly -->
+
+                            <span
+                                    class="badge-rent"
+                                    th:if="${p.availableMonthly}"
+                                    th:text="'₹ ' + ${p.monthlyRent} + '/mo'">
+                            </span>
+
+
+                            <!-- Daily -->
+
+                            <span
+                                    class="badge-rent"
+                                    th:if="${p.availableDaily}"
+                                    th:text="'₹ ' + ${p.dailyRent} + '/day'">
+                            </span>
+
+
+                        </div>
+
                     </td>
+
+
+
+                    <!-- Availability -->
+
                     <td data-label="Available">
-                        <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
-                            <input type="hidden" name="_method" value="patch"/>
+
+
+                        <form
+                                th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}"
+                                method="post">
+
+
+                            <input
+                                    type="hidden"
+                                    name="_method"
+                                    value="patch">
+
+
                             <div class="form-check form-switch">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="available"
-                                       th:checked="${p.available}"
-                                       onchange="this.form.submit()">
+
+                                <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        name="available"
+                                        th:checked="${p.available}"
+                                        onchange="this.form.submit()">
+
                             </div>
+
+
                         </form>
+
                     </td>
+
+
+
+                    <!-- Actions -->
+
                     <td data-label="Actions">
-                        <a th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}" class="btn-edit">
-                            <i class="bi bi-pencil-square"></i> Edit
+
+
+                        <!-- Edit -->
+
+                        <a
+                                th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}"
+                                class="btn-edit">
+
+                            <i
+                                    class="bi bi-pencil-square">
+                            </i>
+
+                            Edit
+
                         </a>
-                        <a th:href="@{'/properties/owner/' + ${ownerId} + '/bookings/' + ${p.id}}" class="btn-bookings">
-                            <i class="bi bi-calendar-week"></i> Bookings
-                            <span class="notif-dot" th:if="${pendingCounts.get(p.id)} != null" th:text="${pendingCounts.get(p.id)}"></span>
+
+
+
+                        <!-- Bookings -->
+
+                        <a
+                                th:href="@{'/properties/owner/' + ${ownerId} + '/bookings/' + ${p.id}}"
+                                class="btn-bookings">
+
+                            <i
+                                    class="bi bi-calendar-week">
+                            </i>
+
+                            Bookings
+
+
+                            <!-- Pending count -->
+
+                            <span
+                                    class="notif-dot"
+                                    th:if="${pendingCounts.get(p.id)} != null"
+                                    th:text="${pendingCounts.get(p.id)}">
+                            </span>
+
                         </a>
+
+
                     </td>
+
+
                 </tr>
 
-                <!-- Empty state -->
-                <tr th:if="${#lists.isEmpty(properties)}">
+
+
+                <!-- =================================================
+                     EMPTY STATE
+                ================================================= -->
+
+                <tr
+                        th:if="${#lists.isEmpty(properties)}">
+
+
                     <td colspan="6">
+
+
                         <div class="empty-state">
-                            <i class="bi bi-house-slash d-block"></i>
-                            No properties listed yet. Add your first one below!
+
+
+                            <i
+                                    class="bi bi-house-slash d-block">
+                            </i>
+
+
+                            No properties listed yet.
+                            Add your first one below!
+
+
                         </div>
+
+
                     </td>
+
+
                 </tr>
+
 
                 </tbody>
+
+
             </table>
+
+
         </div>
+
+
     </div>
 
-    <div class="text-center mt-4 mb-5">
-        <a th:href="@{'/properties/owner/' + ${ownerId} + '/add'}" class="btn-add">
-            <i class="bi bi-plus-circle"></i> Add New Property
+
+
+    <!-- =========================================================
+         ADD PROPERTY
+    ========================================================= -->
+
+    <div
+            class="text-center mt-4 mb-5">
+
+
+        <a
+                th:href="@{'/properties/owner/' + ${ownerId} + '/add'}"
+                class="btn-add">
+
+
+            <i
+                    class="bi bi-plus-circle">
+            </i>
+
+
+            Add New Property
+
+
         </a>
+
+
     </div>
+
 
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    /* Theme Toggle */
-    const toggleBtn = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const html      = document.documentElement;
-    const saved     = localStorage.getItem('sh-theme') || 'light';
-    applyTheme(saved);
-    toggleBtn.addEventListener('click', () => {
-        const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        localStorage.setItem('sh-theme', next);
-    });
-    function applyTheme(theme) {
-        html.dataset.theme = theme;
-        themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-        toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-    }
-</script>
+
+
+
+
+
 </body>
+
 </html>
