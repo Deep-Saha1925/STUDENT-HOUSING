@@ -1794,21 +1794,15 @@
 ============================================================= -->
 
 <div class="container mt-2">
-
-
     <!-- Page Header -->
-
     <div
             class="page-header animate__animated animate__fadeInDown">
-
         <h2>
             My Properties
         </h2>
-
         <p>
             Manage and update all your listed properties
         </p>
-
     </div>
 
     <!-- =========================================================
@@ -1817,45 +1811,27 @@
 
     <div
             class="text-center mt-4 mb-5">
-
-
         <a
                 th:href="@{'/properties/owner/' + ${ownerId} + '/add'}"
                 class="btn-add">
-
             <i
                     class="bi bi-plus-circle">
             </i>
 
-
             Add New Property
-
-
         </a>
-
-
     </div>
 
     <!-- =========================================================
          PROPERTY SECTION
     ========================================================= -->
-
     <div
             class="dash-card animate__animated animate__fadeInUp">
 
-
         <div class="table-responsive">
-
-
             <table class="table">
-
-
-                <!-- Desktop Header -->
-
                 <thead>
-
                 <tr>
-
                     <th>
                         Title
                     </th>
@@ -1884,91 +1860,58 @@
 
                 </thead>
 
-
-
                 <!-- =================================================
                      PROPERTY LIST
                 ================================================= -->
 
                 <tbody>
-
-
                 <!-- Property -->
 
                 <tr th:each="p : ${properties}">
-
-
                     <!-- Title -->
-
                     <td
                             data-label="Title"
                             th:text="${p.title}">
                     </td>
-
-
                     <!-- City -->
-
                     <td
                             data-label="City"
                             th:text="${p.city}">
                     </td>
-
-
                     <!-- Area -->
-
                     <td
                             data-label="Area"
                             th:text="${p.area}">
                     </td>
-
-
                     <!-- Rent -->
 
                     <td data-label="Rent (₹)">
 
                         <div class="rent-options">
-
-
                             <!-- Monthly -->
-
                             <span
                                     class="badge-rent"
                                     th:if="${p.availableMonthly}"
                                     th:text="'₹ ' + ${p.monthlyRent} + '/mo'">
                             </span>
-
-
                             <!-- Daily -->
-
                             <span
                                     class="badge-rent"
                                     th:if="${p.availableDaily}"
                                     th:text="'₹ ' + ${p.dailyRent} + '/day'">
                             </span>
-
-
                         </div>
 
                     </td>
-
-
-
                     <!-- Availability -->
-
                     <td data-label="Available">
-
-
                         <form
                                 th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}"
                                 method="post">
-
-
                             <input
                                     type="hidden"
                                     name="_method"
                                     value="patch">
-
-
                             <div class="form-check form-switch">
 
                                 <input
@@ -1977,50 +1920,29 @@
                                         name="available"
                                         th:checked="${p.available}"
                                         onchange="this.form.submit()">
-
                             </div>
-
-
                         </form>
-
                     </td>
-
-
-
                     <!-- Actions -->
 
                     <td data-label="Actions">
-
-
                         <!-- Edit -->
-
                         <a
                                 th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}"
                                 class="btn-edit">
-
                             <i
                                     class="bi bi-pencil-square">
                             </i>
-
                             Edit
-
                         </a>
-
-
-
                         <!-- Bookings -->
-
                         <a
                                 th:href="@{'/properties/owner/' + ${ownerId} + '/bookings/' + ${p.id}}"
                                 class="btn-bookings">
-
                             <i
                                     class="bi bi-calendar-week">
                             </i>
-
                             Bookings
-
-
                             <!-- Pending count -->
 
                             <span
@@ -2028,40 +1950,21 @@
                                     th:if="${pendingCounts.get(p.id)} != null"
                                     th:text="${pendingCounts.get(p.id)}">
                             </span>
-
                         </a>
-
-
                     </td>
-
-
                 </tr>
-
-
-
                 <!-- =================================================
                      EMPTY STATE
                 ================================================= -->
-
                 <tr
                         th:if="${#lists.isEmpty(properties)}">
-
-
                     <td colspan="6">
-
-
                         <div class="empty-state">
-
-
                             <i
                                     class="bi bi-house-slash d-block">
                             </i>
-
-
                             No properties listed yet.
                             Add your first one below!
-
-
                         </div>
 
 
