@@ -1951,6 +1951,17 @@
                                     th:text="${pendingCounts.get(p.id)}">
                             </span>
                         </a>
+
+                        <!-- DELETE -->
+                        <a
+                                th:href="@{'/properties/owner/' + ${ownerId} + '/delete/' + ${p.id}}"
+                                class="btn-trash"
+                        >
+                            <i
+                                    class="bi bi-pencil-square">
+                            </i>
+                            Delete
+                        </a>
                     </td>
                 </tr>
                 <!-- =================================================
