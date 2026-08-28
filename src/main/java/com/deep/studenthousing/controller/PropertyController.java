@@ -138,10 +138,13 @@ public class PropertyController {
     @GetMapping("/owner/{ownerId}/delete/{propertyId}")
     public String deleteProperty(
             @PathVariable Long ownerId,
-            @PathVariable Long propertyId,
-            Model model
+            @PathVariable Long propertyId
     ){
+        System.out.println("DELETE");
+        propertyService.deleteById(propertyId);
+        System.out.println("DELETE2");
 
+        return "redirect:/properties/owner/" + ownerId;
     }
 
     @PostMapping("/owner/{ownerId}/edit/{propertyId}")
