@@ -135,6 +135,15 @@ public class PropertyController {
         return "edit-property";
     }
 
+    @GetMapping("/owner/{ownerId}/delete/{propertyId}")
+    public String deleteProperty(
+            @PathVariable Long ownerId,
+            @PathVariable Long propertyId,
+            Model model
+    ){
+
+    }
+
     @PostMapping("/owner/{ownerId}/edit/{propertyId}")
     public String updateProperty(@PathVariable Long ownerId,
                                  @PathVariable Long propertyId,
