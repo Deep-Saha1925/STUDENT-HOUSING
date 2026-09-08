@@ -14,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.deep.studenthousing.dto.PropertyMapDTO;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,34 @@ public class PropertyController {
             model.addAttribute("properties", List.of());
             return "fragments/property-list :: propertyList";
         }
+    }
+
+    // JSON endpoint for map pins — separate from /nearby (which returns an HTML fragment)
+    @GetMapping("/nearby/map")
+    @ResponseBody
+    public List<PropertyMapDTO> nearbyPropertiesForMap(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "5") double radius
+    ) {
+        List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
+
+        return nearby.stream()
+                .filter(p -> p.getLatitude() != null && p.getLongitude() != null)
+                .map(p -> new PropertyMapDTO(
+                        p.getId(),
+                        p.getTitle(),
+                        p.getArea(),
+                        p.getCity(),
+                        p.getLatitude(),
+                        p.getLongitude(),
+                        p.getMonthlyRent(),
+                        p.isAvailable(),
+                        (p.getImageUrls() != null && !p.getImageUrls().isEmpty())
+                                ? p.getImageUrls().get(0)
+                                : null
+                ))
+                .toList();
     }
 
     // Show all properties for a specific owner
