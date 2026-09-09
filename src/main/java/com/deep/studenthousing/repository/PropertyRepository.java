@@ -37,20 +37,24 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
      * Only returns available properties that have coordinates.
      */
     @Query(value = """
-    SELECT *, 
+    SELECT *,
            (6371 * acos(
-               cos(radians(:lat)) * cos(radians(p.latitude))
-               * cos(radians(p.longitude) - radians(:lng))
-               + sin(radians(:lat)) * sin(radians(p.latitude))
+               LEAST(1.0, GREATEST(-1.0,
+                   cos(radians(:lat)) * cos(radians(p.latitude))
+                   * cos(radians(p.longitude) - radians(:lng))
+                   + sin(radians(:lat)) * sin(radians(p.latitude))
+               ))
            )) AS distance
     FROM properties p
     WHERE p.latitude  IS NOT NULL
       AND p.longitude IS NOT NULL
       AND p.available = true
       AND (6371 * acos(
-               cos(radians(:lat)) * cos(radians(p.latitude))
-               * cos(radians(p.longitude) - radians(:lng))
-               + sin(radians(:lat)) * sin(radians(p.latitude))
+               LEAST(1.0, GREATEST(-1.0,
+                   cos(radians(:lat)) * cos(radians(p.latitude))
+                   * cos(radians(p.longitude) - radians(:lng))
+                   + sin(radians(:lat)) * sin(radians(p.latitude))
+               ))
            )) <= :radius
     ORDER BY distance ASC
     """, nativeQuery = true)
