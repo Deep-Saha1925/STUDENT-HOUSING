@@ -432,7 +432,36 @@
     return L.divIcon({ className: '', html, iconSize: [size, size], iconAnchor: [size / 2, size] });
   }
 
+  function plotGroupedMarkers(properties) {
+    const groups = {};
+    properties.forEach(p => {
+      const key = groupKey(p.latitude, p.longitude);
+      (groups[key] = groups[key] || []).push(p);
+    });
 
+    Object.values(groups).forEach(group => {
+      const { latitude, longitude } = group[0];
+      const count = group.length;
+      const anyAvailable = group.some(p => p.available);
+      const icon = makePinIcon(count, anyAvailable);
+      const marker = L.marker([latitude, longitude], { icon }).addTo(markerLayer);
+
+      if (count === 1) {
+        marker.on('click', () => { window.location.href = `/properties/${group[0].id}`; });
+        marker.bindTooltip(group[0].title, { direction: 'top', offset: [0, -30] });
+      } else {
+        const popupHtml = `<div style="font-family:'DM Sans',sans-serif;min-width:190px;">
+        <strong>${count} listings here</strong>
+        ${group.map(p => `
+          <div style="margin-top:6px;padding-top:6px;border-top:1px solid #eee;">
+            <a href="/properties/${p.id}" style="text-decoration:none;color:#ff5e62;font-weight:600;font-size:0.85rem;">${p.title}</a>
+            <div style="font-size:0.78rem;color:#777;">₹${p.monthlyRent}/mo ${p.available ? '' : '· unavailable'}</div>
+          </div>`).join('')}
+      </div>`;
+        marker.bindPopup(popupHtml);
+      }
+    });
+  }
 </script>
 
 </body>
