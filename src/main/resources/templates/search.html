@@ -321,6 +321,7 @@
             pos => {
               const { latitude: lat, longitude: lng } = pos.coords;
               const radius = document.getElementById('radiusSelect').value;
+              renderNearbyMap(lat, lng, radius);
               setStatus(`📍 Found you! Searching within ${radius} km…`);
               showLoading();
               fetch(`/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`)
