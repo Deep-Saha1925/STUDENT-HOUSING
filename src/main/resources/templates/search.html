@@ -361,5 +361,85 @@
   }
   function setStatus(msg) { document.getElementById('locationStatus').textContent = msg; }
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  let map, radiusCircle;
+  const markerLayer = L.layerGroup();
+
+  function groupKey(lat, lng) {
+    // ~11m precision (4 decimal places) — treats same-building listings as one pin
+    return lat.toFixed(4) + ',' + lng.toFixed(4);
+  }
+
+  function renderNearbyMap(userLat, userLng, radiusKm) {
+    document.getElementById('mapWrap').style.display = 'block';
+
+    if (!map) {
+      map = L.map('propertyMap');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      markerLayer.addTo(map);
+    }
+
+    map.setView([userLat, userLng], radiusKm > 10 ? 11 : radiusKm > 5 ? 12 : 13);
+    markerLayer.clearLayers();
+
+    if (radiusCircle) map.removeLayer(radiusCircle);
+    radiusCircle = L.circle([userLat, userLng], {
+      radius: radiusKm * 1000,
+      color: '#ff5e62', fillColor: '#ff5e62', fillOpacity: 0.08, weight: 1.5
+    }).addTo(map);
+
+    L.marker([userLat, userLng], {
+      icon: L.divIcon({ className: '', html: '<div style="width:14px;height:14px;border-radius:50%;background:#2b6cff;border:2px solid #fff;box-shadow:0 0 0 3px rgba(43,108,255,0.25);"></div>' })
+    }).addTo(markerLayer).bindPopup('You are here');
+
+    fetch(`/properties/nearby/map?lat=${userLat}&lng=${userLng}&radius=${radiusKm}`)
+            .then(r => r.json())
+            .then(properties => plotGroupedMarkers(properties))
+            .catch(err => console.error('Map fetch error:', err));
+  }
+
+  function plotGroupedMarkers(properties) {
+    const groups = {};
+    properties.forEach(p => {
+      const key = groupKey(p.latitude, p.longitude);
+      (groups[key] = groups[key] || []).push(p);
+    });
+
+    Object.values(groups).forEach(group => {
+      const { latitude, longitude } = group[0];
+      const count = group.length;
+
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="position:relative;">
+                 <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;background:#ff5e62;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>
+                 ${count > 1 ? `<div style="position:absolute;top:-6px;right:-6px;background:#1a1a1a;color:#fff;font-size:11px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${count}</div>` : ''}
+               </div>`,
+        iconSize: [30, 30], iconAnchor: [15, 30]
+      });
+
+      const marker = L.marker([latitude, longitude], { icon }).addTo(markerLayer);
+
+      if (count === 1) {
+        marker.on('click', () => { window.location.href = `/properties/${group[0].id}`; });
+        marker.bindTooltip(group[0].title, { direction: 'top' });
+      } else {
+        const popupHtml = `<div style="font-family:'DM Sans',sans-serif;min-width:180px;">
+          <strong>${count} listings here</strong>
+          ${group.map(p => `
+            <div style="margin-top:6px;padding-top:6px;border-top:1px solid #eee;">
+              <a href="/properties/${p.id}" style="text-decoration:none;color:#ff5e62;font-weight:600;font-size:0.85rem;">${p.title}</a>
+              <div style="font-size:0.78rem;color:#777;">₹${p.monthlyRent}/mo</div>
+            </div>`).join('')}
+        </div>`;
+        marker.bindPopup(popupHtml);
+      }
+    });
+  }
+</script>
+
 </body>
 </html>
