@@ -66,24 +66,23 @@ public class PropertyController {
             @RequestParam double lng,
             @RequestParam(defaultValue = "5") double radius
     ) {
-        List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
-
-        return nearby.stream()
-                .filter(p -> p.getLatitude() != null && p.getLongitude() != null)
-                .map(p -> new PropertyMapDTO(
-                        p.getId(),
-                        p.getTitle(),
-                        p.getArea(),
-                        p.getCity(),
-                        p.getLatitude(),
-                        p.getLongitude(),
-                        p.getMonthlyRent(),
-                        p.isAvailable(),
-                        (p.getImageUrls() != null && !p.getImageUrls().isEmpty())
-                                ? p.getImageUrls().get(0)
-                                : null
-                ))
-                .toList();
+        try {
+            List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
+            return nearby.stream()
+                    .filter(p -> p.getLatitude() != null && p.getLongitude() != null)
+                    .map(p -> new PropertyMapDTO(
+                            p.getId(), p.getTitle(), p.getArea(), p.getCity(),
+                            p.getLatitude(), p.getLongitude(), p.getMonthlyRent(),
+                            p.isAvailable(),
+                            (p.getImageUrls() != null && !p.getImageUrls().isEmpty())
+                                    ? p.getImageUrls().get(0) : null
+                    ))
+                    .toList();
+        } catch (Exception e) {
+            System.err.println("nearby/map failed for lat=" + lat + " lng=" + lng + " radius=" + radius);
+            e.printStackTrace();
+            return List.of();
+        }
     }
 
     // Show all properties for a specific owner
