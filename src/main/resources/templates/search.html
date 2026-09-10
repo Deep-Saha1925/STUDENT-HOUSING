@@ -298,6 +298,12 @@
           <option value="MONTHLY" th:selected="${rentalType == 'MONTHLY'}">Monthly only</option>
           <option value="DAILY" th:selected="${rentalType == 'DAILY'}">Daily only</option>
         </select>
+        <select class="radius-select" id="genderSelect" title="Only properties open to this preference are shown, and it's remembered when you go to book.">
+          <option value="" th:selected="${gender == null}">Any gender preference</option>
+          <option value="MALE" th:selected="${gender == 'MALE'}">Male</option>
+          <option value="FEMALE" th:selected="${gender == 'FEMALE'}">Female</option>
+          <option value="FAMILY" th:selected="${gender == 'FAMILY'}">Family</option>
+        </select>
         <button type="submit" class="btn-search">
           <i class="bi bi-search"></i> Search
         </button>
@@ -357,10 +363,11 @@
       const city = document.getElementById("cityInput").value;
       const rent = document.getElementById("rentInput").value;
       const rentalType = document.getElementById("rentalTypeSelect").value;
+      const gender = document.getElementById("genderSelect").value;
       setStatus('');
       hideMap(); // manual search replaces "near me" mode — the old map/pins no longer apply
       showLoading();
-      fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}&rentalType=${encodeURIComponent(rentalType)}`)
+      fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}&rentalType=${encodeURIComponent(rentalType)}&gender=${encodeURIComponent(gender)}`)
               .then(r => r.text()).then(html => setResults(html, null))
               .catch(err => console.error("Search error:", err));
     });
