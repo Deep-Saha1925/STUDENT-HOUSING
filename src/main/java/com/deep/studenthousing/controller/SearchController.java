@@ -3,6 +3,7 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.service.PropertyService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,10 @@ public class SearchController {
     // for the session, so property-details can hard-block bookings that
     // don't match without ever storing gender on the student's profile.
     public static final String SESSION_GENDER_KEY = "genderPreference";
+
+    // How many properties an anonymous (not logged in) visitor gets to see
+    // on the public homepage before being asked to log in for the rest.
+    public static final int GUEST_PREVIEW_LIMIT = 6;
 
     private final PropertyService propertyService;
 
@@ -51,6 +56,11 @@ public class SearchController {
                 .filter(Property::isAvailable)
                 .toList();
 
+        // /student-search is already login-only (see SecurityConfig), so it's
+        // never guest-limited — set explicitly so the shared fragment has it.
+        model.addAttribute("guestLimited", false);
+        model.addAttribute("hiddenCount", 0);
+
         model.addAttribute("properties", properties);
         model.addAttribute("city", city);
         model.addAttribute("rent", rent);
@@ -65,7 +75,8 @@ public class SearchController {
                                    @RequestParam(value = "rentalType", required = false) String rentalType,
                                    @RequestParam(value = "gender", required = false) String gender,
                                    Model model,
-                                   HttpSession session) {
+                                   HttpSession session,
+                                   Authentication authentication) {
         // Clean params
         if (city != null && city.trim().isEmpty()) {
             city = null;
@@ -85,6 +96,16 @@ public class SearchController {
                 .stream()
                 .filter(Property::isAvailable)
                 .toList();
+
+        // This endpoint is public (SecurityConfig permits /search to anyone) and is
+        // hit both by the guest homepage and by the logged-in student's search page —
+        // only cap results when there's no logged-in user behind the request.
+        boolean guestLimited = authentication == null && properties.size() > GUEST_PREVIEW_LIMIT;
+        model.addAttribute("guestLimited", guestLimited);
+        model.addAttribute("hiddenCount", guestLimited ? properties.size() - GUEST_PREVIEW_LIMIT : 0);
+        if (guestLimited) {
+            properties = properties.stream().limit(GUEST_PREVIEW_LIMIT).toList();
+        }
 
         model.addAttribute("properties", properties);
         return "fragments/property-list :: propertyList";
