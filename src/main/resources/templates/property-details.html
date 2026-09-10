@@ -469,6 +469,18 @@
                 </span>
             </div>
 
+            <div class="type-tags" th:unless="${property.openToAllGenders}">
+                <span class="type-tag" th:if="${property.allowedForMale}">
+                    <i class="bi bi-gender-male"></i> Male
+                </span>
+                <span class="type-tag" th:if="${property.allowedForFemale}">
+                    <i class="bi bi-gender-female"></i> Female
+                </span>
+                <span class="type-tag" th:if="${property.allowedForFamily}">
+                    <i class="bi bi-people-fill"></i> Family
+                </span>
+            </div>
+
             <div class="rent-wrap" th:if="${property.availableMonthly}">
                 <span class="rent-badge" th:text="'₹ ' + ${property.monthlyRent}"></span>
                 <span class="rent-label">/ month</span>
@@ -548,6 +560,19 @@
                     <p class="text-muted small mb-0" th:if="${loggedIn and isStudentViewer and isOwnProperty}">
                         You can't book your own property.
                     </p>
+                    <div class="alert alert-warning py-2 px-3 small mb-0"
+                         th:if="${loggedIn and isStudentViewer and !isOwnProperty and genderBlocked}">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span th:if="${sessionGender == null}">
+                            This owner has set a gender preference for this property.
+                            <a th:href="@{/student-search}">Search with your gender filter selected</a> to check if you're eligible to book.
+                        </span>
+                        <span th:unless="${sessionGender == null}">
+                            This property isn't available for your selected gender preference
+                            (<span th:text="${#strings.toLowerCase(sessionGender)}"></span>).
+                            <a th:href="@{/student-search}">Change your filter</a> if this doesn't look right.
+                        </span>
+                    </div>
                 </div>
             </div>
 
