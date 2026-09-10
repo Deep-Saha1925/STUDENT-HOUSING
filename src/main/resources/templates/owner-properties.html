@@ -351,6 +351,16 @@
             .notif-dot { animation: none; }
         }
 
+        /* ── Mobile (≤575px) ── */
+        @media (max-width: 575px) {
+            .navbar-brand { font-size: 1.05rem; }
+            .welcome-text { display: none; } /* saves space next to the nav buttons on a phone */
+            .page-header { padding: 28px 0 20px; }
+            .table thead th, .table tbody td { padding: 10px; font-size: 0.8rem; }
+            .btn-edit, .btn-bookings { padding: 5px 10px; font-size: 0.75rem; }
+            .btn-add { width: 100%; justify-content: center; }
+        }
+
         /* Add property button */
         .btn-add {
             background: linear-gradient(135deg, var(--accent-2), var(--accent));
