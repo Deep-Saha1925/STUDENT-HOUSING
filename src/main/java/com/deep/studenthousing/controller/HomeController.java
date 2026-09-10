@@ -34,7 +34,8 @@ public class HomeController {
         }
 
         try {
-            List<Property> properties = propertyService.searchProperties(city, rent, null)
+            // Public landing page — no gender filter applied here (null = don't restrict).
+            List<Property> properties = propertyService.searchProperties(city, rent, null, null)
                     .stream()
                     .filter(Property::isAvailable)
                     .toList();
