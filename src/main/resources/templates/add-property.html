@@ -343,6 +343,26 @@
                         <div class="section-divider"></div>
 
                         <div class="field-group">
+                            <label style="text-transform:none;">Who can rent this property?</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                    <input type="checkbox" id="allowedForMale" th:field="*{allowedForMale}" style="width:auto;">
+                                    Male
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                    <input type="checkbox" id="allowedForFemale" th:field="*{allowedForFemale}" style="width:auto;">
+                                    Female
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                    <input type="checkbox" id="allowedForFamily" th:field="*{allowedForFamily}" style="width:auto;">
+                                    Family
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="field-group">
                             <label>Description</label>
                             <textarea class="form-control" th:field="*{description}" rows="3" placeholder="Enter property description"></textarea>
                         </div>
@@ -417,6 +437,15 @@
             if (!monthly && !daily) {
                 e.preventDefault();
                 alert('Select at least one rental type (Monthly and/or Daily).');
+                return;
+            }
+
+            const male = document.getElementById('allowedForMale').checked;
+            const female = document.getElementById('allowedForFemale').checked;
+            const family = document.getElementById('allowedForFamily').checked;
+            if (!male && !female && !family) {
+                e.preventDefault();
+                alert('Select at least one option for "Who can rent this property?" (or check all three if it\u2019s open to everyone).');
             }
         });
     })();
