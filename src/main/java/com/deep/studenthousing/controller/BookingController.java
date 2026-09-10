@@ -9,6 +9,7 @@ import com.deep.studenthousing.exception.UnauthorizedActionException;
 import com.deep.studenthousing.repository.UserRepository;
 import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.PropertyService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -93,7 +94,8 @@ public class BookingController {
                                @RequestParam("startDate") String startDateStr,
                                @RequestParam("endDate") String endDateStr,
                                Authentication authentication,
-                               Model model) {
+                               Model model,
+                               HttpSession session) {
 
         if (authentication == null) {
             return "redirect:/login";
@@ -105,6 +107,15 @@ public class BookingController {
         }
 
         Property property = propertyService.findById(id);
+
+        // Server-side re-check of the gender hard-block — the disabled booking
+        // button is just UI; a direct POST must still be rejected here.
+        String sessionGender = (String) session.getAttribute(SearchController.SESSION_GENDER_KEY);
+        if (!property.isOpenToAllGenders() && !property.isAllowedForGender(sessionGender)) {
+            return "redirect:/properties/" + id + "?booked=error&reason=" +
+                    "This property is not available for your selected gender preference.";
+        }
+
         LocalDate startDate = LocalDate.parse(startDateStr);
         LocalDate endDate = LocalDate.parse(endDateStr);
 
