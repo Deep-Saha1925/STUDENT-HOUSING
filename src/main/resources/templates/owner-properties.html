@@ -473,6 +473,7 @@
                     <th>City</th>
                     <th>Area</th>
                     <th>Rent (₹)</th>
+                    <th>For</th>
                     <th>Available</th>
                     <th>Actions</th>
                 </tr>
@@ -485,6 +486,12 @@
                     <td th:text="${p.area}"></td>
                     <td>
                         <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent} + '/mo'" th:if="${p.availableMonthly}"></span> <span class="badge-rent" th:text="'₹ ' + ${p.dailyRent} + '/day'" th:if="${p.availableDaily}"></span>
+                    </td>
+                    <td>
+                        <span th:if="${p.openToAllGenders}" class="text-muted small">Everyone</span>
+                        <span th:unless="${p.openToAllGenders}" class="small">
+                            <span th:if="${p.allowedForMale}">M</span><span th:if="${p.allowedForFemale}">F</span><span th:if="${p.allowedForFamily}">Fam</span>
+                        </span>
                     </td>
                     <td>
                         <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
@@ -511,7 +518,7 @@
 
                 <!-- Empty state -->
                 <tr th:if="${#lists.isEmpty(properties)}">
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="empty-state">
                             <i class="bi bi-house-slash d-block"></i>
                             No properties listed yet. Add your first one below!
