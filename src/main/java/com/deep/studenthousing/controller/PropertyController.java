@@ -9,6 +9,7 @@ import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -189,6 +190,9 @@ public class PropertyController {
         property.setDailyRent(updatedProperty.getDailyRent());
         property.setAvailableMonthly(updatedProperty.isAvailableMonthly());
         property.setAvailableDaily(updatedProperty.isAvailableDaily());
+        property.setAllowedForMale(updatedProperty.isAllowedForMale());
+        property.setAllowedForFemale(updatedProperty.isAllowedForFemale());
+        property.setAllowedForFamily(updatedProperty.isAllowedForFamily());
         normalizeRentalFields(property);
 
         // Handle new image uploads
@@ -241,6 +245,13 @@ public class PropertyController {
             // Fall back to monthly rather than silently saving an unbookable property.
             property.setAvailableMonthly(true);
         }
+        if (!property.isAllowedForMale() && !property.isAllowedForFemale() && !property.isAllowedForFamily()) {
+            // Same idea: an owner who unchecks all three didn't mean "no one can book this" —
+            // treat it as "open to all" rather than silently locking the listing.
+            property.setAllowedForMale(true);
+            property.setAllowedForFemale(true);
+            property.setAllowedForFamily(true);
+        }
     }
 
     @PostMapping("/owner/{ownerId}/availability/{propertyId}")
@@ -259,7 +270,8 @@ public class PropertyController {
                                org.springframework.security.core.Authentication authentication,
                                @RequestParam(value = "booked", required = false) String booked,
                                @RequestParam(value = "reason", required = false) String reason,
-                               @RequestParam(value = "cancelled", required = false) String cancelled){
+                               @RequestParam(value = "cancelled", required = false) String cancelled,
+                               HttpSession session){
         Property property = propertyService.findById(id);
         model.addAttribute("property", property);
 
@@ -277,10 +289,20 @@ public class PropertyController {
             }
         }
 
+        // Gender hard-block: reuse whatever gender the student last picked in
+        // the search filter (stored in session) — nothing is stored on the
+        // student's profile. If the listing has no gender restriction at all,
+        // it's always bookable regardless of session state.
+        String sessionGender = (String) session.getAttribute(SearchController.SESSION_GENDER_KEY);
+        boolean genderMatches = property.isAllowedForGender(sessionGender);
+        boolean genderBlocked = isStudentViewer && !isOwnProperty && !property.isOpenToAllGenders() && !genderMatches;
+
         model.addAttribute("loggedIn", loggedIn);
         model.addAttribute("isStudentViewer", isStudentViewer);
         model.addAttribute("isOwnProperty", isOwnProperty);
-        model.addAttribute("canBook", isStudentViewer && !isOwnProperty);
+        model.addAttribute("sessionGender", sessionGender);
+        model.addAttribute("genderBlocked", genderBlocked);
+        model.addAttribute("canBook", isStudentViewer && !isOwnProperty && !genderBlocked);
 
         if ("success".equals(booked)) {
             model.addAttribute("bookedSuccess", true);
