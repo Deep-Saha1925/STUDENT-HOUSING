@@ -10,8 +10,10 @@ import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +38,17 @@ public class PropertyController {
         this.propertyService = propertyService;
         this.imageUploadService = imageUploadService;
         this.bookingService = bookingService;
+    }
+
+    // The hidden latitude/longitude fields on add/edit-property.html are only
+    // populated when the owner clicks "Use My Current Location" — otherwise
+    // they're submitted as an empty string. Property.latitude/longitude are
+    // Double (nullable), and Spring's default binder rejects "" for a Double
+    // with a conversion error. allowEmpty=true tells it to treat "" as null
+    // instead, so the form works whether or not the owner used the button.
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(Double.class, new CustomNumberEditor(Double.class, true));
     }
 
     @GetMapping("/nearby")
@@ -193,6 +206,13 @@ public class PropertyController {
         property.setAllowedForMale(updatedProperty.isAllowedForMale());
         property.setAllowedForFemale(updatedProperty.isAllowedForFemale());
         property.setAllowedForFamily(updatedProperty.isAllowedForFamily());
+        // Hidden fields always carry through the correct value — either the
+        // freshly-captured GPS coords (if the owner clicked "Use My Location")
+        // or the previously-saved ones (pre-filled by th:field), so this is
+        // safe to copy unconditionally. Without this line, edits could never
+        // update — or even preserve — a property's coordinates.
+        property.setLatitude(updatedProperty.getLatitude());
+        property.setLongitude(updatedProperty.getLongitude());
         normalizeRentalFields(property);
 
         // Handle new image uploads
