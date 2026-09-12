@@ -371,6 +371,27 @@
                             <input type="text" class="form-control" th:field="*{area}" placeholder="Enter area or neighborhood">
                         </div>
 
+                        <div class="field-group">
+                            <label style="text-transform:none;">Precise Location (recommended)</label>
+                            <button type="button" id="useLocationBtn" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-geo-alt"></i> Update to My Current Location
+                            </button>
+                            <div id="locationStatus" class="small mt-2" style="color: var(--text-muted);">
+                                <span th:if="${property.latitude != null}">
+                                    ✅ This listing already has precise coordinates saved
+                                    (<span th:text="${#numbers.formatDecimal(property.latitude, 1, 5)}"></span>,
+                                    <span th:text="${#numbers.formatDecimal(property.longitude, 1, 5)}"></span>).
+                                    Only click the button above if you want to update it — e.g. if the property moved or the original location was inaccurate.
+                                </span>
+                                <span th:unless="${property.latitude != null}">
+                                    No precise location saved yet — this listing is relying on the City/Area text for "Near Me" search,
+                                    which can be inaccurate or miss the search entirely. Click above while at the property for best results.
+                                </span>
+                            </div>
+                            <input type="hidden" id="latitude" name="latitude" th:field="*{latitude}">
+                            <input type="hidden" id="longitude" name="longitude" th:field="*{longitude}">
+                        </div>
+
                         <div class="section-divider"></div>
 
                         <div class="field-group">
@@ -393,6 +414,26 @@
                         <div class="field-group">
                             <label>Daily Rent (₹)</label>
                             <input type="number" step="0.01" class="form-control" th:field="*{dailyRent}" placeholder="Enter daily rent amount">
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="field-group">
+                            <label style="text-transform:none;">Who can rent this property?</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                    <input type="checkbox" id="allowedForMale" th:field="*{allowedForMale}" style="width:auto;">
+                                    Male
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                    <input type="checkbox" id="allowedForFemale" th:field="*{allowedForFemale}" style="width:auto;">
+                                    Female
+                                </label>
+                                <label class="d-flex align-items-center gap-2" style="text-transform:none;">
+                                    <input type="checkbox" id="allowedForFamily" th:field="*{allowedForFamily}" style="width:auto;">
+                                    Family
+                                </label>
+                            </div>
                         </div>
 
                         <div class="section-divider"></div>
@@ -465,6 +506,43 @@
         themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
         toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     }
+
+    // ── Capture precise GPS coordinates for accurate "Near Me" search ──
+    // Same idea as add-property.html: GPS from the owner's device beats
+    // geocoding the typed City/Area text (see PropertyService.save()).
+    const useLocationBtn = document.getElementById('useLocationBtn');
+    const locationStatus = document.getElementById('locationStatus');
+
+    useLocationBtn.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+            locationStatus.textContent = 'Your browser doesn\'t support location access.';
+            locationStatus.style.color = '#dc3545';
+            return;
+        }
+
+        useLocationBtn.disabled = true;
+        locationStatus.textContent = 'Getting your location…';
+        locationStatus.style.color = 'var(--text-muted)';
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+                locationStatus.textContent = '✅ Location updated — save the form to apply it.';
+                locationStatus.style.color = '#198754';
+                useLocationBtn.disabled = false;
+            },
+            (error) => {
+                let reason = 'something went wrong';
+                if (error.code === error.PERMISSION_DENIED) reason = 'location permission was denied';
+                else if (error.code === error.TIMEOUT) reason = 'the request timed out';
+                locationStatus.textContent = 'Couldn\'t get your location (' + reason + '). The existing saved location (if any) is unchanged.';
+                locationStatus.style.color = '#dc3545';
+                useLocationBtn.disabled = false;
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    });
 </script>
 </body>
 </html>

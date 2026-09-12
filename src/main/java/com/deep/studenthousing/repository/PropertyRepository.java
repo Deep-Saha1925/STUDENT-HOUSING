@@ -25,11 +25,16 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
             "AND (:rent IS NULL OR p.rent <= :rent) " +
             "AND (:rentalType IS NULL " +
             "     OR (:rentalType = 'MONTHLY' AND p.available_monthly = true) " +
-            "     OR (:rentalType = 'DAILY' AND p.available_daily = true))",
+            "     OR (:rentalType = 'DAILY' AND p.available_daily = true)) " +
+            "AND (:gender IS NULL " +
+            "     OR (:gender = 'MALE' AND p.allowed_for_male = true) " +
+            "     OR (:gender = 'FEMALE' AND p.allowed_for_female = true) " +
+            "     OR (:gender = 'FAMILY' AND p.allowed_for_family = true))",
             nativeQuery = true)
     List<Property> searchProperties(@Param("city") String city,
                                     @Param("rent") Double rent,
-                                    @Param("rentalType") String rentalType);
+                                    @Param("rentalType") String rentalType,
+                                    @Param("gender") String gender);
 
     /**
      * Haversine formula in PostgreSQL.
@@ -37,20 +42,24 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
      * Only returns available properties that have coordinates.
      */
     @Query(value = """
-    SELECT *, 
+    SELECT *,
            (6371 * acos(
-               cos(radians(:lat)) * cos(radians(p.latitude))
-               * cos(radians(p.longitude) - radians(:lng))
-               + sin(radians(:lat)) * sin(radians(p.latitude))
+               LEAST(1.0, GREATEST(-1.0,
+                   cos(radians(:lat)) * cos(radians(p.latitude))
+                   * cos(radians(p.longitude) - radians(:lng))
+                   + sin(radians(:lat)) * sin(radians(p.latitude))
+               ))
            )) AS distance
     FROM properties p
     WHERE p.latitude  IS NOT NULL
       AND p.longitude IS NOT NULL
       AND p.available = true
       AND (6371 * acos(
-               cos(radians(:lat)) * cos(radians(p.latitude))
-               * cos(radians(p.longitude) - radians(:lng))
-               + sin(radians(:lat)) * sin(radians(p.latitude))
+               LEAST(1.0, GREATEST(-1.0,
+                   cos(radians(:lat)) * cos(radians(p.latitude))
+                   * cos(radians(p.longitude) - radians(:lng))
+                   + sin(radians(:lat)) * sin(radians(p.latitude))
+               ))
            )) <= :radius
     ORDER BY distance ASC
     """, nativeQuery = true)

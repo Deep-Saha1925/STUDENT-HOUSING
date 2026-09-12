@@ -9,10 +9,16 @@ import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.deep.studenthousing.dto.PropertyMapDTO;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,6 +40,17 @@ public class PropertyController {
         this.bookingService = bookingService;
     }
 
+    // The hidden latitude/longitude fields on add/edit-property.html are only
+    // populated when the owner clicks "Use My Current Location" — otherwise
+    // they're submitted as an empty string. Property.latitude/longitude are
+    // Double (nullable), and Spring's default binder rejects "" for a Double
+    // with a conversion error. allowEmpty=true tells it to treat "" as null
+    // instead, so the form works whether or not the owner used the button.
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(Double.class, new CustomNumberEditor(Double.class, true));
+    }
+
     @GetMapping("/nearby")
     public String nearByProperties(
             @RequestParam double lat,
@@ -52,6 +69,33 @@ public class PropertyController {
             e.printStackTrace();
             model.addAttribute("properties", List.of());
             return "fragments/property-list :: propertyList";
+        }
+    }
+
+    // JSON endpoint for map pins — separate from /nearby (which returns an HTML fragment)
+    @GetMapping("/nearby/map")
+    @ResponseBody
+    public List<PropertyMapDTO> nearbyPropertiesForMap(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "5") double radius
+    ) {
+        try {
+            List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
+            return nearby.stream()
+                    .filter(p -> p.getLatitude() != null && p.getLongitude() != null)
+                    .map(p -> new PropertyMapDTO(
+                            p.getId(), p.getTitle(), p.getArea(), p.getCity(),
+                            p.getLatitude(), p.getLongitude(), p.getMonthlyRent(),
+                            p.isAvailable(),
+                            (p.getImageUrls() != null && !p.getImageUrls().isEmpty())
+                                    ? p.getImageUrls().get(0) : null
+                    ))
+                    .toList();
+        } catch (Exception e) {
+            System.err.println("nearby/map failed for lat=" + lat + " lng=" + lng + " radius=" + radius);
+            e.printStackTrace();
+            return List.of();
         }
     }
 
@@ -171,6 +215,16 @@ public class PropertyController {
         property.setDailyRent(updatedProperty.getDailyRent());
         property.setAvailableMonthly(updatedProperty.isAvailableMonthly());
         property.setAvailableDaily(updatedProperty.isAvailableDaily());
+        property.setAllowedForMale(updatedProperty.isAllowedForMale());
+        property.setAllowedForFemale(updatedProperty.isAllowedForFemale());
+        property.setAllowedForFamily(updatedProperty.isAllowedForFamily());
+        // Hidden fields always carry through the correct value — either the
+        // freshly-captured GPS coords (if the owner clicked "Use My Location")
+        // or the previously-saved ones (pre-filled by th:field), so this is
+        // safe to copy unconditionally. Without this line, edits could never
+        // update — or even preserve — a property's coordinates.
+        property.setLatitude(updatedProperty.getLatitude());
+        property.setLongitude(updatedProperty.getLongitude());
         normalizeRentalFields(property);
 
         // Handle new image uploads
@@ -223,6 +277,13 @@ public class PropertyController {
             // Fall back to monthly rather than silently saving an unbookable property.
             property.setAvailableMonthly(true);
         }
+        if (!property.isAllowedForMale() && !property.isAllowedForFemale() && !property.isAllowedForFamily()) {
+            // Same idea: an owner who unchecks all three didn't mean "no one can book this" —
+            // treat it as "open to all" rather than silently locking the listing.
+            property.setAllowedForMale(true);
+            property.setAllowedForFemale(true);
+            property.setAllowedForFamily(true);
+        }
     }
 
     @PostMapping("/owner/{ownerId}/availability/{propertyId}")
@@ -241,7 +302,8 @@ public class PropertyController {
                                org.springframework.security.core.Authentication authentication,
                                @RequestParam(value = "booked", required = false) String booked,
                                @RequestParam(value = "reason", required = false) String reason,
-                               @RequestParam(value = "cancelled", required = false) String cancelled){
+                               @RequestParam(value = "cancelled", required = false) String cancelled,
+                               HttpSession session){
         Property property = propertyService.findById(id);
         model.addAttribute("property", property);
 
@@ -259,10 +321,20 @@ public class PropertyController {
             }
         }
 
+        // Gender hard-block: reuse whatever gender the student last picked in
+        // the search filter (stored in session) — nothing is stored on the
+        // student's profile. If the listing has no gender restriction at all,
+        // it's always bookable regardless of session state.
+        String sessionGender = (String) session.getAttribute(SearchController.SESSION_GENDER_KEY);
+        boolean genderMatches = property.isAllowedForGender(sessionGender);
+        boolean genderBlocked = isStudentViewer && !isOwnProperty && !property.isOpenToAllGenders() && !genderMatches;
+
         model.addAttribute("loggedIn", loggedIn);
         model.addAttribute("isStudentViewer", isStudentViewer);
         model.addAttribute("isOwnProperty", isOwnProperty);
-        model.addAttribute("canBook", isStudentViewer && !isOwnProperty);
+        model.addAttribute("sessionGender", sessionGender);
+        model.addAttribute("genderBlocked", genderBlocked);
+        model.addAttribute("canBook", isStudentViewer && !isOwnProperty && !genderBlocked);
 
         if ("success".equals(booked)) {
             model.addAttribute("bookedSuccess", true);

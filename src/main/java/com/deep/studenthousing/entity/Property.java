@@ -41,6 +41,18 @@ public class Property {
     @Column(columnDefinition = "boolean default false", nullable = false)
     private boolean availableDaily = false;
 
+    // Gender(s) the owner is willing to rent to. All default true so every
+    // existing listing stays "open to all" the moment this column appears —
+    // same columnDefinition trick used above for availableMonthly/Daily.
+    @Column(columnDefinition = "boolean default true", nullable = false)
+    private boolean allowedForMale = true;
+
+    @Column(columnDefinition = "boolean default true", nullable = false)
+    private boolean allowedForFemale = true;
+
+    @Column(columnDefinition = "boolean default true", nullable = false)
+    private boolean allowedForFamily = true;
+
     private Double latitude;
     private Double longitude;
 
@@ -53,5 +65,27 @@ public class Property {
     //image urls
     @ElementCollection
     private List<String> imageUrls = new ArrayList<>();
+
+    // True when the owner hasn't restricted this listing to any gender —
+    // used to decide whether the hard-block on booking even applies.
+    @Transient
+    public boolean isOpenToAllGenders() {
+        return allowedForMale && allowedForFemale && allowedForFamily;
+    }
+
+    // gender is expected to be "MALE", "FEMALE", or "FAMILY" (case-insensitive).
+    // Null/blank gender only "matches" if the listing has no restriction at all.
+    @Transient
+    public boolean isAllowedForGender(String gender) {
+        if (gender == null || gender.isBlank()) {
+            return isOpenToAllGenders();
+        }
+        return switch (gender.trim().toUpperCase()) {
+            case "MALE" -> allowedForMale;
+            case "FEMALE" -> allowedForFemale;
+            case "FAMILY" -> allowedForFamily;
+            default -> isOpenToAllGenders();
+        };
+    }
 
 }

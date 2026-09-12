@@ -796,6 +796,114 @@
            ADD PROPERTY BUTTON
         ========================================================= */
 
+        /* Groups multi-badge cell content (e.g. both Monthly + Daily rent
+           badges) into one wrapped, gapped unit — applies at every width,
+           not just mobile, since the badges can wrap on any narrower table
+           column regardless of overall viewport size. */
+        .table-responsive table td .cell-value {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        /* ── Mobile / tablet (≤991px) ── */
+        @media (max-width: 991px) {
+            .navbar-brand { font-size: 1.05rem; }
+            .welcome-text { display: none; } /* saves space next to the nav buttons on a phone */
+            .navbar .container-fluid { gap: 6px !important; }
+            .btn-nav, .btn-logout-nav { padding: 6px 10px; font-size: 0.76rem; }
+            .page-header { padding: 28px 0 20px; }
+            .btn-add { width: 100%; justify-content: center; }
+
+            /* The outer dash-card wrapping the table already has a border+shadow;
+               once each row becomes its own bordered card below, keeping both
+               nests a box-in-a-box look that's noisy on a small screen. Flatten
+               the outer one so the row cards read as the primary surface. */
+            .dash-card {
+                padding: 10px;
+                border: none;
+                box-shadow: none;
+                background: transparent;
+            }
+            .table-responsive {
+                background: transparent;
+                border-radius: 0;
+            }
+
+            /* ── Table → stacked cards ──
+               A 7-column table is unreadable at this width even shrunk down.
+               Hide the header row and turn each <td> into a labeled flex row
+               (label from data-label via ::before, value on the right), and
+               each <tr> into its own bordered card. Standard CSS-only
+               responsive-table pattern — no markup duplication needed. */
+            .table-responsive table thead { display: none; }
+            .table-responsive table,
+            .table-responsive table tbody,
+            .table-responsive table tr,
+            .table-responsive table td {
+                display: block;
+                width: 100%;
+            }
+            .table-responsive table tr {
+                background: var(--card-bg);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 15px;
+                padding: 2px 0;
+            }
+            .table-responsive table tr:last-child { margin-bottom: 0; }
+            .table-responsive table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border: none;
+                border-bottom: 1px solid var(--border);
+                font-size: 0.85rem;
+                text-align: right;
+            }
+            .table-responsive table td:last-child { border-bottom: none; }
+            .table-responsive table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+                color: var(--text-muted);
+                text-align: left;
+                flex-shrink: 0;
+            }
+            /* Actions cell has two buttons — a left label + right-aligned pair
+               reads awkwardly, so this one drops the flex/label layout and just
+               centers the buttons underneath their own small heading instead. */
+            .table-responsive table td.td-actions {
+                display: block;
+                text-align: center;
+            }
+            .table-responsive table td.td-actions::before {
+                content: attr(data-label);
+                display: block;
+                text-align: center;
+                margin-bottom: 8px;
+            }
+            .btn-edit, .btn-bookings { padding: 6px 12px; font-size: 0.78rem; }
+
+            /* Empty-state row shouldn't get the card treatment */
+            .table-responsive table tr:has(.empty-state) {
+                border: none;
+                background: transparent;
+            }
+            .table-responsive table tr:has(.empty-state) td {
+                display: block;
+                text-align: center;
+                border: none;
+            }
+            .table-responsive table tr:has(.empty-state) td::before { content: none; }
+        }
+
+        /* Add property button */
         .btn-add {
 
             background:
@@ -959,6 +1067,70 @@
 
 
             .navbar .ms-auto {
+    <!-- ── Table card ── -->
+    <div class="dash-card animate__animated animate__fadeInUp">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>City</th>
+                    <th>Area</th>
+                    <th>Rent (₹)</th>
+                    <th>For</th>
+                    <th>Available</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr th:each="p : ${properties}">
+                    <td data-label="Title" th:text="${p.title}"></td>
+                    <td data-label="City" th:text="${p.city}"></td>
+                    <td data-label="Area" th:text="${p.area}"></td>
+                    <td data-label="Rent">
+                        <span class="cell-value">
+                            <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent} + '/mo'" th:if="${p.availableMonthly}"></span> <span class="badge-rent" th:text="'₹ ' + ${p.dailyRent} + '/day'" th:if="${p.availableDaily}"></span>
+                        </span>
+                    </td>
+                    <td data-label="For">
+                        <span th:if="${p.openToAllGenders}" class="text-muted small">Everyone</span>
+                        <span th:unless="${p.openToAllGenders}" class="small">
+                            <span th:if="${p.allowedForMale}">M</span><span th:if="${p.allowedForFemale}">F</span><span th:if="${p.allowedForFamily}">Fam</span>
+                        </span>
+                    </td>
+                    <td data-label="Available">
+                        <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
+                            <input type="hidden" name="_method" value="patch"/>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="available"
+                                       th:checked="${p.available}"
+                                       onchange="this.form.submit()">
+                            </div>
+                        </form>
+                    </td>
+                    <td data-label="Actions" class="td-actions">
+                        <a th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}" class="btn-edit">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a th:href="@{'/properties/owner/' + ${ownerId} + '/bookings/' + ${p.id}}" class="btn-bookings">
+                            <i class="bi bi-calendar-week"></i> Bookings
+                            <span class="notif-dot" th:if="${pendingCounts.get(p.id)} != null" th:text="${pendingCounts.get(p.id)}"></span>
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- Empty state -->
+                <tr th:if="${#lists.isEmpty(properties)}">
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="bi bi-house-slash d-block"></i>
+                            No properties listed yet. Add your first one below!
+                        </div>
+                    </td>
+                </tr>
 
                 width: 100%;
 

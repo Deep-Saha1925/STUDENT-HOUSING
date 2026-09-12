@@ -20,6 +20,13 @@
         </p>
         <span class="badge bg-success" th:if="${p.available}">Available</span>
         <span class="badge bg-danger" th:unless="${p.available}">Not Available</span>
+        <span class="badge bg-secondary" th:unless="${p.openToAllGenders}">
+          <i class="bi bi-info-circle"></i>
+          <span th:if="${p.allowedForMale}">Male</span><span th:if="${p.allowedForMale and (p.allowedForFemale or p.allowedForFamily)}">,</span>
+          <span th:if="${p.allowedForFemale}">Female</span><span th:if="${p.allowedForFemale and p.allowedForFamily}">,</span>
+          <span th:if="${p.allowedForFamily}">Family</span>
+          only
+        </span>
         <div class="mt-3">
           <a th:href="@{'/properties/' + ${p.id}}" class="btn btn-outline-primary btn-sm">View Details</a>
         </div>
@@ -30,5 +37,25 @@
   <!-- Handle empty search -->
   <div th:if="${#lists.isEmpty(properties)}" class="text-center text-muted" style="color: var(--text) !important">
     🚫 No properties found for your search.
+  </div>
+
+  <!-- Guest preview cap: shown only when the caller (HomeController/SearchController)
+       flagged this response as guest-limited, i.e. an anonymous visitor hit the
+       public homepage/search and there were more results than the free preview.
+       Full-width row (not another col-md-4 grid cell) so it's centered on wide
+       screens instead of landing wherever the next grid slot happens to be. -->
+  <div class="col-12" th:if="${guestLimited}">
+    <div class="card text-center mx-auto mt-2 mb-4" style="max-width: 460px; border: 2px dashed #adb5bd; background: rgba(0,0,0,0.03);">
+      <div class="card-body d-flex flex-column align-items-center py-4">
+        <i class="bi bi-lock-fill" style="font-size: 2rem; color: #6c757d;"></i>
+        <h5 class="mt-3 mb-1" style="color: var(--text) !important;">
+          <span th:text="${hiddenCount}"></span>+ more <span th:text="${hiddenCount == 1 ? 'property' : 'properties'}"></span>
+        </h5>
+        <p class="text-muted small mb-3">Log in to see the full list of available rooms.</p>
+        <a href="/login" class="btn btn-primary btn-sm">
+          <i class="bi bi-box-arrow-in-right"></i> Login to see more
+        </a>
+      </div>
+    </div>
   </div>
 </div>
