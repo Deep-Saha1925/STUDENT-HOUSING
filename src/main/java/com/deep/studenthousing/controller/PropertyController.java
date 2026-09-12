@@ -179,6 +179,18 @@ public class PropertyController {
         return "edit-property";
     }
 
+    @GetMapping("/owner/{ownerId}/delete/{propertyId}")
+    public String deleteProperty(
+            @PathVariable Long ownerId,
+            @PathVariable Long propertyId
+    ){
+        System.out.println("DELETE");
+        propertyService.deleteById(propertyId);
+        System.out.println("DELETE2");
+
+        return "redirect:/properties/owner/" + ownerId;
+    }
+
     @PostMapping("/owner/{ownerId}/edit/{propertyId}")
     public String updateProperty(@PathVariable Long ownerId,
                                  @PathVariable Long propertyId,

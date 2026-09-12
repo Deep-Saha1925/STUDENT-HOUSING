@@ -247,6 +247,11 @@
             box-shadow: 0 10px 28px rgba(255,94,98,0.36);
             opacity: 0.95;
         }
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         .back-link {
             display: inline-flex;
@@ -261,6 +266,56 @@
         }
         .back-link:hover { color: var(--accent); }
 
+        /* ── Use current location ── */
+        .locate-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-locate {
+            background: rgba(255,94,98,0.1);
+            border: 1.5px solid rgba(255,94,98,0.3);
+            color: var(--accent);
+            padding: 9px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-locate:hover:not(:disabled) {
+            background: rgba(255,94,98,0.18);
+            border-color: var(--accent);
+        }
+        .btn-locate:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        .btn-locate .spin {
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .locate-status {
+            font-size: 0.78rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .locate-status.ok { color: #16a34a; }
+        .locate-status.err { color: var(--accent); }
+        .locate-status.pending { color: var(--text-muted); }
+
         /* ── Mobile (≤575px) ── */
         @media (max-width: 575px) {
             .top-bar { padding: 10px 14px; }
@@ -270,6 +325,8 @@
             .add-card-header { padding: 18px 20px; }
             .add-card-header h4 { font-size: 1.4rem; }
             .btn-save { width: 100%; justify-content: center; }
+            .locate-row { flex-direction: column; align-items: stretch; }
+            .btn-locate { justify-content: center; width: 100%; }
         }
     </style>
 </head>
@@ -300,6 +357,19 @@
 
                     <form id="propertyForm" th:action="@{'/properties/owner/' + ${ownerId} + '/add'}" method="post" th:object="${property}" enctype="multipart/form-data">
 
+                        <!-- Use current location -->
+                        <div class="locate-row">
+                            <button type="button" class="btn-locate" id="locateBtn">
+                                <i class="bi bi-geo-alt-fill" id="locateIcon"></i>
+                                <span id="locateBtnText">Use My Current Location</span>
+                            </button>
+                            <span class="locate-status" id="locateStatus"></span>
+                        </div>
+
+                        <!-- Bound to Property.latitude / Property.longitude -->
+                        <input type="hidden" th:field="*{latitude}" id="latitude">
+                        <input type="hidden" th:field="*{longitude}" id="longitude">
+
                         <div class="field-row">
                             <div class="field-group">
                                 <label>Title</label>
@@ -307,13 +377,13 @@
                             </div>
                             <div class="field-group">
                                 <label>City</label>
-                                <input type="text" class="form-control" th:field="*{city}" placeholder="Enter city">
+                                <input type="text" class="form-control" th:field="*{city}" id="city" placeholder="Enter city">
                             </div>
                         </div>
 
                         <div class="field-group">
                             <label>Area</label>
-                            <input type="text" class="form-control" th:field="*{area}" placeholder="Enter area or neighborhood">
+                            <input type="text" class="form-control" th:field="*{area}" id="area" placeholder="Enter area or neighborhood">
                         </div>
 
                         <div class="field-group">
@@ -499,6 +569,88 @@
                 e.preventDefault();
                 alert('Select at least one option for "Who can rent this property?" (or check all three if it\u2019s open to everyone).');
             }
+        });
+    })();
+
+    // ── Use current location ──
+    // Grabs the browser's GPS coordinates, stores them in the hidden
+    // latitude/longitude inputs (bound to Property.latitude / Property.longitude),
+    // and reverse-geocodes them via OpenStreetMap Nominatim to prefill City/Area.
+    (function () {
+        const locateBtn     = document.getElementById('locateBtn');
+        const locateIcon    = document.getElementById('locateIcon');
+        const locateBtnText = document.getElementById('locateBtnText');
+        const locateStatus  = document.getElementById('locateStatus');
+        const latInput      = document.getElementById('latitude');
+        const lngInput       = document.getElementById('longitude');
+        const cityInput      = document.getElementById('city');
+        const areaInput      = document.getElementById('area');
+
+        function setStatus(text, kind) {
+            locateStatus.textContent = text;
+            locateStatus.className = 'locate-status' + (kind ? ' ' + kind : '');
+        }
+
+        function setBusy(busy) {
+            locateBtn.disabled = busy;
+            locateIcon.className = busy ? 'bi bi-arrow-repeat spin' : 'bi bi-geo-alt-fill';
+            locateBtnText.textContent = busy ? 'Locating…' : 'Use My Current Location';
+        }
+
+        async function reverseGeocode(lat, lon) {
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error('Reverse geocoding failed');
+            return res.json();
+        }
+
+        locateBtn.addEventListener('click', () => {
+            if (!('geolocation' in navigator)) {
+                setStatus('Geolocation not supported by your browser', 'err');
+                return;
+            }
+
+            setBusy(true);
+            setStatus('Requesting location…', 'pending');
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                latInput.value = lat;
+                lngInput.value = lon;
+
+                try {
+                    setStatus('Looking up address…', 'pending');
+                    const data = await reverseGeocode(lat, lon);
+                    const addr = data.address || {};
+
+                    // Only fill City/Area if the owner hasn't already typed something in.
+                    const city = addr.city || addr.town || addr.village || addr.county || '';
+                    const area = addr.suburb || addr.neighbourhood || addr.road || '';
+
+                    if (city && !cityInput.value.trim()) cityInput.value = city;
+                    if (area && !areaInput.value.trim()) areaInput.value = area;
+
+                    setStatus('Location captured ✓', 'ok');
+                } catch (err) {
+                    // Coordinates are already saved even if the address lookup fails.
+                    setStatus('Location captured, address lookup failed', 'ok');
+                } finally {
+                    setBusy(false);
+                }
+            }, (error) => {
+                setBusy(false);
+                let msg = 'Could not get location';
+                if (error.code === error.PERMISSION_DENIED) msg = 'Location permission denied';
+                else if (error.code === error.POSITION_UNAVAILABLE) msg = 'Location unavailable';
+                else if (error.code === error.TIMEOUT) msg = 'Location request timed out';
+                setStatus(msg, 'err');
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
         });
     })();
 </script>

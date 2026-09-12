@@ -103,4 +103,7 @@ public class PropertyService {
     }
 
 
+    public void deleteById(Long propertyId) {
+        propertyRepository.deleteById(propertyId);
+    }
 }
