@@ -1,0 +1,19 @@
+# Never let secrets or local-only files into the build context
+.env
+.env.example
+
+# Build artifacts — the Docker build compiles fresh, doesn't need these
+target/
+
+# IDE / VCS metadata — irrelevant to the build, just bloats context
+.idea/
+.git/
+.gitignore
+.gitattributes
+*.md
+
+# Not needed inside the Docker build — it uses the Maven image's own `mvn`,
+# not the wrapper script
+.mvn/
+mvnw
+mvnw.cmd
