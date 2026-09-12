@@ -351,8 +351,19 @@
             .notif-dot { animation: none; }
         }
 
-        /* ── Mobile (≤575px) ── */
-        @media (max-width: 575px) {
+        /* Groups multi-badge cell content (e.g. both Monthly + Daily rent
+           badges) into one wrapped, gapped unit — applies at every width,
+           not just mobile, since the badges can wrap on any narrower table
+           column regardless of overall viewport size. */
+        .table-responsive table td .cell-value {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        /* ── Mobile / tablet (≤991px) ── */
+        @media (max-width: 991px) {
             .navbar-brand { font-size: 1.05rem; }
             .welcome-text { display: none; } /* saves space next to the nav buttons on a phone */
             .navbar .container-fluid { gap: 6px !important; }
@@ -418,15 +429,6 @@
                 color: var(--text-muted);
                 text-align: left;
                 flex-shrink: 0;
-            }
-            /* Groups multi-badge cell content (e.g. both Monthly + Daily rent
-               badges) into one right-aligned unit instead of letting each
-               badge become its own flex item and spread across the row. */
-            .table-responsive table td .cell-value {
-                display: inline-flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                justify-content: flex-end;
             }
             /* Actions cell has two buttons — a left label + right-aligned pair
                reads awkwardly, so this one drops the flex/label layout and just
@@ -667,4 +669,4 @@
     }
 </script>
 </body>
-</html>UI for
+</html>
