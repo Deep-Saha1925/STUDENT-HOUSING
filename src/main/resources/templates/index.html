@@ -555,8 +555,9 @@
         }
 
         #splash-logo {
-            width: 72px;
-            height: 72px;
+            height: 160px;
+            width: auto;
+            max-width: 80vw; /* stays contained on narrow phones regardless of the logo's aspect ratio */
             margin-bottom: 16px;
             opacity: 0;
             transform: scale(0.5) translateY(12px);
@@ -672,7 +673,7 @@
 
 <!-- ── Splash Screen ── -->
 <div id="splash">
-    <img id="splash-logo" th:src="@{/logo.png}" height="100px" alt="logo">
+    <img id="splash-logo" th:src="@{/logo.png}" alt="logo">
     <div class="splash-title">Student Housing</div>
     <div class="splash-sub">Finding your perfect home…</div>
 </div>
