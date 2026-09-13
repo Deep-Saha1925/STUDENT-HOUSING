@@ -358,7 +358,12 @@
                 <h5 th:text="${prop.title}">Property Title</h5>
                 <p><strong>City:</strong> <span th:text="${prop.city}"></span></p>
                 <p><strong>Area:</strong> <span th:text="${prop.area}"></span></p>
-                <p><strong>Rent (₹):</strong> <span th:text="${prop.rent}"></span></p>
+                <p>
+                    <strong>Rent:</strong>
+                    <span th:if="${prop.availableMonthly}" th:text="'₹ ' + ${prop.monthlyRent} + '/mo'"></span>
+                    <span th:if="${prop.availableMonthly and prop.availableDaily}"> &nbsp;|&nbsp; </span>
+                    <span th:if="${prop.availableDaily}" th:text="'₹ ' + ${prop.dailyRent} + '/day'"></span>
+                </p>
             </div>
         </div>
 
