@@ -1067,72 +1067,72 @@
 
 
             .navbar .ms-auto {
-    <!-- ── Table card ── -->
-    <div class="dash-card animate__animated animate__fadeInUp">
-        <div class="table-responsive">
+            <!-- ── Table card ── -->
+            <div class="dash-card animate__animated animate__fadeInUp">
+            <div class="table-responsive">
             <table class="table">
-                <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>City</th>
-                    <th>Area</th>
-                    <th>Rent (₹)</th>
-                    <th>For</th>
-                    <th>Available</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
+            <thead>
+            <tr>
+            <th>Title</th>
+            <th>City</th>
+            <th>Area</th>
+            <th>Rent (₹)</th>
+            <th>For</th>
+            <th>Available</th>
+            <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
 
-                <tr th:each="p : ${properties}">
-                    <td data-label="Title" th:text="${p.title}"></td>
-                    <td data-label="City" th:text="${p.city}"></td>
-                    <td data-label="Area" th:text="${p.area}"></td>
-                    <td data-label="Rent">
-                        <span class="cell-value">
-                            <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent} + '/mo'" th:if="${p.availableMonthly}"></span> <span class="badge-rent" th:text="'₹ ' + ${p.dailyRent} + '/day'" th:if="${p.availableDaily}"></span>
-                        </span>
-                    </td>
-                    <td data-label="For">
-                        <span th:if="${p.openToAllGenders}" class="text-muted small">Everyone</span>
-                        <span th:unless="${p.openToAllGenders}" class="small">
-                            <span th:if="${p.allowedForMale}">M</span><span th:if="${p.allowedForFemale}">F</span><span th:if="${p.allowedForFamily}">Fam</span>
-                        </span>
-                    </td>
-                    <td data-label="Available">
-                        <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
-                            <input type="hidden" name="_method" value="patch"/>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="available"
-                                       th:checked="${p.available}"
-                                       onchange="this.form.submit()">
-                            </div>
-                        </form>
-                    </td>
-                    <td data-label="Actions" class="td-actions">
-                        <a th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}" class="btn-edit">
-                            <i class="bi bi-pencil-square"></i> Edit
-                        </a>
-                        <a th:href="@{'/properties/owner/' + ${ownerId} + '/bookings/' + ${p.id}}" class="btn-bookings">
-                            <i class="bi bi-calendar-week"></i> Bookings
-                            <span class="notif-dot" th:if="${pendingCounts.get(p.id)} != null" th:text="${pendingCounts.get(p.id)}"></span>
-                        </a>
-                    </td>
-                </tr>
+            <tr th:each="p : ${properties}">
+            <td data-label="Title" th:text="${p.title}"></td>
+            <td data-label="City" th:text="${p.city}"></td>
+            <td data-label="Area" th:text="${p.area}"></td>
+            <td data-label="Rent">
+            <span class="cell-value">
+            <span class="badge-rent" th:text="'₹ ' + ${p.monthlyRent} + '/mo'" th:if="${p.availableMonthly}"></span> <span class="badge-rent" th:text="'₹ ' + ${p.dailyRent} + '/day'" th:if="${p.availableDaily}"></span>
+            </span>
+            </td>
+            <td data-label="For">
+            <span th:if="${p.openToAllGenders}" class="text-muted small">Any</span>
+            <span th:unless="${p.openToAllGenders}" class="small">
+            <span th:if="${p.allowedForMale}">Male</span><span th:if="${p.allowedForMale and (p.allowedForFemale or p.allowedForFamily)}">, </span><span th:if="${p.allowedForFemale}">Female</span><span th:if="${p.allowedForFemale and p.allowedForFamily}">, </span><span th:if="${p.allowedForFamily}">Family</span>
+            </span>
+            </td>
+            <td data-label="Available">
+            <form th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}" method="post">
+            <input type="hidden" name="_method" value="patch"/>
+            <div class="form-check form-switch">
+            <input class="form-check-input"
+            type="checkbox"
+            name="available"
+            th:checked="${p.available}"
+            onchange="this.form.submit()">
+            </div>
+            </form>
+            </td>
+            <td data-label="Actions" class="td-actions">
+            <a th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}" class="btn-edit">
+            <i class="bi bi-pencil-square"></i> Edit
+            </a>
+            <a th:href="@{'/properties/owner/' + ${ownerId} + '/bookings/' + ${p.id}}" class="btn-bookings">
+            <i class="bi bi-calendar-week"></i> Bookings
+            <span class="notif-dot" th:if="${pendingCounts.get(p.id)} != null" th:text="${pendingCounts.get(p.id)}"></span>
+            </a>
+            </td>
+            </tr>
 
-                <!-- Empty state -->
-                <tr th:if="${#lists.isEmpty(properties)}">
-                    <td colspan="7">
-                        <div class="empty-state">
-                            <i class="bi bi-house-slash d-block"></i>
-                            No properties listed yet. Add your first one below!
-                        </div>
-                    </td>
-                </tr>
+            <!-- Empty state -->
+            <tr th:if="${#lists.isEmpty(properties)}">
+            <td colspan="7">
+            <div class="empty-state">
+            <i class="bi bi-house-slash d-block"></i>
+            No properties listed yet. Add your first one below!
+            </div>
+            </td>
+            </tr>
 
-                width: 100%;
+            width: 100%;
 
                 display: flex;
 
