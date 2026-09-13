@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/student_housing_logo.svg" width="500" alt="Student Housing Logo"/>
+<img src="assets/logo.png" width="500" alt="Student Housing Logo"/>
 
 <h1>Student Housing Management System</h1>
 <h3>A web-based platform for students, owners, and administrators</h3>
