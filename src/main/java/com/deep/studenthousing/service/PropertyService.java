@@ -27,10 +27,6 @@ public class PropertyService {
         this.geoCodingService = geoCodingService;
     }
 
-//    public void save(Property property) {
-//        propertyRepository.save(property);
-//    }
-
     public void save(Property property){
         if(property.getLatitude() == null && property.getCity() != null
                 && !property.getCity().isBlank()){
