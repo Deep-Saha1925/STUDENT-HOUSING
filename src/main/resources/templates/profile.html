@@ -350,6 +350,8 @@
             <div class="divider"></div>
             <p class="section-title">
                 <i class="bi bi-house-door"></i> Properties Listed
+                <span style="font-size: 0.85em; font-weight: 400; color: var(--text-muted);"
+                      th:text="'(' + ${#lists.size(user.properties)} + ')'"></span>
             </p>
             <div th:if="${#lists.isEmpty(user.properties)}">
                 <p class="empty-msg">No properties listed yet.</p>
