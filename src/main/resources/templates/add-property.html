@@ -213,6 +213,65 @@
             cursor: pointer;
         }
 
+        /* ── Camera capture ── */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .camera-modal.show { display: flex; }
+        .camera-modal-content {
+            background: var(--card-bg, #fff);
+            padding: 16px;
+            border-radius: 14px;
+            max-width: 92vw;
+            text-align: center;
+        }
+        #cameraVideo {
+            max-width: 80vw;
+            max-height: 60vh;
+            border-radius: 10px;
+            background: #000;
+            display: block;
+        }
+        .camera-controls {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .preview-thumb {
+            position: relative;
+            width: 70px;
+            height: 70px;
+        }
+        .preview-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .preview-thumb .remove-preview-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            font-size: 0.7rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+        }
+
         .field-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -454,7 +513,27 @@
 
                         <div class="field-group">
                             <label>Upload Images</label>
-                            <input type="file" class="form-control" id="images" name="images" multiple required>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <input type="file" class="form-control" id="images" name="images" accept="image/*" multiple required style="flex:1; min-width:180px;">
+                                <button type="button" id="takePhotoBtn" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-camera-fill"></i> Take Photo
+                                </button>
+                            </div>
+                            <div id="imagePreviewList" class="d-flex flex-wrap gap-2 mt-2"></div>
+                        </div>
+
+                        <!-- Live camera capture modal — hidden until "Take Photo" is clicked -->
+                        <div id="cameraModal" class="camera-modal">
+                            <div class="camera-modal-content">
+                                <video id="cameraVideo" autoplay playsinline muted></video>
+                                <canvas id="cameraCanvas" style="display:none;"></canvas>
+                                <div class="camera-controls">
+                                    <button type="button" id="captureBtn" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-camera"></i> Capture
+                                    </button>
+                                    <button type="button" id="closeCameraBtn" class="btn btn-secondary btn-sm">Cancel</button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="text-center mt-4">
@@ -552,6 +631,97 @@
                 { enableHighAccuracy: true, timeout: 10000 }
             );
         });
+
+        // ── Live camera capture, merged with picked files ──
+        // <input type="file"> only lets us fully replace its FileList, never
+        // append to it — so we keep our own running array of File objects
+        // (from both the picker and the camera) and rebuild the input's
+        // FileList from that array via the DataTransfer trick every time it
+        // changes. This lets "pick some files" + "take a photo" + "pick more"
+        // all combine into one upload instead of the later action wiping out
+        // the earlier one.
+        (function () {
+            const imagesInput   = document.getElementById('images');
+            const takePhotoBtn  = document.getElementById('takePhotoBtn');
+            const previewList   = document.getElementById('imagePreviewList');
+            const modal         = document.getElementById('cameraModal');
+            const video         = document.getElementById('cameraVideo');
+            const canvas        = document.getElementById('cameraCanvas');
+            const captureBtn    = document.getElementById('captureBtn');
+            const closeCameraBtn = document.getElementById('closeCameraBtn');
+            let stream = null;
+            let allFiles = [];
+
+            function syncInputFiles() {
+                const dt = new DataTransfer();
+                allFiles.forEach(f => dt.items.add(f));
+                imagesInput.files = dt.files;
+            }
+
+            function renderPreviews() {
+                previewList.innerHTML = '';
+                allFiles.forEach((file, idx) => {
+                    const url = URL.createObjectURL(file);
+                    const wrap = document.createElement('div');
+                    wrap.className = 'preview-thumb';
+                    wrap.innerHTML =
+                        '<img src="' + url + '" alt="">' +
+                        '<button type="button" class="remove-preview-btn" data-idx="' + idx + '">&times;</button>';
+                    previewList.appendChild(wrap);
+                });
+                previewList.querySelectorAll('.remove-preview-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        allFiles.splice(parseInt(btn.dataset.idx, 10), 1);
+                        syncInputFiles();
+                        renderPreviews();
+                    });
+                });
+            }
+
+            // Picking files the normal way still works — merges into the tracked list
+            imagesInput.addEventListener('change', () => {
+                allFiles = allFiles.concat(Array.from(imagesInput.files));
+                syncInputFiles();
+                renderPreviews();
+            });
+
+            takePhotoBtn.addEventListener('click', async () => {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert("Camera access isn't supported in this browser. Please upload a photo instead.");
+                    return;
+                }
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    video.srcObject = stream;
+                    modal.classList.add('show');
+                } catch (err) {
+                    alert("Couldn't access the camera (" + err.message + "). You can still upload a photo instead.");
+                }
+            });
+
+            captureBtn.addEventListener('click', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                canvas.toBlob((blob) => {
+                    const file = new File([blob], 'property-photo-' + Date.now() + '.jpg', { type: 'image/jpeg' });
+                    allFiles.push(file);
+                    syncInputFiles();
+                    renderPreviews();
+                    closeCamera();
+                }, 'image/jpeg', 0.9);
+            });
+
+            closeCameraBtn.addEventListener('click', closeCamera);
+
+            function closeCamera() {
+                modal.classList.remove('show');
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                    stream = null;
+                }
+            }
+        })();
 
         document.getElementById('propertyForm').addEventListener('submit', (e) => {
             const monthly = document.getElementById('availableMonthly').checked;
