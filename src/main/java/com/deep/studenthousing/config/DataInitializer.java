@@ -61,5 +61,4 @@ public class DataInitializer implements ApplicationRunner {
                     "Role on record: {}", adminEmail, existing.getId(), existing.getRole());
         }
     }
-
 }
