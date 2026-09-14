@@ -21,7 +21,13 @@ public class DataInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        String adminEmail = "admin@studenthousing.com";
+        // Falls back to the old hardcoded default if ADMIN_USERNAME isn't set,
+        // so existing deployments that only ever set ADMIN_PASSWORD keep working
+        // unchanged — this only takes effect once you add the new env var.
+        String adminEmail = System.getenv("ADMIN_USERNAME");
+        if (adminEmail == null || adminEmail.isBlank()) {
+            adminEmail = "admin@studenthousing.com";
+        }
         String adminPassword = System.getenv("ADMIN_PASSWORD");
 
         if (userRepository.findByEmail(adminEmail) == null) {
