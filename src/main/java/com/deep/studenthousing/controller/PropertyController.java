@@ -56,8 +56,17 @@ public class PropertyController {
             @RequestParam double lat,
             @RequestParam double lng,
             @RequestParam(defaultValue = "5") double radius,
-            Model model
+            Model model,
+            org.springframework.security.core.Authentication authentication
     ){
+        // Location search is a logged-in-only feature. SecurityConfig permits
+        // /properties/** broadly (property detail pages are public), so the
+        // gate has to live here rather than in the filter chain.
+        if (authentication == null) {
+            model.addAttribute("properties", List.of());
+            model.addAttribute("loginRequired", true);
+            return "fragments/property-list :: propertyList";
+        }
         try {
             List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
             model.addAttribute("properties", nearby);
@@ -78,8 +87,13 @@ public class PropertyController {
     public List<PropertyMapDTO> nearbyPropertiesForMap(
             @RequestParam double lat,
             @RequestParam double lng,
-            @RequestParam(defaultValue = "5") double radius
+            @RequestParam(defaultValue = "5") double radius,
+            org.springframework.security.core.Authentication authentication
     ) {
+        // Same gate as /nearby above — don't leak property coordinates to guests.
+        if (authentication == null) {
+            return List.of();
+        }
         try {
             List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
             return nearby.stream()
@@ -184,9 +198,7 @@ public class PropertyController {
             @PathVariable Long ownerId,
             @PathVariable Long propertyId
     ){
-        System.out.println("DELETE");
         propertyService.deleteById(propertyId);
-        System.out.println("DELETE2");
 
         return "redirect:/properties/owner/" + ownerId;
     }
