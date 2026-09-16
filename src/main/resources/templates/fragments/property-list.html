@@ -35,8 +35,22 @@
   </div>
 
   <!-- Handle empty search -->
-  <div th:if="${#lists.isEmpty(properties)}" class="text-center text-muted" style="color: var(--text) !important">
+  <div th:if="${#lists.isEmpty(properties) and !loginRequired}" class="text-center text-muted" style="color: var(--text) !important">
     🚫 No properties found for your search.
+  </div>
+
+  <!-- Shown when a guest tries to use the logged-in-only location search -->
+  <div th:if="${loginRequired}" class="col-12">
+    <div class="card text-center mx-auto mt-2 mb-4" style="max-width: 460px; border: 2px dashed #adb5bd; background: rgba(0,0,0,0.03);">
+      <div class="card-body d-flex flex-column align-items-center py-4">
+        <i class="bi bi-geo-alt-fill" style="font-size: 2rem; color: #6c757d;"></i>
+        <h5 class="mt-3 mb-1" style="color: var(--text) !important;">Login to search nearby</h5>
+        <p class="text-muted small mb-3">Finding properties near your location is available to logged-in users.</p>
+        <a href="/login" class="btn btn-primary btn-sm">
+          <i class="bi bi-box-arrow-in-right"></i> Login
+        </a>
+      </div>
+    </div>
   </div>
 
   <!-- Guest preview cap: shown only when the caller (HomeController/SearchController)
