@@ -27,6 +27,11 @@ public class HomeController {
 
         model.addAttribute("message", "Welcome to Student Housing Finder");
 
+        // Drives the "Find Near Me" bar on the landing page — the feature is
+        // gated to logged-in users (the UI shows a login prompt otherwise, and
+        // PropertyController re-checks server-side).
+        model.addAttribute("loggedIn", authentication != null);
+
         if (city != null && city.trim().isEmpty()) city = null;
 
         Double rent = null;
