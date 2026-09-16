@@ -441,6 +441,69 @@
             gap: 7px;
         }
 
+        /* ── Find Near Me ── */
+        .nearme-wrap {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            transition: background 0.35s ease;
+        }
+        .nearme-wrap label {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin: 0;
+        }
+        .nearme-locked-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            flex: 1;
+            min-width: 180px;
+        }
+        .radius-select {
+            background: var(--input-bg);
+            border: 1.5px solid var(--border);
+            color: var(--text);
+            border-radius: 9px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: background 0.35s;
+        }
+        .btn-nearme {
+            background: transparent;
+            border: 1.5px solid var(--accent);
+            color: var(--accent);
+            padding: 9px 18px;
+            font-size: 0.87rem;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-family: 'DM Sans', sans-serif;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+        .btn-nearme:hover {
+            background: var(--accent);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .btn-nearme.loading { opacity: 0.7; pointer-events: none; }
+        #locationStatus { font-size: 0.79rem; color: var(--text-muted); }
+
         .btn-search:hover {
             opacity: 0.9;
             transform: translateY(-1px);
@@ -637,6 +700,17 @@
             .search-wrap .form-control { width: 100%; min-width: unset; }
             .btn-search { width: 100%; }
 
+            /* Near Me bar stacks so the radius select and button stay tappable */
+            .nearme-wrap {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 14px;
+                gap: 10px;
+            }
+            .nearme-wrap .radius-select { width: 100%; }
+            .btn-nearme { width: 100%; }
+            .nearme-locked-text, #locationStatus { text-align: center; }
+
             /* Listings header stacks */
             .listings-header {
                 flex-direction: column !important;
@@ -674,8 +748,8 @@
 <!-- ── Splash Screen ── -->
 <div id="splash">
     <img id="splash-logo" th:src="@{/logo.png}" alt="logo">
-<!--    <div class="splash-title">Student Housing</div>-->
-<!--    <div class="splash-sub">Finding your perfect home…</div>-->
+    <!--    <div class="splash-title">Student Housing</div>-->
+    <!--    <div class="splash-sub">Finding your perfect home…</div>-->
 </div>
 
 <!-- ── Navbar ── -->
@@ -807,6 +881,36 @@
             </button>
         </form>
 
+        <!-- ── Find Near Me (logged-in users only) ── -->
+        <div class="nearme-wrap">
+            <i class="bi bi-geo-alt-fill" style="color:var(--accent);font-size:1.1rem;flex-shrink:0;"></i>
+
+            <!-- Logged in: fully functional location search -->
+            <th:block th:if="${loggedIn}">
+                <label>Search within:</label>
+                <select class="radius-select" id="radiusSelect">
+                    <option value="2">2 km</option>
+                    <option value="5" selected>5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="20">20 km</option>
+                </select>
+                <button type="button" class="btn-nearme" id="nearMeBtn">
+                    <i class="bi bi-crosshair"></i> Find Near Me
+                </button>
+                <span id="locationStatus"></span>
+            </th:block>
+
+            <!-- Guest: same bar, but prompts login instead of doing the search -->
+            <th:block th:unless="${loggedIn}">
+                <span class="nearme-locked-text">
+                    Search for properties near your current location — available once you log in.
+                </span>
+                <a href="/login" class="btn-nearme">
+                    <i class="bi bi-box-arrow-in-right"></i> Login to use
+                </a>
+            </th:block>
+        </div>
+
         <div id="propertyContainer">
             <div th:replace="fragments/property-list :: propertyList"></div>
         </div>
@@ -876,6 +980,60 @@
                 })
                 .catch(err => console.error("Error fetching properties:", err));
         });
+
+        /* ── Find Near Me ──
+           The button only exists in the DOM for logged-in users (guests get a
+           login link instead), so this wires up only when it's actually there. */
+        const nearMeBtn = document.getElementById("nearMeBtn");
+        if (nearMeBtn) {
+            const statusEl = document.getElementById("locationStatus");
+
+            nearMeBtn.addEventListener("click", function () {
+                if (!navigator.geolocation) {
+                    statusEl.textContent = "Location isn't supported by your browser.";
+                    return;
+                }
+
+                const radius = document.getElementById("radiusSelect").value;
+                nearMeBtn.classList.add("loading");
+                nearMeBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Locating…';
+                statusEl.textContent = "Getting your location…";
+
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        statusEl.textContent = "Searching within " + radius + " km…";
+
+                        fetch(`/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`)
+                            .then(res => res.text())
+                            .then(html => {
+                                document.getElementById("propertyContainer").innerHTML = html;
+                                statusEl.textContent = "Showing properties within " + radius + " km of you.";
+                                resetNearMeBtn();
+                            })
+                            .catch(err => {
+                                console.error("Error fetching nearby properties:", err);
+                                statusEl.textContent = "Couldn't load nearby properties. Please try again.";
+                                resetNearMeBtn();
+                            });
+                    },
+                    function (error) {
+                        let reason = "something went wrong";
+                        if (error.code === error.PERMISSION_DENIED) reason = "location permission was denied";
+                        else if (error.code === error.TIMEOUT) reason = "the request timed out";
+                        statusEl.textContent = "Couldn't get your location (" + reason + ").";
+                        resetNearMeBtn();
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            });
+
+            function resetNearMeBtn() {
+                nearMeBtn.classList.remove("loading");
+                nearMeBtn.innerHTML = '<i class="bi bi-crosshair"></i> Find Near Me';
+            }
+        }
     });
 </script>
 </body>
