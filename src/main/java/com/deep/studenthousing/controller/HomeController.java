@@ -45,6 +45,7 @@ public class HomeController {
             List<Property> properties = propertyService.searchProperties(city, rent, null, null)
                     .stream()
                     .filter(Property::isAvailable)
+                    .limit(6)
                     .toList();
 
             // Guests (not logged in) only get a preview — the rest is behind login.
