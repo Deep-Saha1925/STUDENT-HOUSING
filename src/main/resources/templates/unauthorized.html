@@ -173,6 +173,19 @@
         }
         .btn-unauth-secondary:hover { color: var(--text); border-color: var(--text); }
 
+        /* "Go Back" floats to the top-left corner, mirroring the theme toggle's
+           top-right position, instead of sitting in-card next to "Home" — it's
+           a navigation utility, not an equally-weighted call to action. */
+        .btn-back-top {
+            position: fixed;
+            top: 18px; left: 18px;
+            z-index: 999;
+        }
+        @media (max-width: 575px) {
+            .btn-back-top { top: 12px; left: 12px; padding: 8px 14px; font-size: 0.8rem; }
+            .btn-back-top .btn-back-label { display: none; }
+        }
+
         @media (max-width: 575px) {
             .unauth-card { padding: 32px 24px; }
             .unauth-actions { flex-direction: column; }
@@ -186,6 +199,10 @@
     <i class="bi bi-moon-fill" id="themeIcon"></i>
 </button>
 
+<a href="javascript:history.back()" class="btn-unauth btn-unauth-secondary btn-back-top">
+    <i class="bi bi-arrow-left-circle"></i> <span class="btn-back-label">Go Back</span>
+</a>
+
 <div class="unauth-card animate__animated">
     <div class="unauth-icon-wrap">
         <i class="bi bi-shield-lock-fill"></i>
@@ -195,9 +212,6 @@
     <p class="unauth-message" th:text="${errorMessage} ?: 'You don\'t have permission to access this resource.'"></p>
 
     <div class="unauth-actions">
-        <a href="javascript:history.back()" class="btn-unauth btn-unauth-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Go Back
-        </a>
         <a href="/" class="btn-unauth btn-unauth-primary">
             <i class="bi bi-house-door-fill"></i> Home
         </a>
