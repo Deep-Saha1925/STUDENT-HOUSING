@@ -272,19 +272,17 @@
             background: var(--border);
         }
         .back-btn {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 7px;
+            gap: 6px;
             color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-decoration: none;
             border: 1.5px solid var(--border);
-            border-radius: 10px;
-            padding: 10px;
+            border-radius: 8px;
+            padding: 7px 13px;
             transition: all 0.2s;
             font-weight: 500;
-            width: 100%;
         }
         .back-btn:hover {
             color: var(--text);
@@ -305,6 +303,10 @@
         .login-prompt a:hover { opacity: 0.8; }
 
         /* ── Mobile (≤400px) ── */
+        @media (max-width: 600px) {
+            .back-btn-label { display: none; }
+        }
+
         @media (max-width: 400px) {
             .register-card { padding: 28px 20px; border-radius: 16px; }
             .register-card h2 { font-size: 1.7rem; }
@@ -317,10 +319,15 @@
 
 <!-- ── Fixed top bar: brand + theme toggle ── -->
 <div class="top-bar">
-    <a href="/" class="brand-link">
-        <span class="brand-dot"></span>
-        Student Housing
-    </a>
+    <div class="d-flex align-items-center gap-3">
+        <a th:href="@{/admin/dashboard}" class="back-btn">
+            <i class="bi bi-arrow-left"></i> <span class="back-btn-label">Back to Dashboard</span>
+        </a>
+        <a href="/" class="brand-link">
+            <span class="brand-dot"></span>
+            Student Housing
+        </a>
+    </div>
     <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle dark/light mode">
         <i class="bi bi-moon-fill" id="themeIcon"></i>
     </button>
@@ -378,12 +385,6 @@
             </button>
 
         </form>
-
-        <div class="divider">or</div>
-
-        <a th:href="@{/admin/dashboard}" class="back-btn">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
 
     </div>
 </div>
