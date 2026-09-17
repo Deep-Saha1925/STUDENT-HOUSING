@@ -75,7 +75,7 @@
             top: 0; left: 0; right: 0;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: space-between;
             padding: 12px 18px;
             z-index: 999;
         }
@@ -278,6 +278,7 @@
             font-family: 'DM Sans', sans-serif;
         }
         .btn-back:hover { color: var(--text); border-color: var(--text); }
+        .btn-back .btn-back-label { white-space: nowrap; }
 
         .divider { height: 1px; background: var(--border); margin: 4px 0 22px; }
 
@@ -288,7 +289,8 @@
             .avatar-wrap { width: 68px; height: 68px; font-size: 2rem; }
             .profile-body { padding: 18px 16px 16px; }
             .info-section { padding: 14px 16px; }
-            .btn-back { width: 100%; justify-content: center; }
+            .btn-back { padding: 7px 12px; font-size: 0.78rem; }
+            .btn-back .btn-back-label { display: none; }
         }
 
         /* ── Very small ── */
@@ -300,7 +302,11 @@
 </head>
 <body>
 
+<!-- ── Top bar (toggle only — no brand needed on profile) ── -->
 <div class="top-bar">
+    <a href="javascript:history.back()" class="btn-back">
+        <i class="bi bi-arrow-left"></i> <span class="btn-back-label">Back</span>
+    </a>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="bi bi-moon-fill" id="themeIcon"></i>
     </button>
@@ -370,12 +376,8 @@
 
     </div>
 
-    <div class="text-center mb-4">
-        <a href="javascript:history.back()" class="btn-back">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
-    </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const toggleBtn = document.getElementById('themeToggle');
