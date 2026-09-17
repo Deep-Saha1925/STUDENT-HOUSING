@@ -48,7 +48,7 @@
             top: 0; left: 0; right: 0;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: space-between;
             padding: 12px 18px;
             z-index: 999;
         }
@@ -150,7 +150,6 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            margin-top: 20px;
             text-decoration: none;
             color: var(--text-muted);
             font-size: 0.85rem;
@@ -161,12 +160,16 @@
         @media (max-width: 575px) {
             .page-card { margin-top: 58px; padding: 20px; }
             .booking-row { flex-direction: column; align-items: flex-start; }
+            .back-link .back-link-label { display: none; }
         }
     </style>
 </head>
 <body>
 
 <div class="top-bar">
+    <a th:href="@{'/properties/owner/' + ${ownerId}}" class="back-link">
+        <i class="bi bi-arrow-left-circle"></i> <span class="back-link-label">Back to My Properties</span>
+    </a>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
         <i class="bi bi-moon-fill" id="themeIcon"></i>
     </button>
@@ -240,9 +243,6 @@
             </div>
         </div>
 
-        <a th:href="@{'/properties/owner/' + ${ownerId}}" class="back-link">
-            <i class="bi bi-arrow-left-circle"></i> Back to My Properties
-        </a>
     </div>
 </div>
 
