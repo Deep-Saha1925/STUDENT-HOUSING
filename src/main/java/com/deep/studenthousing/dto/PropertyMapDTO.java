@@ -8,6 +8,9 @@ public record PropertyMapDTO(
         double latitude,
         double longitude,
         double monthlyRent,
+        Double dailyRent,
+        boolean availableMonthly,
+        boolean availableDaily,
         boolean available,
         String thumbnailUrl
 ) {}
