@@ -175,6 +175,14 @@
     .btn-nearme.loading { opacity: 0.7; pointer-events: none; }
     #locationStatus { font-size: 0.79rem; color: var(--text-muted); }
 
+    .nearme-filters-note {
+      flex-basis: 100%; display: none; align-items: center; gap: 8px;
+      font-size: 0.78rem; color: var(--text-muted);
+      border-top: 1px dashed var(--border); padding-top: 10px;
+    }
+    .nearme-filters-note.active { display: flex; }
+    .nearme-filters-note i { color: var(--accent); }
+
     /* ── Map ── */
     #mapWrap {
       max-width: 820px; margin: 0 auto 24px; border-radius: 14px;
@@ -313,7 +321,7 @@
     </form>
   </div>
 
-  <div class="or-divider">or use your location</div>
+  <div class="or-divider">or use your location — rental type, max rent &amp; gender filters above apply here too</div>
 
   <!-- ── Near Me ── -->
   <div class="nearme-wrap">
@@ -329,6 +337,10 @@
       <i class="bi bi-crosshair"></i> Find Near Me
     </button>
     <span id="locationStatus"></span>
+    <div class="nearme-filters-note" id="nearMeFilters">
+      <i class="bi bi-funnel-fill"></i>
+      <span id="nearMeFiltersText"></span>
+    </div>
   </div>
 
   <!-- Map now sits below the Near Me bar, so it never pushes the button when it appears -->
@@ -367,6 +379,7 @@
       const rentalType = document.getElementById("rentalTypeSelect").value;
       const gender = document.getElementById("genderSelect").value;
       setStatus('');
+      lastCoords = null; // leaving Near Me mode
       hideMap(); // manual search replaces "near me" mode — the old map/pins no longer apply
       showLoading();
       fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}&rentalType=${encodeURIComponent(rentalType)}&gender=${encodeURIComponent(gender)}`)
@@ -374,6 +387,57 @@
               .catch(err => console.error("Search error:", err));
     });
   });
+
+  // Filters shared by manual search and Find Near Me
+  let lastCoords = null;   // remembered after a successful Near Me so filter changes can re-run it
+
+  function getFilters() {
+    return {
+      rentalType: document.getElementById('rentalTypeSelect').value,
+      rent:       document.getElementById('rentInput').value,
+      gender:     document.getElementById('genderSelect').value
+    };
+  }
+  function filterQuery(f) {
+    return `&rentalType=${encodeURIComponent(f.rentalType)}&rent=${encodeURIComponent(f.rent)}&gender=${encodeURIComponent(f.gender)}`;
+  }
+  function describeFilters(f) {
+    const parts = [];
+    if (f.rentalType) parts.push(f.rentalType === 'MONTHLY' ? 'Monthly rent' : 'Daily rent');
+    if (f.rent)       parts.push('up to ₹' + f.rent);
+    if (f.gender)     parts.push(f.gender.charAt(0) + f.gender.slice(1).toLowerCase());
+    return parts;
+  }
+  function updateFilterNote() {
+    const parts = describeFilters(getFilters());
+    const note = document.getElementById('nearMeFilters');
+    document.getElementById('nearMeFiltersText').textContent =
+      parts.length ? 'Filters applied: ' + parts.join(' · ') : '';
+    note.classList.toggle('active', parts.length > 0);
+  }
+
+  // While Near Me results are on screen, changing a filter refreshes them
+  // for the same location instead of silently going stale.
+  document.addEventListener('DOMContentLoaded', () => {
+    ['rentalTypeSelect', 'genderSelect', 'rentInput', 'radiusSelect'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => {
+        updateFilterNote();
+        if (lastCoords) runNearbySearch(lastCoords.lat, lastCoords.lng);
+      });
+    });
+    updateFilterNote();
+  });
+
+  function runNearbySearch(lat, lng) {
+    const radius = Number(document.getElementById('radiusSelect').value);
+    const f = getFilters();
+    const q = filterQuery(f);
+    renderNearbyMap(lat, lng, radius, q);
+    showLoading();
+    return fetch(`/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}${q}`)
+      .then(r => r.text())
+      .then(html => { setResults(html, radius, describeFilters(f)); });
+  }
 
   function findNearMe() {
     if (!navigator.geolocation) { setStatus('❌ Geolocation not supported.'); return; }
@@ -385,13 +449,12 @@
             pos => {
               const { latitude: lat, longitude: lng } = pos.coords;
               const radius = Number(document.getElementById('radiusSelect').value);
-              renderNearbyMap(lat, lng, radius);
+              lastCoords = { lat, lng };
               setStatus(`📍 Found you! Searching within ${radius} km…`);
-              showLoading();
-              fetch(`/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`)
-                      .then(r => r.text())
-                      .then(html => {
-                        setResults(html, radius); setStatus('');
+              updateFilterNote();
+              runNearbySearch(lat, lng)
+                      .then(() => {
+                        setStatus('');
                         btn.classList.remove('loading');
                         btn.innerHTML = '<i class="bi bi-crosshair"></i> Find Near Me';
                       })
@@ -418,9 +481,10 @@
         <p class="mt-3" style="color:var(--text-muted);font-size:0.88rem;">Finding properties…</p>
       </div>`;
   }
-  function setResults(htmlContent, radius) {
+  function setResults(htmlContent, radius, filterParts) {
+    const extra = (filterParts && filterParts.length) ? ' · ' + filterParts.join(' · ') : '';
     const badge = radius ? `<div class="result-mode-badge">
-      <i class="bi bi-geo-alt-fill"></i> Showing properties within ${radius} km of your location
+      <i class="bi bi-geo-alt-fill"></i> Within ${radius} km of your location${extra}
     </div>` : '';
     document.getElementById('propertyContainer').innerHTML = badge + htmlContent;
   }
@@ -454,11 +518,11 @@
     overlay.className = 'map-overlay';
     overlay.innerHTML = mode === 'loading'
             ? '<div><div class="spinner-border" role="status"></div><div class="mt-2">Loading nearby properties…</div></div>'
-            : '<div><i class="bi bi-emoji-frown" style="font-size:1.3rem;"></i><div class="mt-2">No properties found in this area. Try a larger radius.</div></div>';
+            : '<div><i class="bi bi-emoji-frown" style="font-size:1.3rem;"></i><div class="mt-2">No properties match your filters in this area. Try a larger radius or relax the filters.</div></div>';
     wrap.appendChild(overlay);
   }
 
-  function renderNearbyMap(userLat, userLng, radiusKm) {
+  function renderNearbyMap(userLat, userLng, radiusKm, filterQ) {
     document.getElementById('mapWrap').style.display = 'block';
 
     if (!map) {
@@ -507,7 +571,7 @@
       }).addTo(markerLayer).bindPopup('You are here');
 
       setMapOverlay('loading');
-      fetch(`/properties/nearby/map?lat=${userLat}&lng=${userLng}&radius=${radiusKm}`)
+      fetch(`/properties/nearby/map?lat=${userLat}&lng=${userLng}&radius=${radiusKm}${filterQ || ''}`)
               .then(r => r.json())
               .then(properties => {
                 plotGroupedMarkers(properties);
@@ -538,6 +602,13 @@
     return L.divIcon({ className: '', html, iconSize: [size, size], iconAnchor: [size / 2, size] });
   }
 
+  function priceText(p) {
+    const parts = [];
+    if (p.availableMonthly) parts.push(`₹${p.monthlyRent}/mo`);
+    if (p.availableDaily && p.dailyRent != null) parts.push(`₹${p.dailyRent}/day`);
+    return parts.join(' · ');
+  }
+
   function plotGroupedMarkers(properties) {
     const groups = {};
     properties.forEach(p => {
@@ -554,14 +625,14 @@
 
       if (count === 1) {
         marker.on('click', () => { window.location.href = `/properties/${group[0].id}`; });
-        marker.bindTooltip(group[0].title, { direction: 'top', offset: [0, -30] });
+        marker.bindTooltip(`${group[0].title} — ${priceText(group[0])}`, { direction: 'top', offset: [0, -30] });
       } else {
         const popupHtml = `<div style="font-family:'DM Sans',sans-serif;min-width:190px;">
         <strong>${count} listings here</strong>
         ${group.map(p => `
           <div style="margin-top:6px;padding-top:6px;border-top:1px solid #eee;">
             <a href="/properties/${p.id}" style="text-decoration:none;color:#ff5e62;font-weight:600;font-size:0.85rem;">${p.title}</a>
-            <div style="font-size:0.78rem;color:#777;">₹${p.monthlyRent}/mo ${p.available ? '' : '· unavailable'}</div>
+            <div style="font-size:0.78rem;color:#777;">${priceText(p)} ${p.available ? '' : '· unavailable'}</div>
           </div>`).join('')}
       </div>`;
         marker.bindPopup(popupHtml);
