@@ -77,9 +77,20 @@ public class PropertyService {
     }
 
     public List<Property> findNearBy(double lat, double lng, double radius) {
+        return findNearBy(lat, lng, radius, null, null, null);
+    }
+
+    /**
+     * Nearby search combined with the same filters as manual search.
+     * rentalType ("MONTHLY"/"DAILY"), rent (max, applied to the chosen rental
+     * type's price) and gender ("MALE"/"FEMALE"/"FAMILY") are all optional —
+     * null means "don't filter on this".
+     */
+    public List<Property> findNearBy(double lat, double lng, double radius,
+                                     String rentalType, Double rent, String gender) {
 
         // Step 1 — GPS based Haversine
-        List<Property> gpsResults = propertyRepository.findNearby(lat, lng, radius);
+        List<Property> gpsResults = propertyRepository.findNearby(lat, lng, radius, rentalType, rent, gender);
 
         if (!gpsResults.isEmpty()) {
             return gpsResults;
@@ -94,7 +105,7 @@ public class PropertyService {
             return List.of();
         }
 
-        List<Property> textResults = propertyRepository.findByCityOrArea(city, area);
+        List<Property> textResults = propertyRepository.findByCityOrArea(city, area, rentalType, rent, gender);
         return textResults;
     }
 
