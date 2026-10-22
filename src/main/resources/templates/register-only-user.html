@@ -313,7 +313,12 @@
             .top-bar { padding: 10px 14px; }
             .page-content { margin-top: 60px; }
         }
-    </style>
+        .pwd-match-msg { font-size: 0.78rem; margin: -8px 2px 12px; min-height: 0; display: none; }
+    .pwd-match-msg.show { display: block; }
+    .pwd-match-msg.error { color: #dc3545; }
+    .pwd-match-msg.ok { color: #198754; }
+    .form-control.mismatch { border-color: #dc3545 !important; }
+</style>
 </head>
 <body>
 
@@ -370,6 +375,16 @@
             </div>
 
             <div class="field-wrap">
+                <i class="bi bi-lock-fill field-icon"></i>
+                <!-- No name/th:field: confirmation is checked in the browser only and never submitted -->
+                <input type="password" class="form-control" id="confirmPasswordField" placeholder="Confirm Password" autocomplete="new-password" required>
+                <button type="button" class="pwd-toggle" id="confirmPwdToggle" tabindex="-1">
+                    <i class="bi bi-eye" id="confirmPwdIcon"></i>
+                </button>
+            </div>
+            <div class="pwd-match-msg" id="pwdMatchMsg" role="alert"></div>
+
+            <div class="field-wrap">
                 <i class="bi bi-people field-icon"></i>
                 <select class="form-control" th:field="*{role}" required>
                     <option value="">-- Select Role --</option>
@@ -416,6 +431,44 @@
         const isHidden = field.type === 'password';
         field.type = isHidden ? 'text' : 'password';
         icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+
+    // ── Confirm password (frontend-only check) ──
+    const pwdField     = document.getElementById('passwordField');
+    const confirmField = document.getElementById('confirmPasswordField');
+    const matchMsg     = document.getElementById('pwdMatchMsg');
+
+    document.getElementById('confirmPwdToggle').addEventListener('click', () => {
+        const icon = document.getElementById('confirmPwdIcon');
+        const isHidden = confirmField.type === 'password';
+        confirmField.type = isHidden ? 'text' : 'password';
+        icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+
+    function checkPasswordMatch() {
+        if (!confirmField.value) {
+            matchMsg.className = 'pwd-match-msg';
+            confirmField.classList.remove('mismatch');
+            return false;
+        }
+        const matches = pwdField.value === confirmField.value;
+        confirmField.classList.toggle('mismatch', !matches);
+        matchMsg.textContent = matches ? 'Passwords match' : 'Passwords do not match';
+        matchMsg.className = 'pwd-match-msg show ' + (matches ? 'ok' : 'error');
+        return matches;
+    }
+    pwdField.addEventListener('input', checkPasswordMatch);
+    confirmField.addEventListener('input', checkPasswordMatch);
+
+    pwdField.form.addEventListener('submit', (e) => {
+        if (pwdField.value !== confirmField.value) {
+            e.preventDefault();
+            checkPasswordMatch();
+            matchMsg.textContent = 'Passwords do not match';
+            matchMsg.className = 'pwd-match-msg show error';
+            confirmField.classList.add('mismatch');
+            confirmField.focus();
+        }
     });
 </script>
 </body>
