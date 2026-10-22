@@ -698,6 +698,7 @@
             }
             .search-wrap .bi-search { display: none !important; }
             .search-wrap .form-control { width: 100%; min-width: unset; }
+            .search-wrap .radius-select { width: 100%; }
             .btn-search { width: 100%; }
 
             /* Near Me bar stacks so the radius select and button stay tappable */
@@ -876,6 +877,11 @@
             <i class="bi bi-search text-muted d-none d-sm-block"></i>
             <input type="text"   id="cityInput" name="city" class="form-control" placeholder="City or area…">
             <input type="number" id="rentInput" name="rent" class="form-control" placeholder="Max rent (₹)">
+            <select id="rentalTypeSelect" class="radius-select" aria-label="Rental type">
+                <option value="">Any rental type</option>
+                <option value="MONTHLY">Monthly only</option>
+                <option value="DAILY">Daily only</option>
+            </select>
             <button type="submit" class="btn-search">
                 <i class="bi bi-sliders2"></i> Search
             </button>
@@ -981,10 +987,11 @@
 
             const city = document.getElementById("cityInput").value;
             const rent = document.getElementById("rentInput").value;
+            const rentalType = document.getElementById("rentalTypeSelect").value;
 
             showPropertyLoading("Searching properties…");
 
-            fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}`)
+            fetch(`/search?city=${encodeURIComponent(city)}&rent=${encodeURIComponent(rent)}&rentalType=${encodeURIComponent(rentalType)}`)
                 .then(res => res.text())
                 .then(html => {
                     document.getElementById("propertyContainer").innerHTML = html;
@@ -1011,6 +1018,9 @@
                 }
 
                 const radius = document.getElementById("radiusSelect").value;
+                // Same rental type / max rent filters as the search bar apply to Near Me
+                const rentalType = document.getElementById("rentalTypeSelect").value;
+                const maxRent = document.getElementById("rentInput").value;
                 nearMeBtn.classList.add("loading");
                 nearMeBtn.disabled = true;
                 nearMeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Locating…';
@@ -1024,11 +1034,13 @@
                         nearMeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Searching…';
                         showPropertyLoading("Finding properties near you…");
 
-                        fetch(`/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}`)
+                        fetch(`/properties/nearby?lat=${lat}&lng=${lng}&radius=${radius}&rentalType=${encodeURIComponent(rentalType)}&rent=${encodeURIComponent(maxRent)}`)
                             .then(res => res.text())
                             .then(html => {
                                 document.getElementById("propertyContainer").innerHTML = html;
-                                statusEl.textContent = "Showing properties within " + radius + " km of you.";
+                                statusEl.textContent = "Showing properties within " + radius + " km of you" +
+                                    (rentalType ? " · " + (rentalType === "MONTHLY" ? "Monthly" : "Daily") + " rent" : "") +
+                                    (maxRent ? " · up to ₹" + maxRent : "") + ".";
                                 resetNearMeBtn();
                             })
                             .catch(err => {
