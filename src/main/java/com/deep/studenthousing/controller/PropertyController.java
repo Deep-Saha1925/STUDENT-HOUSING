@@ -56,6 +56,9 @@ public class PropertyController {
             @RequestParam double lat,
             @RequestParam double lng,
             @RequestParam(defaultValue = "5") double radius,
+            @RequestParam(value = "rentalType", required = false) String rentalType,
+            @RequestParam(value = "rent", required = false) String rentStr,
+            @RequestParam(value = "gender", required = false) String gender,
             Model model,
             org.springframework.security.core.Authentication authentication
     ){
@@ -68,7 +71,8 @@ public class PropertyController {
             return "fragments/property-list :: propertyList";
         }
         try {
-            List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
+            List<Property> nearby = propertyService.findNearBy(lat, lng, radius,
+                    cleanRentalType(rentalType), parseRent(rentStr), cleanGender(gender));
             model.addAttribute("properties", nearby);
             model.addAttribute("nearbyMode", true);
             model.addAttribute("searchedRadius", radius);
@@ -81,6 +85,25 @@ public class PropertyController {
         }
     }
 
+    // Blank / unknown filter values mean "no filter" for the nearby search.
+    private String cleanRentalType(String rentalType) {
+        if (rentalType == null) return null;
+        String t = rentalType.trim().toUpperCase();
+        return (t.equals("MONTHLY") || t.equals("DAILY")) ? t : null;
+    }
+
+    private String cleanGender(String gender) {
+        if (gender == null) return null;
+        String g = gender.trim().toUpperCase();
+        return (g.equals("MALE") || g.equals("FEMALE") || g.equals("FAMILY")) ? g : null;
+    }
+
+    private Double parseRent(String rentStr) {
+        if (rentStr == null || rentStr.isBlank()) return null;
+        try { return Double.parseDouble(rentStr.trim()); }
+        catch (NumberFormatException e) { return null; }
+    }
+
     // JSON endpoint for map pins — separate from /nearby (which returns an HTML fragment)
     @GetMapping("/nearby/map")
     @ResponseBody
@@ -88,6 +111,9 @@ public class PropertyController {
             @RequestParam double lat,
             @RequestParam double lng,
             @RequestParam(defaultValue = "5") double radius,
+            @RequestParam(value = "rentalType", required = false) String rentalType,
+            @RequestParam(value = "rent", required = false) String rentStr,
+            @RequestParam(value = "gender", required = false) String gender,
             org.springframework.security.core.Authentication authentication
     ) {
         // Same gate as /nearby above — don't leak property coordinates to guests.
@@ -95,12 +121,14 @@ public class PropertyController {
             return List.of();
         }
         try {
-            List<Property> nearby = propertyService.findNearBy(lat, lng, radius);
+            List<Property> nearby = propertyService.findNearBy(lat, lng, radius,
+                    cleanRentalType(rentalType), parseRent(rentStr), cleanGender(gender));
             return nearby.stream()
                     .filter(p -> p.getLatitude() != null && p.getLongitude() != null)
                     .map(p -> new PropertyMapDTO(
                             p.getId(), p.getTitle(), p.getArea(), p.getCity(),
                             p.getLatitude(), p.getLongitude(), p.getMonthlyRent(),
+                            p.getDailyRent(), p.isAvailableMonthly(), p.isAvailableDaily(),
                             p.isAvailable(),
                             (p.getImageUrls() != null && !p.getImageUrls().isEmpty())
                                     ? p.getImageUrls().get(0) : null
