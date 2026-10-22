@@ -40,6 +40,7 @@
 - 🔍 Search properties by city, area, max rent, and **rental type (Monthly / Daily / Any)**
 - 📍 **Location-based search** — find properties near you using GPS
 - 🗺️ Adjustable search radius (2 / 5 / 10 / 20 km)
+- 🎯 **Combined search** — "Find Near Me" respects the rental type (Monthly / Daily), max rent, and gender filters, so you can ask for e.g. *daily-rent places within 5 km under ₹800/day*
 - 🖼️ View full property details with image carousel
 - 🏷️ See at a glance whether a listing is Monthly, Daily, or both
 - 📅 **Book a property** with a live availability calendar — pick a date range for daily stays, or a move-in date + duration for monthly stays
@@ -89,7 +90,7 @@
 - 📱 Bootstrap 5 responsive layout
 - 🚫 Custom 403, "Unauthorized," and general error pages
 - 🌐 Cloud-hosted database (Neon PostgreSQL)
-- 📍 **Smart location search** with GPS + text fallback, filterable by rental type
+- 📍 **Smart location search** with GPS + text fallback, combinable with rental type, max rent, and gender filters
 
 </td>
 </tr>
@@ -200,6 +201,19 @@ The platform features a **smart two-mode search system**:
 - **Step 2 (Fallback):** If no GPS results, reverse geocoding via Nominatim converts the student's coordinates to a city/area name, then falls back to text-based matching
 - This ensures results are always returned even when properties don't have GPS coordinates yet
 
+**Combined Search — Near Me + Filters**
+
+Both modes share the same filter set — **rental type** (Monthly / Daily / Any), **max rent**, and **gender preference** — so location and filters can be combined in a single search:
+
+- Filters set in the search bar are sent along with the GPS request: `/properties/nearby?lat=&lng=&radius=&rentalType=&rent=&gender=` (all three filters optional)
+- **Max rent is rental-type aware:** with *Monthly* it's compared to the monthly rent, with *Daily* to the daily rent, and with *Any* a property matches if either of its offered rates is within budget (the same rule is now used by manual search, so both modes agree)
+- The map pins (`/properties/nearby/map`) use the same filters, and pin popups show the monthly and/or daily price
+- While Near Me results are showing, **changing a filter or the radius re-runs the search** for the same location — no need to click Find Near Me again
+- The results badge and the Near Me bar show which filters are active
+- Property cards now show the Monthly and/or Daily rate, so you can see the rental type at a glance
+- The text-match fallback (when no GPS results are found) applies the same filters
+- The homepage search and Near Me also have the rental type selector
+
 **Auto-Geocoding on Property Save**
 
 - When an owner saves a property, `GeoCodingService` automatically calls the Nominatim API to convert `city + area` into `latitude` + `longitude`
@@ -232,8 +246,8 @@ The platform features a **smart two-mode search system**:
 | Unauthorized | `unauthorized.html` | shown on ownership-mismatch actions | 🌐 Everyone |
 | Student Dashboard | `student-dashboard.html` | `/student/dashboard` | 🎓 STUDENT |
 | Search Properties | `search-properties.html` | `/student-search` | 🎓 STUDENT |
-| Search — Manual | `fragments/property-list` | `/search?city=&rent=&rentalType=` | 🎓 STUDENT |
-| Search — Near Me | `fragments/property-list` | `/properties/nearby?lat=&lng=&radius=` | 🎓 STUDENT |
+| Search — Manual | `fragments/property-list` | `/search?city=&rent=&rentalType=&gender=` | 🎓 STUDENT |
+| Search — Near Me | `fragments/property-list` | `/properties/nearby?lat=&lng=&radius=&rentalType=&rent=&gender=` | 🎓 STUDENT |
 | My Bookings | `my-bookings.html` | `/properties/my-bookings` | 🎓 STUDENT |
 | Owner Dashboard | `owner-properties.html` | `/properties/owner/{id}` | 🏠 OWNER |
 | Add Property | `add-property.html` | `/properties/owner/{id}/add` | 🏠 OWNER |
