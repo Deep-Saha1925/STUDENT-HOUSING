@@ -35,7 +35,7 @@
 <td width="50%">
 
 ### 👨‍🎓 Student Features
-- 🔐 Secure login & registration
+- 🔐 Secure login & registration (with confirm-password check on the registration forms)
 - 👤 Personal profile (ID, email, phone)
 - 🔍 Search properties by city, area, max rent, and **rental type (Monthly / Daily / Any)**
 - 📍 **Location-based search** — find properties near you using GPS
