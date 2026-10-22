@@ -22,7 +22,12 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
 
     @Query(value = "SELECT * FROM properties p " +
             "WHERE (:city IS NULL OR LOWER(p.city) LIKE LOWER(CONCAT('%', :city, '%'))) " +
-            "AND (:rent IS NULL OR p.rent <= :rent) " +
+            "AND (:rent IS NULL " +
+            "     OR (:rentalType = 'MONTHLY' AND p.rent <= :rent) " +
+            "     OR (:rentalType = 'DAILY' AND p.daily_rent <= :rent) " +
+            "     OR (:rentalType IS NULL " +
+            "         AND ((p.available_monthly = true AND p.rent <= :rent) " +
+            "           OR (p.available_daily = true AND p.daily_rent <= :rent)))) " +
             "AND (:rentalType IS NULL " +
             "     OR (:rentalType = 'MONTHLY' AND p.available_monthly = true) " +
             "     OR (:rentalType = 'DAILY' AND p.available_daily = true)) " +
@@ -54,6 +59,19 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     WHERE p.latitude  IS NOT NULL
       AND p.longitude IS NOT NULL
       AND p.available = true
+      AND (:rentalType IS NULL
+           OR (:rentalType = 'MONTHLY' AND p.available_monthly = true)
+           OR (:rentalType = 'DAILY' AND p.available_daily = true))
+      AND (:rent IS NULL
+           OR (:rentalType = 'MONTHLY' AND p.rent <= :rent)
+           OR (:rentalType = 'DAILY' AND p.daily_rent <= :rent)
+           OR (:rentalType IS NULL
+               AND ((p.available_monthly = true AND p.rent <= :rent)
+                 OR (p.available_daily = true AND p.daily_rent <= :rent))))
+      AND (:gender IS NULL
+           OR (:gender = 'MALE' AND p.allowed_for_male = true)
+           OR (:gender = 'FEMALE' AND p.allowed_for_female = true)
+           OR (:gender = 'FAMILY' AND p.allowed_for_family = true))
       AND (6371 * acos(
                LEAST(1.0, GREATEST(-1.0,
                    cos(radians(:lat)) * cos(radians(p.latitude))
@@ -65,7 +83,10 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     """, nativeQuery = true)
     List<Property> findNearby(@Param("lat") double lat,
                               @Param("lng") double lng,
-                              @Param("radius") double radius);
+                              @Param("radius") double radius,
+                              @Param("rentalType") String rentalType,
+                              @Param("rent") Double rent,
+                              @Param("gender") String gender);
 
     @Query(value = """
     SELECT * FROM properties p
@@ -81,9 +102,25 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
               OR LOWER(p.city) LIKE LOWER(CONCAT('%', :area, '%'))
           ))
       )
+      AND (:rentalType IS NULL
+           OR (:rentalType = 'MONTHLY' AND p.available_monthly = true)
+           OR (:rentalType = 'DAILY' AND p.available_daily = true))
+      AND (:rent IS NULL
+           OR (:rentalType = 'MONTHLY' AND p.rent <= :rent)
+           OR (:rentalType = 'DAILY' AND p.daily_rent <= :rent)
+           OR (:rentalType IS NULL
+               AND ((p.available_monthly = true AND p.rent <= :rent)
+                 OR (p.available_daily = true AND p.daily_rent <= :rent))))
+      AND (:gender IS NULL
+           OR (:gender = 'MALE' AND p.allowed_for_male = true)
+           OR (:gender = 'FEMALE' AND p.allowed_for_female = true)
+           OR (:gender = 'FAMILY' AND p.allowed_for_family = true))
     ORDER BY p.rent ASC
     """, nativeQuery = true)
     List<Property> findByCityOrArea(@Param("city") String city,
-                                    @Param("area") String area);
+                                    @Param("area") String area,
+                                    @Param("rentalType") String rentalType,
+                                    @Param("rent") Double rent,
+                                    @Param("gender") String gender);
 
 }
