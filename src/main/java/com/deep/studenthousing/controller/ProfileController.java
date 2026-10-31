@@ -14,12 +14,18 @@ public class ProfileController {
 
     private final UserService userService;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.deep.studenthousing.service.AccessGuard guard;
+
     public ProfileController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping("/profile/{id}")
-    public String viewProfile(@PathVariable Long id, Model model){
+    public String viewProfile(@PathVariable Long id, Model model,
+                              org.springframework.security.core.Authentication authentication){
+        // Profiles hold email, phone and the user's listings: only the user themself (or an admin).
+        guard.requireSelfOrAdmin(id, authentication);
         User user = userService.findById(id);
 
         if(user != null){
