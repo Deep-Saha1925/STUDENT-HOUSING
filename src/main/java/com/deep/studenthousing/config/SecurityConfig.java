@@ -2,10 +2,12 @@ package com.deep.studenthousing.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.InvalidCsrfTokenException;
@@ -27,6 +29,11 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users/register").hasRole("ADMIN")
                         .requestMatchers("/properties/owner/**").hasRole("OWNER")
+                        .requestMatchers("/student/**").hasRole("STUDENT")
+                        // Booking actions need a login. They sit under /properties/** (public
+                        // for property pages), so list them before that permitAll rule.
+                        .requestMatchers("/properties/my-bookings", "/properties/bookings/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/properties/*/book").authenticated()
                         .requestMatchers("/", "/search", "/fragments/**", "/access-denied", "/logo.png", "/css/**", "/js/**", "/images/**", "/properties/**").permitAll()
                         .requestMatchers("/register-user").permitAll()
                         .anyRequest().authenticated()
@@ -50,9 +57,17 @@ public class SecurityConfig {
                             }
                         }))
                 )
+                // CSRF protection stays ON for every state-changing request, including the
+                // admin screens (an exemption there would let any website edit users/roles
+                // using an admin's logged-in browser). Thymeleaf th:action forms add the token.
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers("/admin/users/**", "/admin/update/**"))
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'"))
+                        .referrerPolicy(ref -> ref.policy(
+                                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
+                .addFilterBefore(new LoginRateLimitFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
