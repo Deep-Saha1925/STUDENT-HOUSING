@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Language switcher used on every property-owner page.
+     Query-only relative links keep the owner on the same page. -->
+<div th:fragment="switcher" class="lang-switch" role="group" th:attr="aria-label=#{common.language}">
+    <a href="?lang=en" class="lang-btn" th:classappend="${#locale.language == 'en'} ? 'active'"
+       lang="en" hreflang="en">EN</a>
+    <a href="?lang=bn" class="lang-btn" th:classappend="${#locale.language == 'bn'} ? 'active'"
+       lang="bn" hreflang="bn">বাং</a>
+</div>
+
+<!-- Shared styles + Bengali font; put inside <head>. -->
+<th:block th:fragment="head">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600&display=swap"
+          rel="stylesheet">
+    <style>
+        html[lang='bn'] body,
+        html[lang='bn'] input,
+        html[lang='bn'] textarea,
+        html[lang='bn'] button,
+        html[lang='bn'] label {
+            font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'DM Sans', sans-serif;
+        }
+
+        .lang-switch {
+            display: inline-flex;
+            border: 1px solid var(--border, rgba(128, 128, 128, .35));
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .lang-btn {
+            padding: 5px 12px;
+            font-size: .8rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: inherit;
+            opacity: .7;
+        }
+
+        .lang-btn.active {
+            background: var(--accent, #0d6efd);
+            color: #fff;
+            opacity: 1;
+        }
+    </style>
+
+    <!-- Strings used by page scripts (alerts, status text, theme tooltip) -->
+    <script th:inline="javascript">
+        const I18N = {
+            toLight: /*[[#{common.theme.toLight}]]*/ 'Switch to light mode',
+            toDark: /*[[#{common.theme.toDark}]]*/ 'Switch to dark mode',
+            locateBtn: /*[[#{add.locate.button}]]*/ 'Use My Current Location',
+            locating: /*[[#{add.locate.busy}]]*/ 'Locating…',
+            requesting: /*[[#{add.locate.requesting}]]*/ 'Requesting location…',
+            lookingUp: /*[[#{add.locate.lookup}]]*/ 'Looking up address…',
+            locOk: /*[[#{add.locate.ok}]]*/ 'Location captured ✓',
+            locLookupFailed: /*[[#{add.locate.lookupFailed}]]*/ 'Location captured, address lookup failed',
+            locUnsupported: /*[[#{add.locate.unsupported}]]*/ 'Geolocation not supported by your browser',
+            locDenied: /*[[#{add.locate.denied}]]*/ 'Location permission denied',
+            locUnavailable: /*[[#{add.locate.unavailable}]]*/ 'Location unavailable',
+            locTimeout: /*[[#{add.locate.timeout}]]*/ 'Location request timed out',
+            locError: /*[[#{add.locate.error}]]*/ 'Could not get location',
+            cameraUnsupported: /*[[#{camera.unsupported}]]*/ 'Camera access is not supported',
+            cameraFailed: /*[[#{camera.failed}]]*/ 'Could not access the camera ({0})',
+            alertRental: /*[[#{add.alert.rentalType}]]*/ 'Select at least one rental type',
+            alertWho: /*[[#{add.alert.whoCanRent}]]*/ 'Select at least one option',
+            editUnsupported: /*[[#{edit.location.unsupported}]]*/ 'Not supported',
+            editGetting: /*[[#{edit.location.getting}]]*/ 'Getting your location…',
+            editUpdated: /*[[#{edit.location.updated}]]*/ 'Location updated',
+            editFailed: /*[[#{edit.location.failed}]]*/ 'Could not get location ({0})',
+            reasonDefault: /*[[#{edit.location.reason.default}]]*/ 'something went wrong',
+            reasonDenied: /*[[#{edit.location.reason.denied}]]*/ 'permission denied',
+            reasonTimeout: /*[[#{edit.location.reason.timeout}]]*/ 'timed out',
+            confirmReject: /*[[#{bookings.confirm.reject}]]*/ 'Reject this booking request?',
+            confirmCancel: /*[[#{bookings.confirm.cancel}]]*/ 'Cancel this booking?'
+        };
+    </script>
+</th:block>
+
+</body>
+</html>
