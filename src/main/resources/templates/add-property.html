@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:lang="${#locale.language}">
 <head>
-    <title>Add Property</title>
+    <title th:text="#{add.title}">Add Property</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
@@ -388,6 +388,7 @@
             .btn-locate { justify-content: center; width: 100%; }
         }
     </style>
+    <th:block th:replace="~{fragments/owner-lang :: head}"></th:block>
 </head>
 <body>
 
@@ -395,16 +396,19 @@
 <div class="top-bar">
     <div class="d-flex align-items-center gap-3">
         <a th:href="@{'/properties/owner/' + ${ownerId}}" class="back-link">
-            <i class="bi bi-arrow-left"></i> <span class="back-link-label">Back to My Properties</span>
+            <i class="bi bi-arrow-left"></i> <span class="back-link-label" th:text="#{common.backToProperties}">Back to My Properties</span>
         </a>
         <a href="/" class="brand-link">
             <span class="brand-dot"></span>
-            Student Housing
+            <span th:text="#{common.brand}">Student Housing</span>
         </a>
     </div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-        <i class="bi bi-moon-fill" id="themeIcon"></i>
-    </button>
+    <div class="d-flex align-items-center gap-2">
+        <div th:replace="~{fragments/owner-lang :: switcher}"></div>
+        <button class="theme-toggle" id="themeToggle" th:aria-label="#{common.theme.aria}" aria-label="Toggle theme">
+            <i class="bi bi-moon-fill" id="themeIcon"></i>
+        </button>
+    </div>
 </div>
 
 <div class="page-content container animate__animated animate__fadeInUp">
@@ -413,8 +417,8 @@
             <div class="add-card">
 
                 <div class="add-card-header">
-                    <div class="eyebrow"><i class="bi bi-plus-circle"></i> New Listing</div>
-                    <h4>Add New Property</h4>
+                    <div class="eyebrow"><i class="bi bi-plus-circle"></i> <span th:text="#{add.eyebrow}">New Listing</span></div>
+                    <h4 th:text="#{add.heading}">Add New Property</h4>
                 </div>
 
                 <div class="add-card-body">
@@ -425,7 +429,7 @@
                         <div class="locate-row">
                             <button type="button" class="btn-locate" id="locateBtn">
                                 <i class="bi bi-geo-alt-fill" id="locateIcon"></i>
-                                <span id="locateBtnText">Use My Current Location</span>
+                                <span id="locateBtnText" th:text="#{add.locate.button}">Use My Current Location</span>
                             </button>
                             <span class="locate-status" id="locateStatus"></span>
                         </div>
@@ -436,18 +440,18 @@
 
                         <div class="field-row">
                             <div class="field-group">
-                                <label>Title</label>
-                                <input type="text" class="form-control" th:field="*{title}" placeholder="Enter property title">
+                                <label th:text="#{form.title}">Title</label>
+                                <input type="text" class="form-control" th:field="*{title}" th:placeholder="#{form.title.ph}" placeholder="Enter property title">
                             </div>
                             <div class="field-group">
-                                <label>City</label>
-                                <input type="text" class="form-control" th:field="*{city}" id="city" placeholder="Enter city">
+                                <label th:text="#{form.city}">City</label>
+                                <input type="text" class="form-control" th:field="*{city}" id="city" th:placeholder="#{form.city.ph}" placeholder="Enter city">
                             </div>
                         </div>
 
                         <div class="field-group">
-                            <label>Area</label>
-                            <input type="text" class="form-control" th:field="*{area}" id="area" placeholder="Enter area or neighborhood">
+                            <label th:text="#{form.area}">Area</label>
+                            <input type="text" class="form-control" th:field="*{area}" id="area" th:placeholder="#{form.area.ph}" placeholder="Enter area or neighborhood">
                         </div>
 
                         <div class="section-divider"></div>
@@ -455,41 +459,41 @@
                         <div class="field-group">
                             <label class="d-flex align-items-center gap-2" style="text-transform:none;">
                                 <input type="checkbox" id="availableMonthly" th:field="*{availableMonthly}" style="width:auto;">
-                                Available for Monthly Rent
+                                <span th:text="#{form.availableMonthly}">Available for Monthly Rent</span>
                             </label>
                         </div>
                         <div class="field-group">
-                            <label>Monthly Rent (₹)</label>
-                            <input type="number" id="monthlyRent" min="1" step="0.01" class="form-control" th:field="*{monthlyRent}" placeholder="Enter monthly rent amount">
+                            <label th:text="#{form.monthlyRent}">Monthly Rent (₹)</label>
+                            <input type="number" id="monthlyRent" min="1" step="0.01" class="form-control" th:field="*{monthlyRent}" th:placeholder="#{form.monthlyRent.ph}" placeholder="Enter monthly rent amount">
                         </div>
 
                         <div class="field-group">
                             <label class="d-flex align-items-center gap-2" style="text-transform:none;">
                                 <input type="checkbox" id="availableDaily" th:field="*{availableDaily}" style="width:auto;">
-                                Available for Daily Rent
+                                <span th:text="#{form.availableDaily}">Available for Daily Rent</span>
                             </label>
                         </div>
                         <div class="field-group">
-                            <label>Daily Rent (₹)</label>
-                            <input type="number" id="dailyRent" min="1" step="0.01" class="form-control" th:field="*{dailyRent}" placeholder="Enter daily rent amount">
+                            <label th:text="#{form.dailyRent}">Daily Rent (₹)</label>
+                            <input type="number" id="dailyRent" min="1" step="0.01" class="form-control" th:field="*{dailyRent}" th:placeholder="#{form.dailyRent.ph}" placeholder="Enter daily rent amount">
                         </div>
 
                         <div class="section-divider"></div>
 
                         <div class="field-group">
-                            <label style="text-transform:none;">Who can rent this property?</label>
+                            <label style="text-transform:none;" th:text="#{form.whoCanRent}">Who can rent this property?</label>
                             <div class="d-flex flex-wrap gap-3">
                                 <label class="d-flex align-items-center gap-2" style="text-transform:none;">
                                     <input type="checkbox" id="allowedForMale" th:field="*{allowedForMale}" style="width:auto;">
-                                    Male
+                                    <span th:text="#{common.male}">Male</span>
                                 </label>
                                 <label class="d-flex align-items-center gap-2" style="text-transform:none;">
                                     <input type="checkbox" id="allowedForFemale" th:field="*{allowedForFemale}" style="width:auto;">
-                                    Female
+                                    <span th:text="#{common.female}">Female</span>
                                 </label>
                                 <label class="d-flex align-items-center gap-2" style="text-transform:none;">
                                     <input type="checkbox" id="allowedForFamily" th:field="*{allowedForFamily}" style="width:auto;">
-                                    Family
+                                    <span th:text="#{common.family}">Family</span>
                                 </label>
                             </div>
                         </div>
@@ -497,18 +501,18 @@
                         <div class="section-divider"></div>
 
                         <div class="field-group">
-                            <label>Description</label>
-                            <textarea class="form-control" th:field="*{description}" rows="3" placeholder="Enter property description"></textarea>
+                            <label th:text="#{form.description}">Description</label>
+                            <textarea class="form-control" th:field="*{description}" rows="3" th:placeholder="#{form.description.ph}" placeholder="Enter property description"></textarea>
                         </div>
 
                         <div class="section-divider"></div>
 
                         <div class="field-group">
-                            <label>Upload Images</label>
+                            <label th:text="#{form.uploadImages}">Upload Images</label>
                             <div class="d-flex flex-wrap gap-2 align-items-center">
                                 <input type="file" class="form-control" id="images" name="images" accept="image/*" multiple required style="flex:1; min-width:180px;">
                                 <button type="button" id="takePhotoBtn" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-camera-fill"></i> Take Photo
+                                    <i class="bi bi-camera-fill"></i> <span th:text="#{form.takePhoto}">Take Photo</span>
                                 </button>
                             </div>
                             <div id="imagePreviewList" class="d-flex flex-wrap gap-2 mt-2"></div>
@@ -521,16 +525,16 @@
                                 <canvas id="cameraCanvas" style="display:none;"></canvas>
                                 <div class="camera-controls">
                                     <button type="button" id="captureBtn" class="btn btn-primary btn-sm">
-                                        <i class="bi bi-camera"></i> Capture
+                                        <i class="bi bi-camera"></i> <span th:text="#{form.capture}">Capture</span>
                                     </button>
-                                    <button type="button" id="closeCameraBtn" class="btn btn-secondary btn-sm">Cancel</button>
+                                    <button type="button" id="closeCameraBtn" class="btn btn-secondary btn-sm" th:text="#{common.cancel}">Cancel</button>
                                 </div>
                             </div>
                         </div>
 
                         <div class="text-center mt-4">
                             <button type="submit" class="btn-save">
-                                <i class="bi bi-floppy"></i> Save Property
+                                <i class="bi bi-floppy"></i> <span th:text="#{add.save}">Save Property</span>
                             </button>
                         </div>
 
@@ -556,7 +560,7 @@
     function applyTheme(theme) {
         html.dataset.theme = theme;
         themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-        toggleBtn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        toggleBtn.title = theme === 'dark' ? I18N.toLight : I18N.toDark;
     }
 
     // ── Rental-type <-> rent field wiring ──
@@ -634,7 +638,7 @@
 
             takePhotoBtn.addEventListener('click', async () => {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    alert("Camera access isn't supported in this browser. Please upload a photo instead.");
+                    alert(I18N.cameraUnsupported);
                     return;
                 }
                 try {
@@ -642,7 +646,7 @@
                     video.srcObject = stream;
                     modal.classList.add('show');
                 } catch (err) {
-                    alert("Couldn't access the camera (" + err.message + "). You can still upload a photo instead.");
+                    alert(I18N.cameraFailed.replace('{0}', err.message));
                 }
             });
 
@@ -675,7 +679,7 @@
             const daily = document.getElementById('availableDaily').checked;
             if (!monthly && !daily) {
                 e.preventDefault();
-                alert('Select at least one rental type (Monthly and/or Daily).');
+                alert(I18N.alertRental);
                 return;
             }
 
@@ -684,7 +688,7 @@
             const family = document.getElementById('allowedForFamily').checked;
             if (!male && !female && !family) {
                 e.preventDefault();
-                alert('Select at least one option for "Who can rent this property?" (or check all three if it\u2019s open to everyone).');
+                alert(I18N.alertWho);
             }
         });
     })();
@@ -711,7 +715,7 @@
         function setBusy(busy) {
             locateBtn.disabled = busy;
             locateIcon.className = busy ? 'bi bi-arrow-repeat spin' : 'bi bi-geo-alt-fill';
-            locateBtnText.textContent = busy ? 'Locating…' : 'Use My Current Location';
+            locateBtnText.textContent = busy ? I18N.locating : I18N.locateBtn;
         }
 
         async function reverseGeocode(lat, lon) {
@@ -723,12 +727,12 @@
 
         locateBtn.addEventListener('click', () => {
             if (!('geolocation' in navigator)) {
-                setStatus('Geolocation not supported by your browser', 'err');
+                setStatus(I18N.locUnsupported, 'err');
                 return;
             }
 
             setBusy(true);
-            setStatus('Requesting location…', 'pending');
+            setStatus(I18N.requesting, 'pending');
 
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const lat = position.coords.latitude;
@@ -738,7 +742,7 @@
                 lngInput.value = lon;
 
                 try {
-                    setStatus('Looking up address…', 'pending');
+                    setStatus(I18N.lookingUp, 'pending');
                     const data = await reverseGeocode(lat, lon);
                     const addr = data.address || {};
 
@@ -749,19 +753,19 @@
                     if (city && !cityInput.value.trim()) cityInput.value = city;
                     if (area && !areaInput.value.trim()) areaInput.value = area;
 
-                    setStatus('Location captured ✓', 'ok');
+                    setStatus(I18N.locOk, 'ok');
                 } catch (err) {
                     // Coordinates are already saved even if the address lookup fails.
-                    setStatus('Location captured, address lookup failed', 'ok');
+                    setStatus(I18N.locLookupFailed, 'ok');
                 } finally {
                     setBusy(false);
                 }
             }, (error) => {
                 setBusy(false);
-                let msg = 'Could not get location';
-                if (error.code === error.PERMISSION_DENIED) msg = 'Location permission denied';
-                else if (error.code === error.POSITION_UNAVAILABLE) msg = 'Location unavailable';
-                else if (error.code === error.TIMEOUT) msg = 'Location request timed out';
+                let msg = I18N.locError;
+                if (error.code === error.PERMISSION_DENIED) msg = I18N.locDenied;
+                else if (error.code === error.POSITION_UNAVAILABLE) msg = I18N.locUnavailable;
+                else if (error.code === error.TIMEOUT) msg = I18N.locTimeout;
                 setStatus(msg, 'err');
             }, {
                 enableHighAccuracy: true,
