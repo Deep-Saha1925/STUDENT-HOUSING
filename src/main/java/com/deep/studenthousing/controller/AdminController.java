@@ -84,6 +84,14 @@ public class AdminController {
     public String updateUser(@PathVariable Long id, @ModelAttribute User updatedUser) {
         User user = userService.findById(id);
         if(user != null){
+            User sameEmail = userService.findByEmail(updatedUser.getEmail());
+            if (sameEmail != null && !sameEmail.getId().equals(id)) {
+                return "redirect:/admin/users?error=emailTaken";
+            }
+            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()
+                    && (updatedUser.getPassword().length() < 8 || updatedUser.getPassword().length() > 72)) {
+                return "redirect:/admin/users?error=weakPassword";
+            }
             user.setFullName(updatedUser.getFullName());
             user.setEmail(updatedUser.getEmail());
             user.setPhone(updatedUser.getPhone());
@@ -96,7 +104,8 @@ public class AdminController {
         return "redirect:/admin/users?success=updated";
     }
 
-    @GetMapping("/delete/{id}")
+    // POST (not GET) so it is covered by CSRF protection and can't be fired by a link or image tag.
+    @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id, Principal principal) {
         User currentAdmin = userService.findByEmail(principal.getName());
 
