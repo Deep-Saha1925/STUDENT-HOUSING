@@ -50,6 +50,12 @@ public class UserController {
         if(authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))){
 
+            if (user.getPassword() == null || user.getPassword().length() < 8 || user.getPassword().length() > 72
+                    || user.getRole() == null) {
+                model.addAttribute("errorMessage", "Password must be 8-72 characters and a role must be chosen.");
+                return "error-page";
+            }
+            user.setId(null);   // always create a new account, never overwrite an existing one
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userService.save(user);
             return "redirect:/admin/dashboard?success";
