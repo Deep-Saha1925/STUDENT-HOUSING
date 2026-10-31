@@ -4,13 +4,16 @@ import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.exception.UnauthorizedActionException;
+import com.deep.studenthousing.service.AccessGuard;
 import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
@@ -33,6 +36,9 @@ public class PropertyController {
     private final ImageUploadService imageUploadService;
     private final BookingService bookingService;
 
+    @Autowired
+    private AccessGuard guard;
+
     public PropertyController(UserService userService, PropertyService propertyService, ImageUploadService imageUploadService, BookingService bookingService) {
         this.userService = userService;
         this.propertyService = propertyService;
@@ -49,6 +55,10 @@ public class PropertyController {
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(Double.class, new CustomNumberEditor(Double.class, true));
+        // Mass-assignment protection: a browser can send any field name. These
+        // must only ever be set by the server (otherwise someone could post
+        // "id=<another listing>" to overwrite it, or "owner.id=..." to steal one).
+        binder.setDisallowedFields("id", "owner", "owner.*", "imageUrls", "available");
     }
 
     @GetMapping("/nearby")
@@ -143,7 +153,8 @@ public class PropertyController {
 
     // Show all properties for a specific owner
     @GetMapping("/owner/{ownerId}")
-    public String listOwnerProperties(@PathVariable Long ownerId, Model model) {
+    public String listOwnerProperties(@PathVariable Long ownerId, Model model, Authentication authentication) {
+        guard.requireSelfOwner(ownerId, authentication);
         User owner = userService.findById(ownerId);
 
         if (owner == null) {
@@ -167,7 +178,8 @@ public class PropertyController {
 
     // Show form to add property for specific owner
     @GetMapping("/owner/{ownerId}/add")
-    public String addPropertyForm(@PathVariable Long ownerId, Model model) {
+    public String addPropertyForm(@PathVariable Long ownerId, Model model, Authentication authentication) {
+        guard.requireSelfOwner(ownerId, authentication);
         model.addAttribute("property", new Property());
         model.addAttribute("ownerId", ownerId);
         return "add-property";
@@ -179,8 +191,9 @@ public class PropertyController {
                                @ModelAttribute("property") Property property,
                                Model model,
                                @RequestParam("images") MultipartFile[] images,
-                               HttpServletRequest request)  throws IOException {
-        User owner = userService.findById(ownerId);
+                               HttpServletRequest request,
+                               Authentication authentication)  throws IOException {
+        User owner = guard.requireSelfOwner(ownerId, authentication);
 
         //Only Owners can add property
         if (owner.getRole() != Role.OWNER) {
@@ -191,8 +204,11 @@ public class PropertyController {
             return "error-page";
         }
 
+        property.setId(null);          // always a brand-new row, never an overwrite
         property.setOwner(owner);
-        normalizeRentalFields(property);
+        sanitizeAndNormalize(property);
+        // Validate the images before anything is stored, so a bad file doesn't leave a half-created listing.
+        imageUploadService.validate(images);
         propertyService.save(property);
 
         if(images != null && images.length > 0){
@@ -209,23 +225,24 @@ public class PropertyController {
     @GetMapping("/owner/{ownerId}/edit/{propertyId}")
     public String editPropertyForm(@PathVariable Long ownerId,
                                    @PathVariable Long propertyId,
-                                   Model model) {
-        Property property = propertyService.findById(propertyId);
-
-        if (!property.getOwner().getId().equals(ownerId)) {
-            throw new UnauthorizedActionException("This property belongs to a different owner account.");
-        }
+                                   Model model,
+                                   Authentication authentication) {
+        Property property = requireOwnedProperty(ownerId, propertyId, authentication);
 
         model.addAttribute("property", property);
         model.addAttribute("ownerId", ownerId);
         return "edit-property";
     }
 
-    @GetMapping("/owner/{ownerId}/delete/{propertyId}")
+    // POST only: a GET link can be triggered by any other website (<img src=...>) and
+    // CSRF protection does not cover GET. Ownership is checked against the logged-in user.
+    @PostMapping("/owner/{ownerId}/delete/{propertyId}")
     public String deleteProperty(
             @PathVariable Long ownerId,
-            @PathVariable Long propertyId
+            @PathVariable Long propertyId,
+            Authentication authentication
     ){
+        requireOwnedProperty(ownerId, propertyId, authentication);
         propertyService.deleteById(propertyId);
 
         return "redirect:/properties/owner/" + ownerId;
@@ -235,16 +252,9 @@ public class PropertyController {
     public String updateProperty(@PathVariable Long ownerId,
                                  @PathVariable Long propertyId,
                                  @ModelAttribute("property") Property updatedProperty,
-                                 @RequestParam(value = "images", required = false) MultipartFile[] images) throws IOException {
-        Property property = propertyService.findById(propertyId);
-
-        if (property.getOwner().getRole() != Role.OWNER) {
-            throw new UnauthorizedActionException("Only owner accounts can update properties.");
-        }
-
-        if (!property.getOwner().getId().equals(ownerId)) {
-            throw new UnauthorizedActionException("This property belongs to a different owner account.");
-        }
+                                 @RequestParam(value = "images", required = false) MultipartFile[] images,
+                                 Authentication authentication) throws IOException {
+        Property property = requireOwnedProperty(ownerId, propertyId, authentication);
 
         // Update fields
         property.setTitle(updatedProperty.getTitle());
@@ -265,10 +275,11 @@ public class PropertyController {
         // update — or even preserve — a property's coordinates.
         property.setLatitude(updatedProperty.getLatitude());
         property.setLongitude(updatedProperty.getLongitude());
-        normalizeRentalFields(property);
+        sanitizeAndNormalize(property);
 
         // Handle new image uploads
         if (images != null && images.length > 0 && !images[0].isEmpty()) {
+            imageUploadService.validate(images);
             List<String> imageUrls = imageUploadService.uploadMultipleImages(images, ownerId, propertyId);
 
             // Append new images to existing ones
@@ -287,15 +298,15 @@ public class PropertyController {
     @PostMapping("/owner/{ownerId}/edit/{propertyId}/delete-image")
     public String deleteImage(@PathVariable Long ownerId,
                               @PathVariable Long propertyId,
-                              @RequestParam("imageUrl") String imageUrl){
-        Property property = propertyService.findById(propertyId);
+                              @RequestParam("imageUrl") String imageUrl,
+                              Authentication authentication){
+        Property property = requireOwnedProperty(ownerId, propertyId, authentication);
 
-        if (property.getOwner().getId().equals(ownerId)) {
-            // Remove image from property
-            property.getImageUrls().remove(imageUrl);
+        // Only touch Cloudinary for an image that really belongs to this listing;
+        // otherwise a caller could make us delete arbitrary files by guessing URLs.
+        boolean removed = property.getImageUrls() != null && property.getImageUrls().remove(imageUrl);
+        if (removed) {
             propertyService.save(property);
-
-            // (Optional) Delete from Cloudinary
             imageUploadService.deleteImage(imageUrl);
         }
 
@@ -306,6 +317,62 @@ public class PropertyController {
     // Server-side safety net (client JS already does this, but never trust the client alone):
     // an unavailable rental type should never carry a rent value, and a listing
     // needs to offer at least one type or it isn't bookable at all.
+    // Server-side validation of the free-form fields (the HTML form limits are only a hint).
+    private void sanitizeAndNormalize(Property property) {
+        property.setTitle(requireText(property.getTitle(), "Title", 150));
+        property.setCity(requireText(property.getCity(), "City", 100));
+        String area = property.getArea() == null ? "" : property.getArea().trim();
+        if (area.length() > 150) {
+            throw new IllegalArgumentException("Area is too long (maximum 150 characters).");
+        }
+        property.setArea(area);
+        String description = property.getDescription();
+        if (description != null) {
+            description = description.trim();
+            if (description.length() > 2000) {
+                throw new IllegalArgumentException("Description is too long (maximum 2000 characters).");
+            }
+            property.setDescription(description);
+        }
+        if (property.isAvailableMonthly() && (property.getMonthlyRent() <= 0 || property.getMonthlyRent() > 10_000_000)) {
+            throw new IllegalArgumentException("Monthly rent must be a positive amount.");
+        }
+        if (property.isAvailableDaily()
+                && (property.getDailyRent() == null || property.getDailyRent() <= 0 || property.getDailyRent() > 10_000_000)) {
+            throw new IllegalArgumentException("Daily rent must be a positive amount.");
+        }
+        // Coordinates must be real; drop them (so they get geocoded from City/Area) if not.
+        Double lat = property.getLatitude();
+        Double lng = property.getLongitude();
+        if (lat == null || lng == null || lat.isNaN() || lng.isNaN()
+                || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            property.setLatitude(null);
+            property.setLongitude(null);
+        }
+        normalizeRentalFields(property);
+    }
+
+    private String requireText(String value, String label, int maxLength) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(label + " is required.");
+        }
+        String trimmed = value.trim();
+        if (trimmed.length() > maxLength) {
+            throw new IllegalArgumentException(label + " is too long (maximum " + maxLength + " characters).");
+        }
+        return trimmed;
+    }
+
+    // The logged-in user must be the owner in the URL AND the listing must really be theirs.
+    private Property requireOwnedProperty(Long ownerId, Long propertyId, Authentication authentication) {
+        guard.requireSelfOwner(ownerId, authentication);
+        Property property = propertyService.findById(propertyId);
+        if (property.getOwner() == null || !property.getOwner().getId().equals(ownerId)) {
+            throw new UnauthorizedActionException("This property belongs to a different owner account.");
+        }
+        return property;
+    }
+
     private void normalizeRentalFields(Property property) {
         if (!property.isAvailableMonthly()) {
             property.setMonthlyRent(0);
@@ -329,8 +396,9 @@ public class PropertyController {
     @PostMapping("/owner/{ownerId}/availability/{propertyId}")
     public String toggleAvailability(@PathVariable Long ownerId,
                                      @PathVariable Long propertyId,
-                                     @RequestParam(value = "available", required = false) String available) {
-        Property property = propertyService.findById(propertyId);
+                                     @RequestParam(value = "available", required = false) String available,
+                                     Authentication authentication) {
+        Property property = requireOwnedProperty(ownerId, propertyId, authentication);
         property.setAvailable(available != null); // Checkbox checked = true, else false
         propertyService.save(property);
         return "redirect:/properties/owner/" + ownerId;
