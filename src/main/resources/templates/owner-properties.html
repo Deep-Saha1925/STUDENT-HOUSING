@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:lang="${#locale.language}">
 
 <head>
 
-    <title>Owner Dashboard</title>
+    <title th:text="#{owner.title}">Owner Dashboard</title>
 
     <link rel="icon"
           type="image/svg+xml"
@@ -866,7 +866,7 @@
             }
             .table-responsive table td:last-child { border-bottom: none; }
             .table-responsive table td::before {
-                content: attr(data-label);
+                content: attr(data-text);
                 font-weight: 600;
                 font-size: 0.7rem;
                 text-transform: uppercase;
@@ -883,7 +883,7 @@
                 text-align: center;
             }
             .table-responsive table td.td-actions::before {
-                content: attr(data-label);
+                content: attr(data-text);
                 display: block;
                 text-align: center;
                 margin-bottom: 8px;
@@ -1486,8 +1486,7 @@
 
             .table tbody tr td::before {
 
-                content:
-                        attr(data-label);
+                content: attr(data-text);
 
                 flex:
                         0 0 auto;
@@ -1837,7 +1836,7 @@
         }
 
     </style>
-
+    <th:block th:replace="~{fragments/owner-lang :: head}"></th:block>
 </head>
 
 
@@ -1860,9 +1859,7 @@
 
             <span class="brand-dot"></span>
 
-            <span>
-                Owner Dashboard
-            </span>
+            <span th:text="#{owner.title}">Owner Dashboard</span>
 
         </a>
 
@@ -1876,7 +1873,7 @@
 
             <span class="welcome-text">
 
-                👋 Welcome,
+                👋 <span th:text="#{owner.welcome}">Welcome,</span>
 
                 <strong th:text="${owner.fullName}">
                 </strong>
@@ -1884,12 +1881,16 @@
             </span>
 
 
+            <!-- Language -->
+            <div th:replace="~{fragments/owner-lang :: switcher}"></div>
+
             <!-- Theme -->
 
             <button
                     class="theme-toggle"
                     id="themeToggle"
                     type="button"
+                    th:aria-label="#{common.theme.aria}"
                     aria-label="Toggle theme">
 
                 <i
@@ -1905,13 +1906,11 @@
             <a
                     th:href="@{'/profile/' + ${owner.id}}"
                     class="btn-nav"
-                    title="Profile">
+                    th:title="#{owner.nav.profile}" title="Profile">
 
                 <i class="bi bi-person-circle"></i>
 
-                <span class="nav-label">
-                    Profile
-                </span>
+                <span class="nav-label" th:text="#{owner.nav.profile}">Profile</span>
 
             </a>
 
@@ -1921,13 +1920,11 @@
             <a
                     th:href="@{/profile/admin}"
                     class="btn-nav"
-                    title="Contact Admin">
+                    th:title="#{owner.nav.contactAdmin}" title="Contact Admin">
 
                 <i class="bi bi-headset"></i>
 
-                <span class="nav-label">
-                    Contact Admin
-                </span>
+                <span class="nav-label" th:text="#{owner.nav.contactAdmin}">Contact Admin</span>
 
             </a>
 
@@ -1942,13 +1939,11 @@
                 <button
                         type="submit"
                         class="btn-logout-nav"
-                        title="Logout">
+                        th:title="#{owner.nav.logout}" title="Logout">
 
                     <i class="bi bi-box-arrow-right"></i>
 
-                    <span class="nav-label">
-                        Logout
-                    </span>
+                    <span class="nav-label" th:text="#{owner.nav.logout}">Logout</span>
 
                 </button>
 
@@ -1969,12 +1964,8 @@
     <!-- Page Header -->
     <div
             class="page-header animate__animated animate__fadeInDown">
-        <h2>
-            My Properties
-        </h2>
-        <p>
-            Manage and update all your listed properties
-        </p>
+        <h2 th:text="#{owner.props.heading}">My Properties</h2>
+        <p th:text="#{owner.props.subheading}">Manage and update all your listed properties</p>
     </div>
 
     <!-- =========================================================
@@ -1989,8 +1980,7 @@
             <i
                     class="bi bi-plus-circle">
             </i>
-
-            Add New Property
+            <span th:text="#{owner.props.add}">Add New Property</span>
         </a>
     </div>
 
@@ -2004,29 +1994,17 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>
-                        Title
-                    </th>
+                    <th th:text="#{owner.props.col.title}">Title</th>
 
-                    <th>
-                        City
-                    </th>
+                    <th th:text="#{owner.props.col.city}">City</th>
 
-                    <th>
-                        Area
-                    </th>
+                    <th th:text="#{owner.props.col.area}">Area</th>
 
-                    <th>
-                        Rent (₹)
-                    </th>
+                    <th th:text="#{owner.props.col.rent}">Rent (₹)</th>
 
-                    <th>
-                        Available
-                    </th>
+                    <th th:text="#{owner.props.col.available}">Available</th>
 
-                    <th>
-                        Actions
-                    </th>
+                    <th th:text="#{owner.props.col.actions}">Actions</th>
 
                 </tr>
 
@@ -2042,41 +2020,41 @@
                 <tr th:each="p : ${properties}">
                     <!-- Title -->
                     <td
-                            data-label="Title"
+                            data-label="Title" data-text="Title" th:attr="data-text=#{owner.props.col.title}"
                             th:text="${p.title}">
                     </td>
                     <!-- City -->
                     <td
-                            data-label="City"
+                            data-label="City" data-text="City" th:attr="data-text=#{owner.props.col.city}"
                             th:text="${p.city}">
                     </td>
                     <!-- Area -->
                     <td
-                            data-label="Area"
+                            data-label="Area" data-text="Area" th:attr="data-text=#{owner.props.col.area}"
                             th:text="${p.area}">
                     </td>
                     <!-- Rent -->
 
-                    <td data-label="Rent (₹)">
+                    <td data-label="Rent (₹)" data-text="Rent (₹)" th:attr="data-text=#{owner.props.col.rent}">
 
                         <div class="rent-options">
                             <!-- Monthly -->
                             <span
                                     class="badge-rent"
                                     th:if="${p.availableMonthly}"
-                                    th:text="'₹ ' + ${p.monthlyRent} + '/mo'">
+                                    th:text="'₹ ' + ${p.monthlyRent} + #{owner.props.perMonth}">
                             </span>
                             <!-- Daily -->
                             <span
                                     class="badge-rent"
                                     th:if="${p.availableDaily}"
-                                    th:text="'₹ ' + ${p.dailyRent} + '/day'">
+                                    th:text="'₹ ' + ${p.dailyRent} + #{owner.props.perDay}">
                             </span>
                         </div>
 
                     </td>
                     <!-- Availability -->
-                    <td data-label="Available">
+                    <td data-label="Available" data-text="Available" th:attr="data-text=#{owner.props.col.available}">
                         <form
                                 th:action="@{'/properties/owner/' + ${ownerId} + '/availability/' + ${p.id}}"
                                 method="post">
@@ -2097,7 +2075,7 @@
                     </td>
                     <!-- Actions -->
 
-                    <td data-label="Actions">
+                    <td data-label="Actions" data-text="Actions" th:attr="data-text=#{owner.props.col.actions}">
                         <!-- Edit -->
                         <a
                                 th:href="@{'/properties/owner/' + ${ownerId} + '/edit/' + ${p.id}}"
@@ -2105,7 +2083,7 @@
                             <i
                                     class="bi bi-pencil-square">
                             </i>
-                            Edit
+                            <span th:text="#{owner.props.edit}">Edit</span>
                         </a>
                         <!-- Bookings -->
                         <a
@@ -2114,7 +2092,7 @@
                             <i
                                     class="bi bi-calendar-week">
                             </i>
-                            Bookings
+                            <span th:text="#{owner.props.bookings}">Bookings</span>
                             <!-- Pending count -->
 
                             <span
@@ -2132,7 +2110,7 @@
                             <i
                                     class="bi bi-trash">
                             </i>
-                            Delete
+                            <span th:text="#{owner.props.delete}">Delete</span>
                         </a>
                     </td>
                 </tr>
@@ -2146,8 +2124,7 @@
                             <i
                                     class="bi bi-house-slash d-block">
                             </i>
-                            No properties listed yet.
-                            Add your first one below!
+                            <span th:text="#{owner.props.empty}">No properties listed yet. Add your first one below!</span>
                         </div>
                     </td>
                 </tr>
@@ -2232,8 +2209,8 @@
 
         toggleBtn.title =
             theme === 'dark'
-                ? 'Switch to light mode'
-                : 'Switch to dark mode';
+                ? I18N.toLight
+                : I18N.toDark;
     }
 
 </script>
