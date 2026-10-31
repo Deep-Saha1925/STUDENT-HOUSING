@@ -7,15 +7,18 @@ import com.deep.studenthousing.entity.Role;
 import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.exception.UnauthorizedActionException;
 import com.deep.studenthousing.repository.UserRepository;
+import com.deep.studenthousing.service.AccessGuard;
 import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.PropertyService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +29,9 @@ public class BookingController {
     private final BookingService bookingService;
     private final PropertyService propertyService;
     private final UserRepository userRepository;
+
+    @Autowired
+    private AccessGuard guard;
 
     public BookingController(BookingService bookingService, PropertyService propertyService, UserRepository userRepository) {
         this.bookingService = bookingService;
@@ -40,7 +46,9 @@ public class BookingController {
                                     @RequestParam(value = "cancelled", required = false) String cancelled,
                                     @RequestParam(value = "actionSuccess", required = false) String actionSuccess,
                                     @RequestParam(value = "actionError", required = false) String actionError,
-                                    Model model) {
+                                    Model model,
+                                    Authentication authentication) {
+        guard.requireSelfOwner(ownerId, authentication);
         Property property = propertyService.findById(propertyId);
 
         if (!property.getOwner().getId().equals(ownerId)) {
@@ -116,8 +124,22 @@ public class BookingController {
                     "This property is not available for your selected gender preference.";
         }
 
-        LocalDate startDate = LocalDate.parse(startDateStr);
-        LocalDate endDate = LocalDate.parse(endDateStr);
+        if (!property.isAvailable()) {
+            return "redirect:/properties/" + id + "?booked=error&reason=This property is not available right now.";
+        }
+
+        LocalDate startDate;
+        LocalDate endDate;
+        try {
+            startDate = LocalDate.parse(startDateStr);
+            endDate = LocalDate.parse(endDateStr);
+        } catch (DateTimeParseException e) {
+            return "redirect:/properties/" + id + "?booked=error&reason=Please choose valid dates.";
+        }
+        if (startDate.isBefore(LocalDate.now()) || endDate.isBefore(startDate)
+                || startDate.plusYears(2).isBefore(endDate)) {
+            return "redirect:/properties/" + id + "?booked=error&reason=Please choose valid dates.";
+        }
 
         try {
             bookingService.createBooking(property, student, rentalType, startDate, endDate);
