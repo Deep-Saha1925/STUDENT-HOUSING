@@ -2103,15 +2103,14 @@
                         </a>
 
                         <!-- DELETE -->
-                        <a
-                                th:href="@{'/properties/owner/' + ${ownerId} + '/delete/' + ${p.id}}"
-                                class="btn-edit"
-                        >
-                            <i
-                                    class="bi bi-trash">
-                            </i>
-                            <span th:text="#{owner.props.delete}">Delete</span>
-                        </a>
+                        <form th:action="@{'/properties/owner/' + ${ownerId} + '/delete/' + ${p.id}}"
+                              method="post" class="d-inline"
+                              onsubmit="return confirm(I18N.confirmDelete);">
+                            <button type="submit" class="btn-edit" style="cursor:pointer;font-family:inherit;">
+                                <i class="bi bi-trash"></i>
+                                <span th:text="#{owner.props.delete}">Delete</span>
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 <!-- =================================================
