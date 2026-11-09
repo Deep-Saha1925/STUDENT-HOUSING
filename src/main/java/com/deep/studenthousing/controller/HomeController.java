@@ -1,6 +1,8 @@
 package com.deep.studenthousing.controller;
 
 import com.deep.studenthousing.entity.Property;
+import com.deep.studenthousing.entity.Role;
+import com.deep.studenthousing.service.NoticeService;
 import com.deep.studenthousing.service.PropertyService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -14,9 +16,11 @@ import java.util.List;
 public class HomeController {
 
     private final PropertyService propertyService;
+    private final NoticeService noticeService;
 
-    public HomeController(PropertyService propertyService) {
+    public HomeController(PropertyService propertyService, NoticeService noticeService) {
         this.propertyService = propertyService;
+        this.noticeService = noticeService;
     }
 
     @GetMapping("/")
@@ -31,6 +35,13 @@ public class HomeController {
         // gated to logged-in users (the UI shows a login prompt otherwise, and
         // PropertyController re-checks server-side).
         model.addAttribute("loggedIn", authentication != null);
+
+        // Admin notices for the banner at the top of the page (guests see only "ALL" notices).
+        try {
+            model.addAttribute("notices", noticeService.visibleFor(roleOf(authentication)));
+        } catch (Exception e) {
+            model.addAttribute("notices", List.of());
+        }
 
         if (city != null && city.trim().isEmpty()) city = null;
 
@@ -67,5 +78,15 @@ public class HomeController {
         model.addAttribute("city", city);
         model.addAttribute("rent", rent);
         return "index";
+    }
+
+    /** Maps the logged-in user's authority (ROLE_STUDENT etc.) to our Role enum; null for guests. */
+    private Role roleOf(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) return null;
+        for (var a : authentication.getAuthorities()) {
+            String name = a.getAuthority().replace("ROLE_", "");
+            try { return Role.valueOf(name); } catch (IllegalArgumentException ignored) {}
+        }
+        return null;
     }
 }
