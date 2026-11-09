@@ -234,6 +234,7 @@
         .icon-blue   { background: rgba(59,130,246,0.1);  color: #3b82f6; }
         .icon-teal   { background: rgba(20,184,166,0.1);  color: #0d9488; }
         .icon-orange { background: rgba(249,115,22,0.1);  color: #ea580c; }
+        .icon-rose   { background: rgba(244,63,94,0.1);   color: #e11d48; }
 
         .dashboard-card h4 {
             font-family: 'DM Serif Display', serif;
@@ -286,6 +287,13 @@
             border: 1.5px solid rgba(249,115,22,0.25);
         }
         .btn-card-orange:hover { background: rgba(249,115,22,0.2); color: #c2410c; }
+
+        .btn-card-rose {
+            background: rgba(244,63,94,0.1);
+            color: #e11d48;
+            border: 1.5px solid rgba(244,63,94,0.25);
+        }
+        .btn-card-rose:hover { background: rgba(244,63,94,0.2); color: #be123c; }
 
         /* ===========================
    Mobile Responsive
@@ -446,6 +454,17 @@
         <p>Add new users (Admins only).</p>
         <a th:href="@{/users/register}" class="btn-card btn-card-orange">
             <i class="bi bi-person-plus"></i> Register New User
+        </a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon-wrap icon-rose">
+            <i class="bi bi-megaphone-fill"></i>
+        </div>
+        <h4>Notices</h4>
+        <p>Post announcements shown at the top of the home page.</p>
+        <a th:href="@{/admin/notices}" class="btn-card btn-card-rose">
+            <i class="bi bi-megaphone"></i> Manage
         </a>
     </div>
 
