@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Admin notices banner. Included at the top of index.html:
+     <div th:replace="~{fragments/notice-banner :: banner}"></div> -->
+<div th:fragment="banner">
+    <style>
+        .notice-wrap { position: relative; z-index: 5; }
+        .notice-bar {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 11px 20px; font-size: .88rem; line-height: 1.5;
+            border-bottom: 1px solid rgba(0,0,0,.08);
+        }
+        .notice-bar .n-icon { font-size: 1.1rem; margin-top: 1px; flex-shrink: 0; }
+        .notice-bar .n-body { flex: 1; }
+        .notice-bar .n-body strong { margin-right: 6px; }
+        .notice-bar .n-close {
+            background: none; border: 0; color: inherit; opacity: .6;
+            font-size: 1.1rem; cursor: pointer; padding: 0 4px; line-height: 1;
+        }
+        .notice-bar .n-close:hover { opacity: 1; }
+        .notice-INFO    { background: #e8f1ff; color: #1d4ed8; }
+        .notice-WARNING { background: #fff4d6; color: #92600a; }
+        .notice-URGENT  { background: #ffe3e3; color: #b42318; }
+        [data-theme="dark"] .notice-INFO    { background: #172554; color: #93c5fd; }
+        [data-theme="dark"] .notice-WARNING { background: #3a2a05; color: #fcd34d; }
+        [data-theme="dark"] .notice-URGENT  { background: #3b0d0d; color: #fca5a5; }
+    </style>
+
+    <div class="notice-wrap" th:if="${notices != null and !notices.isEmpty()}">
+        <div th:each="n : ${notices}"
+             th:class="'notice-bar notice-' + ${n.severity}"
+             th:attr="data-notice-id=${n.id}" role="alert">
+            <i class="bi n-icon"
+               th:classappend="${n.severity.name() == 'URGENT'} ? 'bi-exclamation-octagon-fill'
+                              : (${n.severity.name() == 'WARNING'} ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill')"></i>
+            <div class="n-body">
+                <strong th:text="${n.title}">Title</strong>
+                <span th:text="${n.message}">Message</span>
+            </div>
+            <button type="button" class="n-close" aria-label="Dismiss" title="Dismiss">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        // Dismiss = hide on this browser only. A new/edited notice has a new id, so it shows again.
+        (function () {
+            var bars = document.querySelectorAll('.notice-bar');
+            bars.forEach(function (bar) {
+                var key = 'sh-notice-dismissed-' + bar.getAttribute('data-notice-id');
+                try { if (localStorage.getItem(key)) { bar.remove(); return; } } catch (e) {}
+                bar.querySelector('.n-close').addEventListener('click', function () {
+                    try { localStorage.setItem(key, '1'); } catch (e) {}
+                    bar.remove();
+                });
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>
