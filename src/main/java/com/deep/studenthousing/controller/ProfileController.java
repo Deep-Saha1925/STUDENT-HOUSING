@@ -37,13 +37,17 @@ public class ProfileController {
     }
 
     @GetMapping("/profile/admin")
-    public String viewAdminProfile(Model model){
+    public String viewAdminProfile(Model model, Authentication authentication){
         User admin = userService.findFirstByRole();
         if(admin != null){
             User newUser = new User();
             newUser.setEmail(admin.getEmail());
             newUser.setPhone(admin.getPhone());
             model.addAttribute("user", newUser);
+            // Only owners get the "Send a report" button (the /owner/** pages are owner-only).
+            boolean isOwner = authentication != null && authentication.getAuthorities().stream()
+                    .anyMatch(g -> "ROLE_OWNER".equals(g.getAuthority()));
+            model.addAttribute("isOwner", isOwner);
             return "admin-profile";
         }else{
             throw new UserNotFoundException("Admin not found");
