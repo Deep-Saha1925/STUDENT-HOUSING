@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Reports - Admin</title>
+    <th:block th:replace="~{fragments/report-ui :: styles}"></th:block>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container-fluid d-flex align-items-center gap-3">
+        <a th:href="@{/admin/dashboard}" class="navbar-brand">Admin Panel</a>
+        <a th:href="@{/admin/dashboard}" class="btn-nav ms-auto"><i class="bi bi-arrow-left"></i> Dashboard</a>
+    </div>
+</nav>
+
+<div class="container py-4" style="max-width: 1100px;">
+
+    <h2 class="page-title mb-1">Owner Reports</h2>
+    <p class="text-muted-2 mb-3">Reports sent by property owners. Open one to reply, ask for info, or decide.</p>
+
+    <!-- Status filter -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <a th:href="@{/admin/reports}" class="btn btn-sm"
+           th:classappend="${selected == null} ? 'btn-dark' : 'btn-outline-secondary'">All</a>
+        <a th:each="s : ${statuses}" th:href="@{/admin/reports(status=${s})}" class="btn btn-sm"
+           th:classappend="${selected == s} ? 'btn-dark' : 'btn-outline-secondary'" th:text="${s.label}"></a>
+    </div>
+
+    <div class="panel">
+        <div th:if="${reports.isEmpty()}" class="text-muted-2">No reports here.</div>
+        <div class="table-responsive" th:if="${!reports.isEmpty()}">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Subject</th><th>Owner</th><th>Type</th><th>Status</th><th>Last update</th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${reports}">
+                    <td>
+                        <span class="dot-unread" th:if="${r.adminUnread}" title="Needs your attention"></span>
+                        <a class="row-link" th:href="@{'/admin/reports/' + ${r.id}}" th:text="${r.subject}"></a>
+                        <div class="text-muted-2" th:if="${r.propertyTitle != null}" th:text="${r.propertyTitle}"></div>
+                    </td>
+                    <td th:text="${r.owner.fullName}"></td>
+                    <td th:text="${r.type.label}"></td>
+                    <td><span th:class="'st st-' + ${r.status}" th:text="${r.status.label}"></span></td>
+                    <td class="text-muted-2" th:text="${#temporals.format(r.updatedAt, 'dd MMM yyyy, HH:mm')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
