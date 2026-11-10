@@ -235,6 +235,7 @@
         .icon-teal   { background: rgba(20,184,166,0.1);  color: #0d9488; }
         .icon-orange { background: rgba(249,115,22,0.1);  color: #ea580c; }
         .icon-rose   { background: rgba(244,63,94,0.1);   color: #e11d48; }
+        .icon-violet { background: rgba(139,92,246,0.1);  color: #7c3aed; }
 
         .dashboard-card h4 {
             font-family: 'DM Serif Display', serif;
@@ -294,6 +295,13 @@
             border: 1.5px solid rgba(244,63,94,0.25);
         }
         .btn-card-rose:hover { background: rgba(244,63,94,0.2); color: #be123c; }
+
+        .btn-card-violet {
+            background: rgba(139,92,246,0.1);
+            color: #7c3aed;
+            border: 1.5px solid rgba(139,92,246,0.25);
+        }
+        .btn-card-violet:hover { background: rgba(139,92,246,0.2); color: #6d28d9; }
 
         /* ===========================
    Mobile Responsive
@@ -465,6 +473,19 @@
         <p>Post announcements shown at the top of the home page.</p>
         <a th:href="@{/admin/notices}" class="btn-card btn-card-rose">
             <i class="bi bi-megaphone"></i> Manage
+        </a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon-wrap icon-violet">
+            <i class="bi bi-inbox-fill"></i>
+        </div>
+        <h4>Owner Reports
+            <span class="badge rounded-pill bg-danger ms-1" th:if="${unreadReports > 0}" th:text="${unreadReports}">1</span>
+        </h4>
+        <p>Review reports from owners, reply, and approve or reject.</p>
+        <a th:href="@{/admin/reports}" class="btn-card btn-card-violet">
+            <i class="bi bi-inbox"></i> Open inbox
         </a>
     </div>
 
