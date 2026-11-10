@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users/register").hasRole("ADMIN")
                         .requestMatchers("/properties/owner/**").hasRole("OWNER")
+                        .requestMatchers("/owner/**").hasRole("OWNER")
                         .requestMatchers("/student/**").hasRole("STUDENT")
                         // Booking actions need a login. They sit under /properties/** (public
                         // for property pages), so list them before that permitAll rule.
@@ -46,7 +47,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(((request, response, accessDeniedException) -> {
                             if(accessDeniedException instanceof InvalidCsrfTokenException
-                                || accessDeniedException instanceof MissingCsrfTokenException){
+                                    || accessDeniedException instanceof MissingCsrfTokenException){
                                 // CSRF token mismatch on login POST - NOT a real
                                 // authorization failure. Send back to login instead
                                 // of the access-denied page.
