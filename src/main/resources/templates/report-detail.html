@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Report</title>
+    <th:block th:replace="~{fragments/report-ui :: styles}"></th:block>
+</head>
+<body>
+
+<!-- Same page for both sides: ${admin} is true for the admin view. -->
+<nav class="navbar">
+    <div class="container-fluid d-flex align-items-center gap-3">
+        <span class="navbar-brand" th:text="${admin} ? 'Admin Panel' : 'Student Housing'">Student Housing</span>
+        <a th:href="${admin} ? @{/admin/reports} : @{/owner/reports}" class="btn-nav ms-auto">
+            <i class="bi bi-arrow-left"></i> Reports
+        </a>
+    </div>
+</nav>
+
+<div class="container py-4" style="max-width: 860px;">
+
+    <div th:if="${param.success}" class="alert alert-success py-2">Saved.</div>
+    <div th:if="${param.error != null and param.error[0] == 'needText'}" class="alert alert-danger py-2">
+        Please write a message when asking for info or rejecting.
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'closed'}" class="alert alert-warning py-2">
+        This report is closed, so you can't add messages.
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'invalid'}" class="alert alert-danger py-2">
+        Message is empty or too long (max 2000).
+    </div>
+
+    <!-- Header -->
+    <div class="panel mb-4">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+            <div>
+                <h2 class="page-title mb-1" th:text="${report.subject}">Subject</h2>
+                <div class="text-muted-2">
+                    <span th:text="${report.type.label}"></span>
+                    <span th:if="${report.propertyTitle != null}"> · <i class="bi bi-building"></i> <span th:text="${report.propertyTitle}"></span></span>
+                    <span th:if="${admin}"> · from <strong th:text="${report.owner.fullName}"></strong>
+                        (<span th:text="${report.owner.email}"></span>, <span th:text="${report.owner.phone}"></span>)</span>
+                </div>
+                <div class="text-muted-2">Sent <span th:text="${#temporals.format(report.createdAt, 'dd MMM yyyy, HH:mm')}"></span></div>
+            </div>
+            <span th:class="'st st-' + ${report.status}" th:text="${report.status.label}"></span>
+        </div>
+    </div>
+
+    <!-- Thread -->
+    <div class="d-flex flex-column mb-3">
+        <div th:each="m : ${messages}" th:class="'msg ' + (${m.fromAdmin} ? 'msg-admin' : 'msg-owner')">
+            <div class="who">
+                <span th:text="${m.fromAdmin} ? 'Admin' : ${m.sender.fullName}"></span>
+                · <span th:text="${#temporals.format(m.createdAt, 'dd MMM, HH:mm')}"></span>
+            </div>
+            <div class="body" th:if="${!m.message.isEmpty()}" th:text="${m.message}"></div>
+            <div th:if="${m.statusAfter != null}" class="mt-2">
+                <span class="text-muted-2">Status changed to</span>
+                <span th:class="'st st-' + ${m.statusAfter}" th:text="${m.statusAfter.label}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin reply + decision -->
+    <div class="panel" th:if="${admin}">
+        <form th:action="@{'/admin/reports/' + ${report.id} + '/reply'}" method="post" class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Reply to owner <span class="text-muted-2">(required for Need info / Rejected)</span></label>
+                <textarea name="message" class="form-control" rows="3" maxlength="2000"></textarea>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Set status</label>
+                <select name="status" class="form-select">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}"
+                            th:selected="${s == report.status}"
+                            th:disabled="${s.name() == 'NEW' and report.status.name() != 'NEW'}"></option>
+                </select>
+            </div>
+            <div class="col-md-7 d-flex align-items-end">
+                <button type="submit" class="btn-accent"><i class="bi bi-reply"></i> Send / update</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Owner reply -->
+    <div class="panel" th:if="${!admin and !report.status.closed}">
+        <form th:action="@{'/owner/reports/' + ${report.id} + '/reply'}" method="post" class="row g-3">
+            <div class="col-12">
+                <label class="form-label" th:text="${report.status.name() == 'NEED_INFO'} ? 'The admin needs more info — your reply' : 'Add a message'"></label>
+                <textarea name="message" class="form-control" rows="3" maxlength="2000" required></textarea>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn-accent"><i class="bi bi-send"></i> Send</button>
+            </div>
+        </form>
+    </div>
+    <div class="text-muted-2" th:if="${!admin and report.status.closed}">
+        This report was <strong th:text="${report.status.label}"></strong>. Start a new report if you need anything else.
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
