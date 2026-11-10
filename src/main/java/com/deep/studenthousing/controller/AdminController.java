@@ -3,6 +3,7 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.service.PropertyService;
+import com.deep.studenthousing.service.ReportService;
 import com.deep.studenthousing.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,13 +23,15 @@ public class AdminController {
 
     private final UserService userService;
     private final PropertyService propertyService;
+    private final ReportService reportService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public AdminController(UserService userService, PropertyService propertyService) {
+    public AdminController(UserService userService, PropertyService propertyService, ReportService reportService) {
         this.userService = userService;
         this.propertyService = propertyService;
+        this.reportService = reportService;
     }
 
     @GetMapping("/dashboard")
@@ -37,6 +40,7 @@ public class AdminController {
         User admin = userService.findByEmail(email);
 
         model.addAttribute("admin", admin);
+        model.addAttribute("unreadReports", reportService.countAdminUnread());
 
         return "admin-dashboard";
     }
