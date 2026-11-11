@@ -64,6 +64,9 @@
 - 🔔 **Pending-request notification badge** on the My Properties dashboard — see at a glance which properties have requests waiting
 - 🚫 Cancel a confirmed booking if needed
 - 🌐 **Auto-geocoding** — GPS coordinates saved automatically from city + area on property save
+- 🚩 **Send reports to the admin** (service down / maintenance, property issue, booking or tenant dispute, other), optionally linked to one of your properties
+- 💬 **Two-way report thread** — answer the admin when they ask for more info, and follow the status New → Under review → Need info → Approved / Rejected
+- 🔴 **Unread-reply badge** on the Reports button when the admin has answered
 
 </td>
 </tr>
@@ -77,6 +80,9 @@
 - 🚫 Admins cannot be deleted
 - 🏘️ View all properties (paginated table)
 - 🚷 Access denied page for unauthorized routes
+- 📣 **Notices** — post announcements (Info / Warning / Urgent) for everyone, students only or owners only, with optional auto-hide time
+- 📥 **Owner Reports inbox** — filter by status, reply, ask for info, approve or reject, with an unread badge on the dashboard
+- 🔁 **One-click "Create notice from this report"** for approved reports (pre-filled, edited by the admin before publishing)
 
 </td>
 <td width="50%">
@@ -91,6 +97,8 @@
 - 🚫 Custom 403, "Unauthorized," and general error pages
 - 🌐 Cloud-hosted database (Neon PostgreSQL)
 - 📍 **Smart location search** with GPS + text fallback, combinable with rental type, max rent, and gender filters
+- 📣 **Notice banner** at the top of the home page, audience-aware (guests see only "Everyone" notices) and dismissible per browser
+- 🧾 **Owner report workflow** with a per-report message thread, status history and unread tracking on both sides
 
 </td>
 </tr>
@@ -259,11 +267,79 @@ Both modes share the same filter set — **rental type** (Monthly / Daily / Any)
 | Reject Booking | — | `POST /properties/bookings/{id}/reject` | 🏠 OWNER |
 | Cancel/Withdraw Booking | — | `POST /properties/bookings/{id}/cancel` | 🎓 STUDENT / 🏠 OWNER |
 | User Profile | `user-profile.html` | `/profile/{id}` | 🔒 Auth |
-| Admin Profile | `admin-profile.html` | `/profile/admin` | 🔒 Auth |
+| Contact Admin | `admin-profile.html` | `/profile/admin` | 🔒 Auth |
 | Admin Dashboard | `admin-dashboard.html` | `/admin/dashboard` | 🔐 ADMIN |
 | Manage Users | `manage-users.html` | `/admin/users` | 🔐 ADMIN |
 | Manage Properties | `manage-properties.html` | `/admin/properties` | 🔐 ADMIN |
 | Edit User | `edit-user.html` | `/admin/users/edit/{id}` | 🔐 ADMIN |
+| Notices | `admin-notices.html` | `/admin/notices` (`?fromReport={id}` pre-fills from a report) | 🔐 ADMIN |
+| Create / Toggle / Delete Notice | — | `POST /admin/notices`, `/admin/notices/{id}/toggle`, `/admin/notices/{id}/delete` | 🔐 ADMIN |
+| Owner Reports inbox | `admin-reports.html` | `/admin/reports?status=` | 🔐 ADMIN |
+| Report Thread (admin) | `report-detail.html` | `/admin/reports/{id}` · `POST /admin/reports/{id}/reply` | 🔐 ADMIN |
+| My Reports | `owner-reports.html` | `/owner/reports` · `POST /owner/reports` | 🏠 OWNER |
+| Report Thread (owner) | `report-detail.html` | `/owner/reports/{id}` · `POST /owner/reports/{id}/reply` | 🏠 OWNER (own reports only) |
+
+---
+
+## 📣 Notices & Owner Reports
+
+Two small modules that let the admin talk to users and let owners talk back.
+
+### 1️⃣ Notices (admin → users)
+
+The admin writes a notice at `/admin/notices`; it appears as a coloured banner under the navbar on the home page.
+
+| Field | Options |
+|---|---|
+| **Type** | `INFO` (blue), `WARNING` (amber), `URGENT` (red) |
+| **Show to** | Everyone (incl. guests), Students only, Owners only — admins see all active notices |
+| **Auto-hide at** | Optional date/time; expired notices disappear by themselves |
+| **Status** | Live / Off (switch off without deleting) / Expired |
+
+Users can dismiss a banner; this is remembered in that browser only (`localStorage`), and an edited or new notice shows again.
+
+### 2️⃣ Owner reports (owner → admin)
+
+Owners open **Reports** from their dashboard (or *Contact Admin → Send a report*) and choose a type:
+
+`Service down / maintenance` · `Property issue (damage, safety, repairs)` · `Booking or tenant dispute` · `Other`
+
+A report can optionally be linked to one of the owner's properties (stored as id + title, so deleting a property never breaks old reports).
+
+```
+        owner sends report
+              │
+              ▼
+            NEW ──admin opens/replies──► UNDER_REVIEW ◄──owner answers──┐
+                                              │                          │
+                                  admin asks for details                 │
+                                              ▼                          │
+                                          NEED_INFO ─────────────────────┘
+                                              │
+                          ┌───────────────────┴──────────────────┐
+                          ▼                                      ▼
+                      APPROVED                               REJECTED
+                          │
+              "Create notice from this report"
+                          ▼
+              pre-filled notice form ──admin edits & publishes──► banner on home page
+```
+
+**Rules**
+- Every report is a conversation: the owner's description is the first message, then replies from both sides, with status changes shown as chips.
+- *Need info* and *Rejected* require a written message from the admin.
+- When the owner replies to *Need info*, the report moves back to *Under review*.
+- Approved / Rejected reports are closed for owner replies (the admin can still change the status).
+- A dot in the lists (and a red count on the dashboard / Reports button) marks unread activity for each side.
+- An approved report can be turned into a notice **once**; the owner then receives an automatic "published as a public notice" message. The admin edits the pre-filled text first, so private details are not published by accident.
+
+**Security**
+- `/admin/**` is ADMIN-only and `/owner/**` is OWNER-only (`SecurityConfig`).
+- Owners can open only their own reports (`ReportService.findForOwnerById` → `UnauthorizedActionException`).
+- A linked property must belong to the sender, otherwise the link is ignored.
+- All forms are `POST` with CSRF tokens; message lengths are validated server-side (title/subject ≤ 150, text ≤ 2000, notice ≤ 1000).
+
+**Database** — tables are created by Hibernate (`ddl-auto=update`): `notices`, `reports`, `report_messages`. Deleting a user cascades to their reports and messages.
 
 ---
 
@@ -271,9 +347,9 @@ Both modes share the same filter set — **rental type** (Monthly / Daily / Any)
 
 | Role | Permissions |
 |---|---|
-| **Student** | Search properties (manual + GPS, filterable by rental type), view property details, book properties (monthly or daily), track/withdraw booking requests, manage own profile |
-| **Owner** | Add/edit/delete own properties, set Monthly/Daily availability and pricing independently, manage listing availability, upload/remove images (coordinates auto-saved), approve/reject/cancel booking requests |
-| **Admin** | Manage all users and properties, register new users (cannot be deleted) |
+| **Student** | Search properties (manual + GPS, filterable by rental type), view property details, book properties (monthly or daily), track/withdraw booking requests, manage own profile, see notices addressed to students |
+| **Owner** | Add/edit/delete own properties, set Monthly/Daily availability and pricing independently, manage listing availability, upload/remove images (coordinates auto-saved), approve/reject/cancel booking requests, send reports to the admin and follow the reply thread |
+| **Admin** | Manage all users and properties, register new users (cannot be deleted), publish notices, handle owner reports (reply, request info, approve/reject, turn into a notice) |
 
 ---
 
@@ -284,12 +360,12 @@ STUDENT-HOUSING/
 ├── assets/                         # Logo + README screenshots
 ├── src/main/java/com/deep/studenthousing/
 │   ├── config/                     # Security, CSRF, login rate-limit, Cloudinary, i18n, admin seeding
-│   ├── controller/                 # Home, Login, Register, Student, Property, Booking, Admin, Profile
+│   ├── controller/                 # Home, Login, Register, Student, Property, Booking, Admin, Profile, AdminNotice, AdminReport, OwnerReport
 │   ├── dto/                        # PropertyMapDTO (map pins)
-│   ├── entity/                     # User, Property, PropertyImage, Booking + enums
+│   ├── entity/                     # User, Property, PropertyImage, Booking, Notice, Report, ReportMessage + enums
 │   ├── exception/                  # GlobalExceptionHandler, UnauthorizedActionException, ...
 │   ├── repository/                 # Spring Data JPA repositories (incl. Haversine query)
-│   └── service/                    # Property, Booking, User, GeoCoding, ImageUpload, AccessGuard
+│   └── service/                    # Property, Booking, User, GeoCoding, ImageUpload, AccessGuard, Notice, Report
 ├── src/main/resources/
 │   ├── templates/                  # Thymeleaf pages + fragments/
 │   ├── static/                     # favicon, logo
