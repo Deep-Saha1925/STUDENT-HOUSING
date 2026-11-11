@@ -8,6 +8,7 @@ import com.deep.studenthousing.service.AccessGuard;
 import com.deep.studenthousing.service.BookingService;
 import com.deep.studenthousing.service.ImageUploadService;
 import com.deep.studenthousing.service.PropertyService;
+import com.deep.studenthousing.service.ReportService;
 import com.deep.studenthousing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -38,6 +39,9 @@ public class PropertyController {
 
     @Autowired
     private AccessGuard guard;
+
+    @Autowired
+    private ReportService reportService;
 
     public PropertyController(UserService userService, PropertyService propertyService, ImageUploadService imageUploadService, BookingService bookingService) {
         this.userService = userService;
@@ -172,6 +176,7 @@ public class PropertyController {
         model.addAttribute("ownerId", ownerId);
         model.addAttribute("properties", properties);
         model.addAttribute("pendingCounts", bookingService.getPendingBookingCountsByOwner(ownerId));
+        model.addAttribute("unreadReports", reportService.countOwnerUnread(owner));
 
         return "owner-properties";
     }
