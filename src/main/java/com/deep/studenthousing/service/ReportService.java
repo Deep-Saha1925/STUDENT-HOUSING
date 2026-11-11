@@ -114,6 +114,19 @@ public class ReportService {
         reportRepository.save(report);
     }
 
+    /** Called after an approved report was turned into a public notice. */
+    @Transactional
+    public void markNoticePublished(Long reportId, User admin) {
+        reportRepository.findById(reportId).ifPresent(r -> {
+            if (r.getStatus() != ReportStatus.APPROVED || r.isNoticePublished()) return;
+            r.setNoticePublished(true);
+            addMessage(r, admin, true, "This report has been published as a public notice.", null);
+            r.setOwnerUnread(true);
+            r.setUpdatedAt(LocalDateTime.now());
+            reportRepository.save(r);
+        });
+    }
+
     @Transactional
     public void markAdminRead(Report report) {
         if (report.isAdminUnread()) {
