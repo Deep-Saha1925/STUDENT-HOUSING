@@ -1940,6 +1940,8 @@
 
                 <span class="nav-label" th:text="#{owner.nav.reports}">Reports</span>
 
+                <span class="badge rounded-pill bg-danger" th:if="${unreadReports != null and unreadReports > 0}" th:text="${unreadReports}">1</span>
+
             </a>
 
 
