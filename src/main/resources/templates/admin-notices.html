@@ -71,26 +71,34 @@
     <!-- New notice -->
     <div class="panel mb-4">
         <h5 class="mb-3"><i class="bi bi-megaphone"></i> New notice</h5>
+        <div class="alert alert-info py-2" th:if="${fromReport != null}">
+            Pre-filled from report <strong>#<span th:text="${fromReport.id}"></span></strong>
+            (<span th:text="${fromReport.subject}"></span>). Edit anything before publishing — the owner's
+            private details should not go public.
+        </div>
         <form th:action="@{/admin/notices}" method="post" class="row g-3">
+            <input type="hidden" name="reportId" th:if="${fromReport != null}" th:value="${fromReport.id}">
             <div class="col-12">
                 <label class="form-label">Title</label>
-                <input type="text" name="title" class="form-control" maxlength="150" required
+                <input type="text" name="title" class="form-control" maxlength="150" required th:value="${prefillTitle}"
                        placeholder="e.g. Scheduled maintenance on Sunday">
             </div>
             <div class="col-12">
                 <label class="form-label">Message</label>
-                <textarea name="message" class="form-control" rows="3" maxlength="1000" required></textarea>
+                <textarea name="message" class="form-control" rows="3" maxlength="1000" required th:text="${prefillMessage}"></textarea>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Type</label>
                 <select name="severity" class="form-select">
-                    <option th:each="s : ${severities}" th:value="${s}" th:text="${s}"></option>
+                    <option th:each="s : ${severities}" th:value="${s}" th:text="${s}"
+                            th:selected="${prefillSeverity != null and s == prefillSeverity}"></option>
                 </select>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Show to</label>
                 <select name="audience" class="form-select">
                     <option th:each="a : ${audiences}" th:value="${a}"
+                            th:selected="${prefillAudience != null and a == prefillAudience}"
                             th:text="${a.name() == 'ALL'} ? 'Everyone (incl. guests)' : ${a} + 's only'"></option>
                 </select>
             </div>
