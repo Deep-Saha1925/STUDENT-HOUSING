@@ -82,6 +82,20 @@
         </form>
     </div>
 
+    <!-- Approved report -> public notice -->
+    <div class="panel mt-3" th:if="${admin and report.status.name() == 'APPROVED'}">
+        <div th:if="${!report.noticePublished}" class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span>This report is approved. Share it with users as a public notice?</span>
+            <a th:href="@{/admin/notices(fromReport=${report.id})}" class="btn-accent text-decoration-none">
+                <i class="bi bi-megaphone"></i> Create notice from this report
+            </a>
+        </div>
+        <div th:if="${report.noticePublished}" class="text-muted-2">
+            <i class="bi bi-check-circle-fill text-success"></i> Published as a public notice.
+            <a th:href="@{/admin/notices}">View notices</a>
+        </div>
+    </div>
+
     <!-- Owner reply -->
     <div class="panel" th:if="${!admin and !report.status.closed}">
         <form th:action="@{'/owner/reports/' + ${report.id} + '/reply'}" method="post" class="row g-3">
