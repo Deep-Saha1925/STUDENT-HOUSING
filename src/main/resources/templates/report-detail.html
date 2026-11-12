@@ -39,13 +39,14 @@
                 <h2 class="page-title mb-1" th:text="${report.subject}">Subject</h2>
                 <div class="text-muted-2">
                     <span th:text="${report.type.label}"></span>
+                    <span th:if="${report.startedByAdmin}" class="badge bg-secondary ms-1" th:text="${admin} ? 'Started by you' : 'From admin'"></span>
                     <span th:if="${report.propertyTitle != null}"> · <i class="bi bi-building"></i> <span th:text="${report.propertyTitle}"></span></span>
-                    <span th:if="${admin}"> · from <strong th:text="${report.owner.fullName}"></strong>
+                    <span th:if="${admin}"> · <span th:text="${report.startedByAdmin} ? 'sent to' : 'from'"></span> <strong th:text="${report.owner.fullName}"></strong>
                         (<span th:text="${report.owner.email}"></span>, <span th:text="${report.owner.phone}"></span>)</span>
                 </div>
                 <div class="text-muted-2">Sent <span th:text="${#temporals.format(report.createdAt, 'dd MMM yyyy, HH:mm')}"></span></div>
             </div>
-            <span th:class="'st st-' + ${report.status}" th:text="${report.status.label}"></span>
+            <span th:class="'st st-' + ${report.status}" th:text="${report.statusLabel}"></span>
         </div>
     </div>
 
@@ -59,7 +60,7 @@
             <div class="body" th:if="${!m.message.isEmpty()}" th:text="${m.message}"></div>
             <div th:if="${m.statusAfter != null}" class="mt-2">
                 <span class="text-muted-2">Status changed to</span>
-                <span th:class="'st st-' + ${m.statusAfter}" th:text="${m.statusAfter.label}"></span>
+                <span th:class="'st st-' + ${m.statusAfter}" th:text="${m.statusAfterLabel}"></span>
             </div>
         </div>
     </div>
@@ -74,7 +75,7 @@
             <div class="col-md-5">
                 <label class="form-label">Set status</label>
                 <select name="status" class="form-select">
-                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}"
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${report.labelOf(s)}"
                             th:selected="${s == report.status}"
                             th:disabled="${s.name() == 'NEW' and report.status.name() != 'NEW'}"></option>
                 </select>
@@ -86,7 +87,7 @@
     </div>
 
     <!-- Approved report -> public notice -->
-    <div class="panel mt-3" th:if="${admin and report.status.name() == 'APPROVED'}">
+    <div class="panel mt-3" th:if="${admin and !report.startedByAdmin and report.status.name() == 'APPROVED'}">
         <div th:if="${!report.noticePublished}" class="d-flex flex-wrap align-items-center justify-content-between gap-2">
             <span>This report is approved. Share it with users as a public notice?</span>
             <a th:href="@{/admin/notices(fromReport=${report.id})}" class="btn-accent text-decoration-none">
@@ -103,7 +104,7 @@
     <div class="panel" th:if="${!admin and !report.status.closed}">
         <form th:action="@{'/owner/reports/' + ${report.id} + '/reply'}" method="post" class="row g-3">
             <div class="col-12">
-                <label class="form-label" th:text="${report.status.name() == 'NEED_INFO'} ? 'The admin needs more info — your reply' : 'Add a message'"></label>
+                <label class="form-label" th:text="${report.startedByAdmin} ? 'Your reply to the admin' : (${report.status.name() == 'NEED_INFO'} ? 'The admin needs more info — your reply' : 'Add a message')"></label>
                 <textarea name="message" class="form-control" rows="3" maxlength="2000" required></textarea>
             </div>
             <div class="col-12">
@@ -112,7 +113,7 @@
         </form>
     </div>
     <div class="text-muted-2" th:if="${!admin and report.status.closed}">
-        This report was <strong th:text="${report.status.label}"></strong>. Start a new report if you need anything else.
+        This conversation is closed (<strong th:text="${report.statusLabel}"></strong>). Start a new report if you need anything else.
     </div>
 </div>
 
