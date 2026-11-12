@@ -46,8 +46,14 @@ public class OwnerReportController {
         if (subject.isEmpty() || description.isEmpty() || subject.length() > 150 || description.length() > 2000) {
             return "redirect:/owner/reports?error=invalid";
         }
-        Report r = reportService.create(owner, type, propertyId, subject, description);
-        return "redirect:/owner/reports/" + r.getId() + "?success=created";
+        try {
+            Report r = reportService.create(owner, type, propertyId, subject, description);
+            return "redirect:/owner/reports/" + r.getId() + "?success=created";
+        } catch (ReportService.LimitExceededException e) {
+            return "redirect:/owner/reports?error=limit";
+        } catch (IllegalArgumentException e) {
+            return "redirect:/owner/reports?error=invalid";
+        }
     }
 
     @GetMapping("/{id}")
@@ -74,7 +80,13 @@ public class OwnerReportController {
         if (report.getStatus().isClosed()) {
             return "redirect:/owner/reports/" + id + "?error=closed";
         }
-        reportService.ownerReply(report, owner, message);
+        try {
+            reportService.ownerReply(report, owner, message);
+        } catch (ReportService.LimitExceededException e) {
+            return "redirect:/owner/reports/" + id + "?error=limit";
+        } catch (IllegalArgumentException e) {
+            return "redirect:/owner/reports/" + id + "?error=invalid";
+        }
         return "redirect:/owner/reports/" + id + "?success=sent";
     }
 }
