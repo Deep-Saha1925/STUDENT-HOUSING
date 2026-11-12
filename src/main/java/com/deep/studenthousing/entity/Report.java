@@ -46,6 +46,28 @@ public class Report {
     // Set later (step 2b) when an approved report has been turned into a public notice.
     private boolean noticePublished = false;
 
+    // True when the admin started the conversation (a message sent to an owner),
+    // as opposed to an owner sending a report. Existing rows default to false.
+    @Column(columnDefinition = "boolean not null default false")
+    private boolean startedByAdmin = false;
+
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    // Status values are shared (no new enum values), but admin-started messages read differently.
+    public static String labelFor(ReportStatus s, boolean startedByAdmin) {
+        if (startedByAdmin) {
+            switch (s) {
+                case NEED_INFO:    return "Awaiting owner reply";
+                case UNDER_REVIEW: return "Owner replied";
+                case APPROVED:     return "Resolved";
+                default: break;
+            }
+        }
+        return s.getLabel();
+    }
+
+    public String getStatusLabel() { return labelFor(status, startedByAdmin); }
+
+    public String labelOf(ReportStatus s) { return labelFor(s, startedByAdmin); }
 }
