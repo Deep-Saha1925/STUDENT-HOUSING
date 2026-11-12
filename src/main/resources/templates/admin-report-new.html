@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Message an owner - Admin</title>
+    <th:block th:replace="~{fragments/report-ui :: styles}"></th:block>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container-fluid d-flex align-items-center gap-3">
+        <a th:href="@{/admin/dashboard}" class="navbar-brand">Admin Panel</a>
+        <a th:href="@{/admin/reports}" class="btn-nav ms-auto"><i class="bi bi-arrow-left"></i> Reports</a>
+    </div>
+</nav>
+
+<div class="container py-4" style="max-width: 760px;">
+    <h2 class="page-title mb-1">Message an owner</h2>
+    <p class="text-muted-2 mb-4">Private message to one owner, for example about an issue raised for their property.
+        The owner sees it under <strong>My Reports</strong> and can reply.</p>
+
+    <div th:if="${param.error}" class="alert alert-danger py-2">
+        Choose an owner, write a subject (max 150) and a message (max 2000), and make sure the property belongs to that owner.
+    </div>
+
+    <div class="panel">
+        <form th:action="@{/admin/reports/new}" method="post" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Owner</label>
+                <select name="ownerId" id="ownerSel" class="form-select" required>
+                    <option value="">— Choose an owner —</option>
+                    <option th:each="o : ${owners}" th:value="${o.id}"
+                            th:text="${o.fullName} + ' (' + ${o.email} + ')'"
+                            th:selected="${selectedOwnerId != null and o.id == selectedOwnerId}"></option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Property <span class="text-muted-2">(optional)</span></label>
+                <select name="propertyId" id="propSel" class="form-select">
+                    <option value="">— Not about a specific property —</option>
+                    <option th:each="p : ${properties}" th:value="${p.id}"
+                            th:attr="data-owner=${p.owner != null ? p.owner.id : ''}"
+                            th:text="${p.title} + ' — ' + ${p.owner != null ? p.owner.fullName : ''}"
+                            th:selected="${selectedPropertyId != null and p.id == selectedPropertyId}"></option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-select">
+                    <option th:each="t : ${types}" th:value="${t}" th:text="${t.label}"
+                            th:selected="${t.name() == 'PROPERTY_ISSUE'}"></option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Subject</label>
+                <input type="text" name="subject" class="form-control" maxlength="150" required
+                       placeholder="e.g. Complaint about water supply at your property">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Message</label>
+                <textarea name="message" class="form-control" rows="5" maxlength="2000" required
+                          placeholder="Describe the issue and what you expect the owner to do."></textarea>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn-accent"><i class="bi bi-send"></i> Send to owner</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Choosing a property selects its owner; choosing an owner hides other owners' properties.
+    (function () {
+        var owner = document.getElementById('ownerSel');
+        var prop = document.getElementById('propSel');
+        function filter() {
+            Array.prototype.forEach.call(prop.options, function (op) {
+                if (!op.value) return;
+                var hide = owner.value && op.getAttribute('data-owner') !== owner.value;
+                op.hidden = hide; op.disabled = hide;
+            });
+            var cur = prop.options[prop.selectedIndex];
+            if (cur && cur.disabled) prop.value = '';
+        }
+        prop.addEventListener('change', function () {
+            var cur = prop.options[prop.selectedIndex];
+            var o = cur && cur.getAttribute('data-owner');
+            if (o) owner.value = o;
+            filter();
+        });
+        owner.addEventListener('change', filter);
+        filter();
+    })();
+</script>
+</body>
+</html>
