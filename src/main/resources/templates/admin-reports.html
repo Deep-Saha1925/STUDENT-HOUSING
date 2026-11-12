@@ -15,8 +15,11 @@
 
 <div class="container py-4" style="max-width: 1100px;">
 
-    <h2 class="page-title mb-1">Owner Reports</h2>
-    <p class="text-muted-2 mb-3">Reports sent by property owners. Open one to reply, ask for info, or decide.</p>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+        <h2 class="page-title mb-0">Owner Reports</h2>
+        <a th:href="@{/admin/reports/new}" class="btn-accent text-decoration-none"><i class="bi bi-send"></i> Message an owner</a>
+    </div>
+    <p class="text-muted-2 mb-3">Reports sent by property owners, and messages you started. Open one to reply, ask for info, or decide.</p>
 
     <!-- Status filter -->
     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -38,9 +41,9 @@
                         <a class="row-link" th:href="@{'/admin/reports/' + ${r.id}}" th:text="${r.subject}"></a>
                         <div class="text-muted-2" th:if="${r.propertyTitle != null}" th:text="${r.propertyTitle}"></div>
                     </td>
-                    <td th:text="${r.owner.fullName}"></td>
+                    <td><i class="bi bi-send" th:if="${r.startedByAdmin}" title="Started by admin"></i> <span th:text="${r.owner.fullName}"></span></td>
                     <td th:text="${r.type.label}"></td>
-                    <td><span th:class="'st st-' + ${r.status}" th:text="${r.status.label}"></span></td>
+                    <td><span th:class="'st st-' + ${r.status}" th:text="${r.statusLabel}"></span></td>
                     <td class="text-muted-2" th:text="${#temporals.format(r.updatedAt, 'dd MMM yyyy, HH:mm')}"></td>
                 </tr>
                 </tbody>
