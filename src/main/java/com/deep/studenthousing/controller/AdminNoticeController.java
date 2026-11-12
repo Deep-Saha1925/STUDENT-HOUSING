@@ -48,8 +48,9 @@ public class AdminNoticeController {
                             || r.getType() == ReportType.PROPERTY_ISSUE;
 
                     model.addAttribute("fromReport", r);
-                    model.addAttribute("prefillTitle", cut(r.getSubject(), 150));
-                    model.addAttribute("prefillMessage", cut(body, 1000));
+                    // Owners' emails / phone numbers must not leak onto a public banner.
+                    model.addAttribute("prefillTitle", cut(redact(r.getSubject()), 150));
+                    model.addAttribute("prefillMessage", cut(redact(body), 1000));
                     model.addAttribute("prefillSeverity", serious ? NoticeSeverity.WARNING : NoticeSeverity.INFO);
                     model.addAttribute("prefillAudience", NoticeAudience.ALL);
                 }
@@ -71,8 +72,8 @@ public class AdminNoticeController {
                          Authentication authentication) {
 
         String back = reportId != null ? "&fromReport=" + reportId : "";
-        title = title.trim();
-        message = message.trim();
+        title = stripControl(title);
+        message = stripControl(message);
         if (title.isEmpty() || message.isEmpty() || title.length() > 150 || message.length() > 1000) {
             return "redirect:/admin/notices?error=invalid" + back;
         }
@@ -108,6 +109,17 @@ public class AdminNoticeController {
     public String delete(@PathVariable Long id) {
         noticeService.delete(id);
         return "redirect:/admin/notices?success=deleted";
+    }
+
+    /** Hides email addresses and long digit sequences (phone numbers) in text taken from a report. */
+    private static String redact(String s) {
+        if (s == null) return "";
+        return s.replaceAll("[A-Za-z0-9._%+'-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}", "[email hidden]")
+                .replaceAll("\\+?(?:\\d[\\s().-]?){9,}\\d", "[number hidden]");
+    }
+
+    private static String stripControl(String s) {
+        return s.replaceAll("[\\p{Cntrl}&&[^\\n\\r\\t]]", "").trim();
     }
 
     private static String cut(String s, int max) {
