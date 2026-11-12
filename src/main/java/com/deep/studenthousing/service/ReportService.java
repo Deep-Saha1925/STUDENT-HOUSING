@@ -5,6 +5,7 @@ import com.deep.studenthousing.exception.UnauthorizedActionException;
 import com.deep.studenthousing.repository.PropertyRepository;
 import com.deep.studenthousing.repository.ReportMessageRepository;
 import com.deep.studenthousing.repository.ReportRepository;
+import com.deep.studenthousing.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +18,16 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final ReportMessageRepository messageRepository;
     private final PropertyRepository propertyRepository;
+    private final UserRepository userRepository;
 
     public ReportService(ReportRepository reportRepository,
                          ReportMessageRepository messageRepository,
-                         PropertyRepository propertyRepository) {
+                         PropertyRepository propertyRepository,
+                         UserRepository userRepository) {
         this.reportRepository = reportRepository;
         this.messageRepository = messageRepository;
         this.propertyRepository = propertyRepository;
+        this.userRepository = userRepository;
     }
 
     // Abuse limits. Anyone can self-register as an OWNER, so owner input is untrusted:
@@ -81,7 +85,60 @@ public class ReportService {
         return reportRepository.countByOwnerAndOwnerUnreadTrue(owner);
     }
 
+    public List<User> findOwners() {
+        return userRepository.findByRoleOrderByFullNameAsc(Role.OWNER);
+    }
+
     // ---------- writes ----------
+
+    /**
+     * Admin starts a private conversation with an owner (optionally about one property).
+     * Reuses the report thread, so the owner sees it in "My Reports" with an unread badge.
+     */
+    @Transactional
+    public Report createFromAdmin(User admin, Long ownerId, Long propertyId,
+                                  ReportType type, String subject, String message) {
+        subject = clean(subject);
+        message = clean(message);
+        if (subject.isEmpty() || message.isEmpty() || subject.length() > MAX_SUBJECT || message.length() > MAX_TEXT) {
+            throw new IllegalArgumentException("Subject and message are required (max " + MAX_SUBJECT + " / " + MAX_TEXT + " characters).");
+        }
+
+        Property property = null;
+        if (propertyId != null) {
+            property = propertyRepository.findById(propertyId)
+                    .orElseThrow(() -> new IllegalArgumentException("Property not found."));
+            if (ownerId == null && property.getOwner() != null) {
+                ownerId = property.getOwner().getId();   // property chosen first -> its owner
+            }
+        }
+        if (ownerId == null) throw new IllegalArgumentException("Please choose an owner.");
+
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new IllegalArgumentException("Owner not found."));
+        if (owner.getRole() != Role.OWNER) {
+            throw new IllegalArgumentException("That user is not an owner.");
+        }
+        if (property != null && (property.getOwner() == null || !property.getOwner().getId().equals(owner.getId()))) {
+            throw new IllegalArgumentException("That property does not belong to the chosen owner.");
+        }
+
+        Report r = new Report();
+        r.setOwner(owner);
+        r.setType(type);
+        r.setSubject(subject);
+        r.setStartedByAdmin(true);
+        r.setStatus(ReportStatus.NEED_INFO);   // shown as "Awaiting owner reply"
+        r.setAdminUnread(false);
+        r.setOwnerUnread(true);
+        if (property != null) {
+            r.setPropertyId(property.getId());
+            r.setPropertyTitle(property.getTitle());
+        }
+        reportRepository.save(r);
+        addMessage(r, admin, true, message, ReportStatus.NEED_INFO);
+        return r;
+    }
 
     @Transactional
     public Report create(User owner, ReportType type, Long propertyId, String subject, String description) {
