@@ -73,8 +73,8 @@
         <h5 class="mb-3"><i class="bi bi-megaphone"></i> New notice</h5>
         <div class="alert alert-info py-2" th:if="${fromReport != null}">
             Pre-filled from report <strong>#<span th:text="${fromReport.id}"></span></strong>
-            (<span th:text="${fromReport.subject}"></span>). Edit anything before publishing — the owner's
-            private details should not go public.
+            (<span th:text="${fromReport.subject}"></span>). Emails and phone numbers were hidden automatically.
+            Please review and edit the text before publishing — it will be public.
         </div>
         <form th:action="@{/admin/notices}" method="post" class="row g-3">
             <input type="hidden" name="reportId" th:if="${fromReport != null}" th:value="${fromReport.id}">
