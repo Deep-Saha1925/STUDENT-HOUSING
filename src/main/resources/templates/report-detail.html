@@ -25,6 +25,9 @@
     <div th:if="${param.error != null and param.error[0] == 'closed'}" class="alert alert-warning py-2">
         This report is closed, so you can't add messages.
     </div>
+    <div th:if="${param.error != null and param.error[0] == 'limit'}" class="alert alert-warning py-2">
+        This conversation has reached its message limit. Please start a new report.
+    </div>
     <div th:if="${param.error != null and param.error[0] == 'invalid'}" class="alert alert-danger py-2">
         Message is empty or too long (max 2000).
     </div>
