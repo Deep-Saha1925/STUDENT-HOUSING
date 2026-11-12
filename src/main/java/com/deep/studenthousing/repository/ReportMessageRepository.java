@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ReportMessageRepository extends JpaRepository<ReportMessage, Long> {
     List<ReportMessage> findByReportOrderByCreatedAtAsc(Report report);
+    long countByReport(Report report);
 }
