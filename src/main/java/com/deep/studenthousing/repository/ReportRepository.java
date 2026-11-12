@@ -14,5 +14,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findAllByOrderByUpdatedAtDesc();
     List<Report> findByStatusOrderByUpdatedAtDesc(ReportStatus status);
     long countByAdminUnreadTrue();
+    long countByOwnerAndCreatedAtAfter(User owner, java.time.LocalDateTime since);
     long countByOwnerAndOwnerUnreadTrue(User owner);
 }
