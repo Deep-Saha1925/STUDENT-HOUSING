@@ -25,7 +25,12 @@
     </div>
     <p class="text-muted-2 mb-4">Tell the admin about maintenance, property issues or disputes. They can reply here or ask for more info.</p>
 
-    <div th:if="${param.error}" class="alert alert-danger py-2">Subject (max 150) and details (max 2000) are required.</div>
+    <div th:if="${param.error != null and param.error[0] == 'limit'}" class="alert alert-warning py-2">
+        You have sent several reports recently. Please wait a while before sending another.
+    </div>
+    <div th:if="${param.error != null and param.error[0] != 'limit'}" class="alert alert-danger py-2">
+        Subject (max 150) and details (max 2000) are required.
+    </div>
 
     <!-- New report form -->
     <div class="collapse mb-4" id="newReport">
