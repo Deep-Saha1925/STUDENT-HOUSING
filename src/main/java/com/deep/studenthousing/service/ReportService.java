@@ -26,6 +26,24 @@ public class ReportService {
         this.propertyRepository = propertyRepository;
     }
 
+    // Abuse limits. Anyone can self-register as an OWNER, so owner input is untrusted:
+    // without caps one account could flood the admin inbox and the database.
+    private static final int MAX_REPORTS_PER_HOUR = 5;
+    private static final int MAX_REPORTS_PER_DAY = 15;
+    private static final int MAX_MESSAGES_PER_REPORT = 100;
+    private static final int MAX_SUBJECT = 150;
+    private static final int MAX_TEXT = 2000;
+
+    /** Thrown when a rate/size limit is hit; controllers turn it into a friendly message. */
+    public static class LimitExceededException extends RuntimeException {
+        public LimitExceededException(String message) { super(message); }
+    }
+
+    /** Drops control characters (e.g. a NUL byte makes PostgreSQL reject the row) but keeps line breaks. */
+    private static String clean(String s) {
+        return s == null ? "" : s.replaceAll("[\\p{Cntrl}&&[^\\n\\r\\t]]", "").trim();
+    }
+
     // ---------- reads ----------
 
     public List<Report> findForOwner(User owner) {
@@ -45,11 +63,10 @@ public class ReportService {
 
     /** Owner may only open their own reports. */
     public Report findForOwnerById(Long id, User owner) {
-        Report r = findById(id);
-        if (!r.getOwner().getId().equals(owner.getId())) {
-            throw new UnauthorizedActionException("You can only view your own reports.");
-        }
-        return r;
+        // Same answer for "doesn't exist" and "belongs to someone else", so ids can't be probed.
+        return reportRepository.findById(id)
+                .filter(r -> r.getOwner().getId().equals(owner.getId()))
+                .orElseThrow(() -> new UnauthorizedActionException("You can only view your own reports."));
     }
 
     public List<ReportMessage> messages(Report report) {
@@ -68,6 +85,17 @@ public class ReportService {
 
     @Transactional
     public Report create(User owner, ReportType type, Long propertyId, String subject, String description) {
+        subject = clean(subject);
+        description = clean(description);
+        if (subject.isEmpty() || description.isEmpty() || subject.length() > MAX_SUBJECT || description.length() > MAX_TEXT) {
+            throw new IllegalArgumentException("Subject and details are required (max " + MAX_SUBJECT + " / " + MAX_TEXT + " characters).");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (reportRepository.countByOwnerAndCreatedAtAfter(owner, now.minusHours(1)) >= MAX_REPORTS_PER_HOUR
+                || reportRepository.countByOwnerAndCreatedAtAfter(owner, now.minusDays(1)) >= MAX_REPORTS_PER_DAY) {
+            throw new LimitExceededException("Too many reports sent recently. Please wait before sending another.");
+        }
+
         Report r = new Report();
         r.setOwner(owner);
         r.setType(type);
@@ -90,6 +118,9 @@ public class ReportService {
     public void ownerReply(Report report, User owner, String text) {
         if (report.getStatus().isClosed()) {
             throw new IllegalArgumentException("This report is closed.");
+        }
+        if (messageRepository.countByReport(report) >= MAX_MESSAGES_PER_REPORT) {
+            throw new LimitExceededException("This conversation is too long. Please start a new report.");
         }
         addMessage(report, owner, false, text, null);
         // The owner answered a "Need info" request -> back to the admin's queue.
@@ -148,7 +179,11 @@ public class ReportService {
         m.setReport(report);
         m.setSender(sender);
         m.setFromAdmin(fromAdmin);
-        m.setMessage(text == null ? "" : text.trim());
+        String body = clean(text);
+        if (body.length() > MAX_TEXT) {
+            throw new IllegalArgumentException("Message is too long (max " + MAX_TEXT + " characters).");
+        }
+        m.setMessage(body);
         m.setStatusAfter(statusAfter);
         messageRepository.save(m);
     }
