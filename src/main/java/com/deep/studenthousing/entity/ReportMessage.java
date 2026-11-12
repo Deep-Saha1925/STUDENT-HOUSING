@@ -41,4 +41,9 @@ public class ReportMessage {
     private ReportStatus statusAfter;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public String getStatusAfterLabel() {
+        return statusAfter == null ? null
+                : Report.labelFor(statusAfter, report != null && report.isStartedByAdmin());
+    }
 }
