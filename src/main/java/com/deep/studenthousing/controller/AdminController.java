@@ -2,6 +2,7 @@ package com.deep.studenthousing.controller;
 
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.entity.User;
+import com.deep.studenthousing.service.ComplaintService;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.ReportService;
 import com.deep.studenthousing.service.UserService;
@@ -24,14 +25,16 @@ public class AdminController {
     private final UserService userService;
     private final PropertyService propertyService;
     private final ReportService reportService;
+    private final ComplaintService complaintService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public AdminController(UserService userService, PropertyService propertyService, ReportService reportService) {
+    public AdminController(UserService userService, PropertyService propertyService, ReportService reportService, ComplaintService complaintService) {
         this.userService = userService;
         this.propertyService = propertyService;
         this.reportService = reportService;
+        this.complaintService = complaintService;
     }
 
     @GetMapping("/dashboard")
@@ -41,6 +44,7 @@ public class AdminController {
 
         model.addAttribute("admin", admin);
         model.addAttribute("unreadReports", reportService.countAdminUnread());
+        model.addAttribute("unreadComplaints", complaintService.countAdminUnread());
 
         return "admin-dashboard";
     }
