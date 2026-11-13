@@ -3,6 +3,7 @@ package com.deep.studenthousing.controller;
 import com.deep.studenthousing.entity.User;
 import com.deep.studenthousing.entity.Property;
 import com.deep.studenthousing.repository.UserRepository;
+import com.deep.studenthousing.service.ComplaintService;
 import com.deep.studenthousing.service.PropertyService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,10 +18,12 @@ public class StudentController {
 
     private final UserRepository userRepo;
     private final PropertyService propertyService;
+    private final ComplaintService complaintService;
 
-    public StudentController(UserRepository userRepo, PropertyService propertyService) {
+    public StudentController(UserRepository userRepo, PropertyService propertyService, ComplaintService complaintService) {
         this.userRepo = userRepo;
         this.propertyService = propertyService;
+        this.complaintService = complaintService;
     }
 
     @GetMapping("/student/dashboard")
@@ -41,6 +44,7 @@ public class StudentController {
             if (user != null) {
                 model.addAttribute("user", user);
                 model.addAttribute("properties", properties);
+                model.addAttribute("unreadComplaints", complaintService.countStudentUnread(user));
 
                 // point to student dashboard template
                 return "student-dashboard";
