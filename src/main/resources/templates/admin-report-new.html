@@ -23,7 +23,12 @@
     </div>
 
     <div class="panel">
+        <div class="alert alert-info py-2" th:if="${complaint != null}">
+            Pre-filled from student issue <strong>#<span th:text="${complaint.id}"></span></strong>.
+            The student's name is included and contact details were hidden. Edit anything before sending.
+        </div>
         <form th:action="@{/admin/reports/new}" method="post" class="row g-3">
+            <input type="hidden" name="complaintId" th:if="${complaint != null}" th:value="${complaint.id}">
             <div class="col-md-6">
                 <label class="form-label">Owner</label>
                 <select name="ownerId" id="ownerSel" class="form-select" required>
@@ -52,12 +57,12 @@
             </div>
             <div class="col-12">
                 <label class="form-label">Subject</label>
-                <input type="text" name="subject" class="form-control" maxlength="150" required
+                <input type="text" name="subject" class="form-control" maxlength="150" required th:value="${prefillSubject}"
                        placeholder="e.g. Complaint about water supply at your property">
             </div>
             <div class="col-12">
                 <label class="form-label">Message</label>
-                <textarea name="message" class="form-control" rows="5" maxlength="2000" required
+                <textarea name="message" class="form-control" rows="9" maxlength="2000" required th:text="${prefillMessage}"
                           placeholder="Describe the issue and what you expect the owner to do."></textarea>
             </div>
             <div class="col-12">
