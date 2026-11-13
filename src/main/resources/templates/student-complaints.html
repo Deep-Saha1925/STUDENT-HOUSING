@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Issues</title>
+    <th:block th:replace="~{fragments/report-ui :: styles}"></th:block>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="container-fluid d-flex align-items-center gap-3">
+        <span class="navbar-brand">Student Housing</span>
+        <a th:href="@{/student/dashboard}" class="btn-nav ms-auto"><i class="bi bi-arrow-left"></i> Dashboard</a>
+    </div>
+</nav>
+
+<div class="container py-4" style="max-width: 1000px;">
+
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+        <h2 class="page-title mb-0">My Issues</h2>
+        <button class="btn-accent" type="button" data-bs-toggle="collapse" data-bs-target="#newIssue">
+            <i class="bi bi-plus-lg"></i> Report an issue
+        </button>
+    </div>
+    <p class="text-muted-2 mb-4">Had a problem at a place you booked? Tell the admin. They can follow up with the owner and update you here.</p>
+
+    <div th:if="${param.error != null and param.error[0] == 'limit'}" class="alert alert-warning py-2">
+        You have raised several issues today. Please try again tomorrow.
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'open'}" class="alert alert-warning py-2">
+        You already have an open issue for that property. Add your message to it instead.
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'invalid'}" class="alert alert-danger py-2">
+        Choose an approved booking and fill in the subject (max 150) and details (max 2000).
+    </div>
+
+    <div class="collapse mb-4" id="newIssue">
+        <div class="panel">
+            <div th:if="${bookings.isEmpty()}" class="text-muted-2">
+                You can report an issue once an owner has approved one of your bookings.
+            </div>
+            <form th:if="${!bookings.isEmpty()}" th:action="@{/student/complaints}" method="post" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Which booking?</label>
+                    <select name="bookingId" class="form-select" required>
+                        <option th:each="b : ${bookings}" th:value="${b.id}"
+                                th:text="${b.property.title} + ' · from ' + ${#temporals.format(b.startDate, 'dd MMM yyyy')}"></option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">What kind of issue?</label>
+                    <select name="category" class="form-select">
+                        <option th:each="c : ${categories}" th:value="${c}" th:text="${c.label}"></option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="subject" class="form-control" maxlength="150" required
+                           placeholder="e.g. No water supply for three days">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Details</label>
+                    <textarea name="description" class="form-control" rows="4" maxlength="2000" required></textarea>
+                    <div class="text-muted-2 mt-1">The owner may be told your name. Please do not put phone numbers or passwords here.</div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn-accent"><i class="bi bi-send"></i> Send to admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div th:if="${complaints.isEmpty()}" class="text-muted-2">You haven't raised any issues.</div>
+        <div class="table-responsive" th:if="${!complaints.isEmpty()}">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Issue</th><th>Type</th><th>Status</th><th>Last update</th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${complaints}">
+                    <td>
+                        <span class="dot-unread" th:if="${c.studentUnread}" title="New reply from admin"></span>
+                        <a class="row-link" th:href="@{'/student/complaints/' + ${c.id}}" th:text="${c.subject}"></a>
+                        <div class="text-muted-2" th:if="${c.propertyTitle != null}" th:text="${c.propertyTitle}"></div>
+                    </td>
+                    <td th:text="${c.category.label}"></td>
+                    <td><span th:class="'st st-' + ${c.status}" th:text="${c.status.label}"></span></td>
+                    <td class="text-muted-2" th:text="${#temporals.format(c.updatedAt, 'dd MMM yyyy, HH:mm')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
