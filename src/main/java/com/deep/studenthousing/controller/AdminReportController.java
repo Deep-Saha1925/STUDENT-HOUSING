@@ -2,6 +2,8 @@ package com.deep.studenthousing.controller;
 
 import com.deep.studenthousing.entity.*;
 import com.deep.studenthousing.service.AccessGuard;
+import com.deep.studenthousing.service.ComplaintService;
+import com.deep.studenthousing.service.TextSanitizer;
 import com.deep.studenthousing.service.PropertyService;
 import com.deep.studenthousing.service.ReportService;
 import org.springframework.security.core.Authentication;
@@ -20,11 +22,14 @@ public class AdminReportController {
     private final ReportService reportService;
     private final AccessGuard guard;
     private final PropertyService propertyService;
+    private final ComplaintService complaintService;
 
-    public AdminReportController(ReportService reportService, AccessGuard guard, PropertyService propertyService) {
+    public AdminReportController(ReportService reportService, AccessGuard guard, PropertyService propertyService,
+                                 ComplaintService complaintService) {
         this.reportService = reportService;
         this.guard = guard;
         this.propertyService = propertyService;
+        this.complaintService = complaintService;
     }
 
     @GetMapping
@@ -35,14 +40,22 @@ public class AdminReportController {
         return "admin-reports";
     }
 
-    /** Form: admin writes a private message to an owner (optionally about one property). */
+    /** Form: admin writes a private message to an owner (optionally about one property or a student's issue). */
     @GetMapping("/new")
     public String newForm(@RequestParam(required = false) Long propertyId,
                           @RequestParam(required = false) Long ownerId,
+                          @RequestParam(required = false) Long complaintId,
                           Model model) {
+        Complaint complaint = null;
+        if (complaintId != null) {
+            try { complaint = complaintService.findById(complaintId); }
+            catch (IllegalArgumentException ignored) { /* unknown id -> plain form */ }
+        }
+        final Long wantedProperty = (complaint != null && propertyId == null) ? complaint.getPropertyId() : propertyId;
+
         List<Property> properties = propertyService.findAll();
-        Property chosen = propertyId == null ? null
-                : properties.stream().filter(p -> p.getId().equals(propertyId)).findFirst().orElse(null);
+        Property chosen = wantedProperty == null ? null
+                : properties.stream().filter(p -> p.getId().equals(wantedProperty)).findFirst().orElse(null);
         if (chosen != null && chosen.getOwner() != null) {
             ownerId = chosen.getOwner().getId();
         }
@@ -51,7 +64,28 @@ public class AdminReportController {
         model.addAttribute("types", ReportType.values());
         model.addAttribute("selectedOwnerId", ownerId);
         model.addAttribute("selectedPropertyId", chosen == null ? null : chosen.getId());
+
+        if (complaint != null) {
+            model.addAttribute("complaint", complaint);
+            model.addAttribute("prefillSubject", TextSanitizer.cut("Issue raised: " + complaint.getSubject(), 150));
+            model.addAttribute("prefillMessage", buildComplaintMessage(complaint));
+        }
         return "admin-report-new";
+    }
+
+    /** Text for the owner. The student's name is shown; contact details in the text are hidden. */
+    private String buildComplaintMessage(Complaint c) {
+        String details = complaintService.messages(c).stream()
+                .filter(m -> !m.isFromAdmin())
+                .map(ComplaintMessage::getMessage)
+                .findFirst().orElse("");
+        String text = "A student has raised an issue about your property"
+                + (c.getPropertyTitle() != null ? " \"" + c.getPropertyTitle() + "\"" : "") + ".\n"
+                + "Category: " + c.getCategory().getLabel() + "\n"
+                + "Raised by: " + c.getStudent().getFullName() + "\n\n"
+                + "Details from the student:\n" + TextSanitizer.redact(details) + "\n\n"
+                + "Please reply here with your response and the action you will take.";
+        return TextSanitizer.cut(text, 2000);
     }
 
     @PostMapping("/new")
@@ -60,13 +94,19 @@ public class AdminReportController {
                          @RequestParam ReportType type,
                          @RequestParam String subject,
                          @RequestParam String message,
+                         @RequestParam(required = false) Long complaintId,
                          Authentication authentication) {
         User admin = guard.currentUser(authentication);
         try {
             Report r = reportService.createFromAdmin(admin, ownerId, propertyId, type, subject, message);
+            if (complaintId != null) {
+                complaintService.markForwarded(complaintId, r.getId(), admin);   // tells the student too
+            }
             return "redirect:/admin/reports/" + r.getId() + "?success=sent";
         } catch (IllegalArgumentException e) {
-            return "redirect:/admin/reports/new?error=invalid" + (propertyId != null ? "&propertyId=" + propertyId : "");
+            return "redirect:/admin/reports/new?error=invalid"
+                    + (propertyId != null ? "&propertyId=" + propertyId : "")
+                    + (complaintId != null ? "&complaintId=" + complaintId : "");
         }
     }
 
