@@ -236,6 +236,7 @@
         .icon-orange { background: rgba(249,115,22,0.1);  color: #ea580c; }
         .icon-rose   { background: rgba(244,63,94,0.1);   color: #e11d48; }
         .icon-violet { background: rgba(139,92,246,0.1);  color: #7c3aed; }
+        .icon-amber  { background: rgba(245,158,11,0.1);  color: #d97706; }
 
         .dashboard-card h4 {
             font-family: 'DM Serif Display', serif;
@@ -302,6 +303,13 @@
             border: 1.5px solid rgba(139,92,246,0.25);
         }
         .btn-card-violet:hover { background: rgba(139,92,246,0.2); color: #6d28d9; }
+
+        .btn-card-amber {
+            background: rgba(245,158,11,0.1);
+            color: #d97706;
+            border: 1.5px solid rgba(245,158,11,0.25);
+        }
+        .btn-card-amber:hover { background: rgba(245,158,11,0.2); color: #b45309; }
 
         /* ===========================
    Mobile Responsive
@@ -486,6 +494,19 @@
         <p>Review reports from owners, reply, and approve or reject.</p>
         <a th:href="@{/admin/reports}" class="btn-card btn-card-violet">
             <i class="bi bi-inbox"></i> Open inbox
+        </a>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon-wrap icon-amber">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h4>Student Issues
+            <span class="badge rounded-pill bg-danger ms-1" th:if="${unreadComplaints > 0}" th:text="${unreadComplaints}">1</span>
+        </h4>
+        <p>Issues students raised about properties. Reply or send them to the owner.</p>
+        <a th:href="@{/admin/complaints}" class="btn-card btn-card-amber">
+            <i class="bi bi-exclamation-triangle"></i> Open issues
         </a>
     </div>
 
