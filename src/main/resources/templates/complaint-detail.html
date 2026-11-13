@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Issue</title>
+    <th:block th:replace="~{fragments/report-ui :: styles}"></th:block>
+</head>
+<body>
+
+<!-- Same page for both sides: ${admin} is true for the admin view. -->
+<nav class="navbar">
+    <div class="container-fluid d-flex align-items-center gap-3">
+        <span class="navbar-brand" th:text="${admin} ? 'Admin Panel' : 'Student Housing'">Student Housing</span>
+        <a th:href="${admin} ? @{/admin/complaints} : @{/student/complaints}" class="btn-nav ms-auto">
+            <i class="bi bi-arrow-left"></i> Issues
+        </a>
+    </div>
+</nav>
+
+<div class="container py-4" style="max-width: 860px;">
+
+    <div th:if="${param.success}" class="alert alert-success py-2">Saved.</div>
+    <div th:if="${param.error != null and param.error[0] == 'needText'}" class="alert alert-danger py-2">
+        Please write a reason the student can read when dismissing.
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'closed'}" class="alert alert-warning py-2">
+        This issue is closed, so you can't add messages.
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'limit'}" class="alert alert-warning py-2">
+        This conversation has reached its message limit.
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'invalid'}" class="alert alert-danger py-2">
+        Message is empty or too long (max 2000).
+    </div>
+
+    <div class="panel mb-4">
+        <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+            <div>
+                <h2 class="page-title mb-1" th:text="${complaint.subject}">Subject</h2>
+                <div class="text-muted-2">
+                    <span th:text="${complaint.category.label}"></span>
+                    <span th:if="${complaint.propertyTitle != null}"> · <i class="bi bi-building"></i>
+                        <a th:if="${complaint.propertyId != null}" th:href="@{'/properties/' + ${complaint.propertyId}}" th:text="${complaint.propertyTitle}"></a>
+                    </span>
+                </div>
+                <div class="text-muted-2" th:if="${admin}">
+                    Raised by <strong th:text="${complaint.student.fullName}"></strong>
+                    (<span th:text="${complaint.student.email}"></span>, <span th:text="${complaint.student.phone}"></span>)
+                </div>
+                <div class="text-muted-2">Sent <span th:text="${#temporals.format(complaint.createdAt, 'dd MMM yyyy, HH:mm')}"></span></div>
+            </div>
+            <span th:class="'st st-' + ${complaint.status}" th:text="${complaint.status.label}"></span>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column mb-3">
+        <div th:each="m : ${messages}" th:class="'msg ' + (${m.fromAdmin} ? 'msg-admin' : 'msg-owner')">
+            <div class="who">
+                <span th:text="${m.fromAdmin} ? 'Admin' : (${admin} ? ${m.sender.fullName} : 'You')"></span>
+                · <span th:text="${#temporals.format(m.createdAt, 'dd MMM, HH:mm')}"></span>
+            </div>
+            <div class="body" th:if="${!m.message.isEmpty()}" th:text="${m.message}"></div>
+            <div th:if="${m.statusAfter != null}" class="mt-2">
+                <span class="text-muted-2">Status changed to</span>
+                <span th:class="'st st-' + ${m.statusAfter}" th:text="${m.statusAfter.label}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin: reply + status -->
+    <div class="panel" th:if="${admin}">
+        <form th:action="@{'/admin/complaints/' + ${complaint.id} + '/reply'}" method="post" class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Reply to student <span class="text-muted-2">(required when dismissing)</span></label>
+                <textarea name="message" class="form-control" rows="3" maxlength="2000"></textarea>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Set status</label>
+                <select name="status" class="form-select">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.label}"
+                            th:selected="${s == complaint.status}"
+                            th:disabled="${(s.name() == 'NEW' or s.name() == 'SENT_TO_OWNER') and s != complaint.status}"></option>
+                </select>
+            </div>
+            <div class="col-md-7 d-flex align-items-end">
+                <button type="submit" class="btn-accent"><i class="bi bi-reply"></i> Send / update</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Admin: send to owner -->
+    <div class="panel mt-3" th:if="${admin}">
+        <div th:if="${complaint.forwardedReportId != null}" class="mb-2">
+            <i class="bi bi-check-circle-fill text-success"></i> Sent to the owner.
+            <a th:href="@{'/admin/reports/' + ${complaint.forwardedReportId}}">View the conversation with the owner</a>
+        </div>
+        <div th:if="${!complaint.status.closed}" class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span th:text="${complaint.forwardedReportId != null} ? 'Send another message to the owner?' : 'Send this issue to the property owner? You can edit the message first.'"></span>
+            <a th:href="@{/admin/reports/new(complaintId=${complaint.id})}" class="btn-accent text-decoration-none">
+                <i class="bi bi-send"></i> Send to owner
+            </a>
+        </div>
+    </div>
+
+    <!-- Student: reply -->
+    <div class="panel" th:if="${!admin and !complaint.status.closed}">
+        <form th:action="@{'/student/complaints/' + ${complaint.id} + '/reply'}" method="post" class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Add a message</label>
+                <textarea name="message" class="form-control" rows="3" maxlength="2000" required></textarea>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn-accent"><i class="bi bi-send"></i> Send</button>
+            </div>
+        </form>
+    </div>
+    <div class="text-muted-2" th:if="${!admin and complaint.status.closed}">
+        This issue is closed (<strong th:text="${complaint.status.label}"></strong>). Raise a new one if the problem comes back.
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
